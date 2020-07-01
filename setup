@@ -1,0 +1,35 @@
+#!/bin/bash
+
+PROJECT_DIR_PATH=$(pwd)
+BUILD_DIR="./build"
+COMPILE_COMMANDS_FILE=compile_commands.json
+
+exit_on_fail() {
+    if ! [ $? -eq 0 ]; then
+        exit 1
+    fi
+}
+
+echo Project directory path: $PROJECT_DIR_PATH
+
+if ! [ -d $BUILD_DIR ]
+then
+    echo Creating \'$BUILD_DIR\' directory...
+    mkdir $BUILD_DIR
+
+    exit_on_fail
+fi
+
+rm -rf $BUILD_DIR/*
+
+cd $BUILD_DIR
+echo $(pwd)
+cmake -DCMAKE_EXPORT_COMPILE_COMMANDS=ON ..
+exit_on_fail
+
+cd $PROJECT_DIR_PATH
+if [ -f $COMPILE_COMMANDS_FILE ]; then
+    rm $COMPILE_COMMANDS_FILE 
+fi
+
+ln $BUILD_DIR/compile_commands.json

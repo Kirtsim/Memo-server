@@ -1,0 +1,18 @@
+cmake_minimum_required (VERSION 3.0)
+
+project (Memo-server)
+add_compile_options(-std=c++17 -Wall -Wextra -Wsign-conversion)
+
+set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
+
+set(Boost_USE_STATIC_LIBS ON) 
+set(Boost_USE_MULTITHREADED ON)  
+set(Boost_USE_STATIC_RUNTIME OFF) 
+find_package(Boost 1.72.0 COMPONENTS filesystem) 
+
+if(Boost_FOUND)
+    add_executable(memo_server src/main.cpp) 
+
+    target_link_libraries(memo_server Boost::filesystem)
+endif()
+
