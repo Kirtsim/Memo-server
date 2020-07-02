@@ -1,0 +1,25 @@
+#!/bin/bash
+
+exit_on_fail() {
+    if ! [ $? -eq 0 ]; then
+        exit 1
+    fi
+}
+
+BUILD_DIR="./build"
+EXECUTABLE="memo_server"
+
+cd $BUILD_DIR
+exit_on_fail
+
+echo "++ Building project"
+echo "*******************************"
+make
+exit_on_fail
+
+echo "*******************************"
+echo "++ Build successfull"
+echo ""
+echo "++ Running program..."
+./$EXECUTABLE
+
