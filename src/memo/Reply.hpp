@@ -1,5 +1,6 @@
 #pragma once
 #include "memo/Header.hpp"
+#include <boost/asio.hpp>
 
 #include <vector>
 #include <string>
@@ -27,6 +28,10 @@ public:
         bad_gateway = 502,
         service_unavailable = 503
     };
+
+    std::vector<boost::asio::const_buffer> toBuffers();
+
+    static Reply StockReply(Status iStatus);
     
 private:
     Status status;

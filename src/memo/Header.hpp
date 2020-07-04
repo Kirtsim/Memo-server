@@ -5,8 +5,8 @@ namespace memo {
 
 struct Header
 {
-    std::string _name;
-    std::string _value;
+    std::string name;
+    std::string value;
 };
 
 } // namespace memo
