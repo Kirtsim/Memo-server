@@ -5,9 +5,7 @@ add_compile_options(-std=c++17 -Wall -Wextra -Wsign-conversion)
 
 # variable denoting where the "absolute" include paths start in
 set(BASEPATH "${CMAKE_SOURCE_DIR}/src/")
-set(SOURCES src/main.cpp
-            src/memo/Reply.cpp)
-set(HEADER_FILES src/memo/Header.hpp
+set(SOURCES src/main.cpp)
 
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
@@ -16,7 +14,7 @@ set(Boost_USE_MULTITHREADED ON)
 set(Boost_USE_STATIC_RUNTIME OFF) 
 find_package(Boost 1.72.0 REQUIRED)
 
-add_executable(memo_server ${SOURCES} ${HEADER_FILES})
+add_executable(memo_server ${SOURCES})
 
 # needed for "absolute" include paths
 target_include_directories(memo_server PRIVATE ${BASEPATH})
