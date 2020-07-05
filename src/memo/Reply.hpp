@@ -31,6 +31,26 @@ public:
 
     std::vector<boost::asio::const_buffer> toBuffers();
 
+    void setStatus(Status iStatus)
+    {
+        status = iStatus;
+    }
+
+    std::vector<Header>& accessHeaders()
+    {
+        return headers;
+    }
+
+    void addToHeaders(const Header& iHeader)
+    {
+        headers.push_back(iHeader);
+    }
+
+    void setContent(const std::string& iContent)
+    {
+        content = iContent;
+    }
+
     static Reply StockReply(Status iStatus);
     
 private:
