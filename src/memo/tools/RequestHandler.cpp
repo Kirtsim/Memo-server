@@ -1,4 +1,5 @@
 #include "memo/tools/RequestHandler.hpp"
+#include "memo/tools/Tools.hpp"
 #include "memo/Request.hpp"
 #include "memo/Reply.hpp"
 
@@ -50,8 +51,7 @@ void RequestHandler::handleRequest(const Request& iRequest, Reply& ioReply)
     ioReply.accessHeaders()[0].setName("Content-Length");
     ioReply.accessHeaders()[0].setValue(std::to_string(aContent.size()));
     ioReply.accessHeaders()[1].setName("Content-Type");
-    // TODO: uncomment once mime-types are defined
-    //ioReply.accessHeaders()[1].setValue(mime_types::extension_to_type(extension));
+    ioReply.accessHeaders()[1].setValue(Tools::Extension2Mime(aFileExtension));
 }
 
 bool RequestHandler::DecodeUrl(const std::string& iUrlStr, std::string& oOutput)
@@ -117,7 +117,7 @@ bool RequestHandler::ReadFileContent(const std::string& iFilePath, std::string& 
 
     char aBuffer[512];
     while (aInputStream.read(aBuffer, sizeof(aBuffer)).gcount() > 0)
-        oContent.append(aBuffer, aInputStream.gcount());
+        oContent.append(aBuffer, static_cast<size_t>(aInputStream.gcount()));
     return true;
 }
 

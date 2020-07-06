@@ -23,10 +23,9 @@ public:
 private:
     std::string docRoot;
 
-    bool ReadFileContent(const std::string& iFilePath, std::string& oContent);
-
     static bool IsAbsolute(const std::string& iPath);
     static std::string FileExtensionOf(const std::string& iPath);
+    static bool ReadFileContent(const std::string& iFilePath, std::string& oContent);
     static bool DecodeUrl(const std::string& iUrlStr, std::string& oOutput);
 };
 } // namespace tools

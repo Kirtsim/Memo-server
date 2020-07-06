@@ -89,9 +89,9 @@ std::vector<boost::asio::const_buffer> Reply::toBuffers()
     aBuffers.push_back(ToBuffer(status));
     for (const Header& aHeader : headers)
     {
-        aBuffers.push_back(boost::asio::buffer(aHeader.name));
+        aBuffers.push_back(boost::asio::buffer(aHeader.getName()));
         aBuffers.push_back(boost::asio::buffer(kNameValueSeparator));
-        aBuffers.push_back(boost::asio::buffer(aHeader.value));
+        aBuffers.push_back(boost::asio::buffer(aHeader.getValue()));
         aBuffers.push_back(boost::asio::buffer(kCRLF));
     }
     aBuffers.push_back(boost::asio::buffer(kCRLF));
@@ -228,10 +228,10 @@ Reply Reply::StockReply(Reply::Status iStatus)
     aReply.status = iStatus;
     aReply.content = replies::ToString(iStatus);
     aReply.headers.resize(2);
-    aReply.headers[0].name  = "Content-Length";
-    aReply.headers[0].value = std::to_string(aReply.content.size());
-    aReply.headers[1].name  = "Content-Type";
-    aReply.headers[1].value = "text/html";
+    aReply.headers[0].setName("Content-Length");
+    aReply.headers[0].setValue(std::to_string(aReply.content.size()));
+    aReply.headers[1].setName("Content-Type");
+    aReply.headers[1].setValue("text/html");
     return aReply;
 }
 
