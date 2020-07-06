@@ -6,6 +6,12 @@ namespace memo {
 class Header
 {
 public:
+    Header() = default;
+
+    Header(const std::string& iName, const std::string& iValue) :
+        name(iName), value(iValue)
+    {}
+
     void setName(const std::string& iName)
     {
         name = iName;

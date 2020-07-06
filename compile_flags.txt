@@ -1,4 +1,0 @@
--I
-/usr/local/Cellar/boost/1.72.0_2/include/
--I
-/Users/kharos/Documents/cpp/projects/Memo/Memo-server/src

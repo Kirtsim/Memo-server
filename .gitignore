@@ -1,6 +1,7 @@
 .clangd
 build
 compile_commands.json
+compile_flags.json
 
 # VIM
 *.swp

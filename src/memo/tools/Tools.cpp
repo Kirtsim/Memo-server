@@ -8,7 +8,7 @@ namespace tools {
 namespace {
 const std::string kDefaultMime = "text/plain";
 const std::map<std::string, std::string> kExtension2MimeMap {
-   	{ "gif",  "image/gif" },
+    { "gif",  "image/gif" },
     { "htm",  "text/html" },
     { "html", "text/html" },
     { "jpg",  "image/jpeg" },

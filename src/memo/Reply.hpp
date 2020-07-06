@@ -11,7 +11,7 @@ class Reply
 {
 public:
     enum Status {
-    	ok = 200,
+        ok = 200,
         created = 201,
         accepted = 202,
         no_content = 204,
