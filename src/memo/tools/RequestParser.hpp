@@ -30,7 +30,7 @@ public:
     {
         while (ioBeginIt != ioEndIt)
         {
-            boost::tribool aResult = consume(ioRequest, *ioBeginIt++);
+            boost::tribool aResult = consume(*ioBeginIt++);
             if (aResult || !aResult)
             {
                 updateRequest(ioRequest);

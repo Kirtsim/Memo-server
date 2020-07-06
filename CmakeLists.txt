@@ -8,15 +8,19 @@ set(BASEPATH "${CMAKE_SOURCE_DIR}/src/")
 
 set(SOURCES src/main.cpp
             src/memo/Reply.cpp
+            src/memo/Connection.cpp
             src/memo/tools/Tools.cpp
             src/memo/tools/RequestParser.cpp
-            src/memo/tools/RequestHandler.cpp)
+            src/memo/tools/RequestHandler.cpp
+            src/memo/manager/ConnectionManager.cpp)
 set(HEADERS src/memo/Header.hpp
             src/memo/Request.hpp
             src/memo/Reply.hpp
+            src/memo/Connection.hpp
             src/memo/tools/Tools.hpp
             src/memo/tools/RequestParser.hpp
-            src/memo/tools/RequestHandler.hpp)
+            src/memo/tools/RequestHandler.hpp
+            src/memo/manager/ConnectionManager.hpp)
 
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 

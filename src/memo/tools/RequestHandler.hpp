@@ -2,12 +2,9 @@
 #include <string>
 
 namespace memo {
-
-class Reply;
-class Request;
-
+    class Reply;
+    class Request;
 namespace tools {
-
 
 /// The common handler for all incoming requests.
 class RequestHandler
@@ -28,5 +25,6 @@ private:
     static bool ReadFileContent(const std::string& iFilePath, std::string& oContent);
     static bool DecodeUrl(const std::string& iUrlStr, std::string& oOutput);
 };
+
 } // namespace tools
 } // namespace memo
