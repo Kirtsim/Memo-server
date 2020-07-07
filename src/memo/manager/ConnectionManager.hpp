@@ -9,6 +9,8 @@ namespace manager {
 class ConnectionManager
 {
 public:
+    ConnectionManager() = default;
+
 	void start(const Connection::Ptr& iConnection);
 
   	/// Stop the specified connection.

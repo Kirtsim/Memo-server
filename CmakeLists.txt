@@ -8,6 +8,7 @@ set(BASEPATH "${CMAKE_SOURCE_DIR}/src/")
 
 set(SOURCES src/main.cpp
             src/memo/Reply.cpp
+            src/memo/Server.cpp
             src/memo/Connection.cpp
             src/memo/tools/Tools.cpp
             src/memo/tools/RequestParser.cpp
@@ -16,6 +17,7 @@ set(SOURCES src/main.cpp
 set(HEADERS src/memo/Header.hpp
             src/memo/Request.hpp
             src/memo/Reply.hpp
+            src/memo/Server.hpp
             src/memo/Connection.hpp
             src/memo/tools/Tools.hpp
             src/memo/tools/RequestParser.hpp

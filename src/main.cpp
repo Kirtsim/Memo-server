@@ -1,12 +1,31 @@
+#include "memo/Server.hpp"
+
 #include <iostream>
-#include "memo/Header.hpp"
-#include "memo/Reply.hpp"
-#include <boost/optional.hpp>
+#include <string>
 
-
-
-int main()
+int main(int argc, char* argv[])
 {
-    std::cout << "Time to shine!" << std::endl;
+  	try
+  	{
+  	    if (argc != 4)
+  	    {
+  	      std::cerr << "Usage: http_server <address> <port> <doc_root>\n";
+  	      std::cerr << "  For IPv4, try:\n";
+  	      std::cerr << "    receiver 0.0.0.0 80 .\n";
+  	      std::cerr << "  For IPv6, try:\n";
+  	      std::cerr << "    receiver 0::0 80 .\n";
+  	      return 1;
+  	    }
+
+        memo::Server aServer(argv[1], argv[2], argv[3]);
+        std::cout << "Launching server..." << std::endl;
+  	    aServer.run();
+  	}
+  	catch (std::exception& e)
+  	{
+  	    std::cerr << "exception: " << e.what() << "\n";
+  	}
+    std::cout << "Server stopped." << std::endl;
+
     return 0;
 }
