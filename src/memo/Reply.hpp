@@ -51,6 +51,11 @@ public:
         content = iContent;
     }
 
+    const std::string& getContent() const
+    {
+        return content;
+    }
+
     static Reply StockReply(Status iStatus);
     
 private:

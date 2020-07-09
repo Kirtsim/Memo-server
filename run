@@ -7,14 +7,15 @@ exit_on_fail() {
 }
 
 BUILD_DIR="./build"
-EXECUTABLE="memo_server"
+PROJECT_PATH=$(pwd)
+EXECUTABLE="memo_server 127.0.0.1 8000 $PROJECT_PATH"
 
 cd $BUILD_DIR
 exit_on_fail
 
 echo "++ Building project"
 echo "*******************************"
-make
+make -j4
 exit_on_fail
 
 echo "*******************************"

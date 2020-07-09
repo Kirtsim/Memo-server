@@ -30,7 +30,7 @@ public:
     {
         while (ioBeginIt != ioEndIt)
         {
-            boost::tribool aResult = consume(ioRequest, *ioBeginIt++);
+            boost::tribool aResult = consume(*ioBeginIt++);
             if (aResult || !aResult)
             {
                 updateRequest(ioRequest);
@@ -38,6 +38,7 @@ public:
             }
         }
         boost::tribool aResult = boost::indeterminate;
+        updateRequest(ioRequest);
         return boost::make_tuple(aResult, ioBeginIt);
     }
 

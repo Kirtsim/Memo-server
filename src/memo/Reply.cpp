@@ -1,4 +1,5 @@
 #include "memo/Reply.hpp"
+#include <iostream>
 
 namespace memo {
 
@@ -37,8 +38,8 @@ const std::string bad_gateway =
 const std::string service_unavailable =
   "HTTP/1.0 503 Service Unavailable\r\n";
 
-const char kNameValueSeparator[] = ": ";
-const char kCRLF[]               =  "\r\n";
+const std::string kNameValueSeparator = ": ";
+const std::string kCRLF               = "\r\n";
 
 boost::asio::const_buffer ToBuffer(Reply::Status iStatus)
 {
@@ -81,7 +82,6 @@ boost::asio::const_buffer ToBuffer(Reply::Status iStatus)
   	}
 }
 } // namespace
-
 
 std::vector<boost::asio::const_buffer> Reply::toBuffers()
 {
