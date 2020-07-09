@@ -1,5 +1,6 @@
 #include "memo/tools/RequestParser.hpp"
 #include "memo/Request.hpp"
+#include <iostream>
 
 namespace memo {
 namespace tools {
@@ -236,12 +237,23 @@ boost::tribool RequestParser::consume(char iInputChar)
 
 void RequestParser::updateRequest(Request& oRequest)
 {
+    std::cout << "[RequestParser] Received request:" << std::endl;
+    std::cout << "[RequestParser] -----------------" << std::endl;
+    std::cout << "[RequestParser]  method:       " << method << std::endl;
+    std::cout << "[RequestParser]  uri:          " << uri << std::endl;
+    std::cout << "[RequestParser]  http version: " << httpVersionMajor << "." << httpVersionMinor << std::endl;
+    std::cout << "[RequestParser]  headers: " <<  std::endl;
+
     oRequest.setMethod(method);
     oRequest.setUri(uri);
     oRequest.setHttpVersionMajor(httpVersionMajor);
     oRequest.setHttpVersionMinor(httpVersionMinor);
     for (const auto& aHeader : headers)
-        oRequest.addToHeaders( { aHeader.name, aHeader.value } ); 
+    {
+        std::cout << "[RequestParser]     +-  " << aHeader.name << ": " << aHeader.value <<  std::endl;
+        oRequest.addToHeaders( { aHeader.name, aHeader.value } );
+    } 
+    std::cout << "[RequestParser] +++++++++++++++++" << std::endl;
 }
 
 bool RequestParser::IsChar(int c)

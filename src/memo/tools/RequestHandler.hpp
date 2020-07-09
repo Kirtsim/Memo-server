@@ -10,13 +10,12 @@ namespace tools {
 class RequestHandler
 {
 public:
-    RequestHandler(const RequestHandler&) = delete;
-    RequestHandler& operator=(const RequestHandler&) = delete;
-
     explicit RequestHandler(const std::string& iDocRoot);
 
     void handleRequest(const Request& iRequest, Reply& ioReply);
 
+    RequestHandler(const RequestHandler&) = delete;
+    RequestHandler& operator=(const RequestHandler&) = delete;
 private:
     std::string docRoot;
 

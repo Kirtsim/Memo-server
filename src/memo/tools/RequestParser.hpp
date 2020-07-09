@@ -38,6 +38,7 @@ public:
             }
         }
         boost::tribool aResult = boost::indeterminate;
+        updateRequest(ioRequest);
         return boost::make_tuple(aResult, ioBeginIt);
     }
 

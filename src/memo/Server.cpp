@@ -1,4 +1,5 @@
 #include "memo/Server.hpp"
+#include <iostream>
 #include <boost/bind.hpp>
 
 namespace memo {
@@ -16,6 +17,7 @@ Server::Server(const std::string& iAddress,
   // Register to handle the signals that indicate when the server should exit.
   // It is safe to register for the same signal multiple times in a program,
   // provided all registration for the specified signal is made through Asio.
+    std::cout << "Starting Server on address: " << iAddress << ":" << iPort << std::endl;
     signals.add(SIGINT);
     signals.add(SIGTERM);
 #if defined(SIGQUIT)
@@ -73,6 +75,7 @@ void Server::handleStop()
     // will exit.
     acceptor.close();
     connectionManager.stop_all();
+    std::cout << "Server shutdown" << std::endl;
 }
 
 } // namespace memo

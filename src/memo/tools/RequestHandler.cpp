@@ -3,6 +3,7 @@
 #include "memo/Request.hpp"
 #include "memo/Reply.hpp"
 
+#include <iostream>
 #include <fstream>
 
 namespace memo {
@@ -17,13 +18,16 @@ void RequestHandler::handleRequest(const Request& iRequest, Reply& ioReply)
     std::string aRequestPath;
     if (!DecodeUrl(iRequest.getUri(), aRequestPath))
     {
+        std::cout << "[RequestHandler] could not decode uri." << std::endl;
         ioReply = Reply::StockReply(Reply::Status::bad_request);
         return;
     }
+    std::cout << "[RequestHandler] Decoded uri: " << aRequestPath << std::endl;
 
     // Request path must be absolute and must not contain "..".
     if (not IsAbsolute(aRequestPath))
     {
+        std::cout << "[RequestHandler] Uri is not an absolute path." << std::endl;
         ioReply = Reply::StockReply(Reply::Status::bad_request);
         return;
     }
@@ -32,6 +36,7 @@ void RequestHandler::handleRequest(const Request& iRequest, Reply& ioReply)
     if (aRequestPath[aRequestPath.size() - 1] == '/')
     {
         aRequestPath += "index.html";
+        std::cout << "[RequestHandler] Setting uri to : " << aRequestPath << std::endl;
     }
 
     std::string aFileExtension = FileExtensionOf(aRequestPath);
@@ -40,6 +45,7 @@ void RequestHandler::handleRequest(const Request& iRequest, Reply& ioReply)
     bool aReadSuccess = ReadFileContent(aFullFilePath, aContent);
     if (!aReadSuccess)
     {
+        std::cout << "[RequestHandler] Could not read file content." << std::endl;
         ioReply = Reply::StockReply(Reply::Status::not_found);
         return;
     }

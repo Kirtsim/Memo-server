@@ -22,7 +22,7 @@ public:
     using Ptr = boost::shared_ptr<Connection>;
 
     explicit Connection(boost::asio::io_service& ioIOService,
-                        manager::ConnectionManager& ioConnectionManager, 
+                        manager::ConnectionManager& ioConnectionManager,
                         tools::RequestHandler& ioRequestHandler);
 
     boost::asio::ip::tcp::socket& accessSocket();
@@ -38,10 +38,11 @@ public:
 private:
     /// Handle completion of a read operation.
     void handleRead(const boost::system::error_code& iErrorCode,
-                    size_t iTransformedBytesCount);
+                    size_t iTransferredBytesCount);
 
     /// Handle completion of a write operation.
-    void handleWrite(const boost::system::error_code& iErrorCode);
+    void handleWrite(const boost::system::error_code& iErrorCode,
+                     size_t iTransferredBytesCount);
 
     boost::asio::ip::tcp::socket socket;
     boost::array<char, 8192>     dataBuffer;
