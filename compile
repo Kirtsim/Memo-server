@@ -1,25 +1,41 @@
 #!/bin/bash
 
+# Arguments
+RUN_REQUESTED=0
+SKIP_BUILD=0
+ARGS_FILE=""
+
+# Variables
+BUILD_DIR="./build"
+PROJECT_PATH=$(pwd)
+EXECUTABLE="memo_server"
+SERVER_ARGS="127.0.0.1 8000 $PROJECT_PATH"
+
 exit_on_fail() {
     if ! [ $? -eq 0 ]; then
         exit 1
     fi
 }
 
-BUILD_DIR="./build"
-PROJECT_PATH=$(pwd)
-EXECUTABLE="memo_server 127.0.0.1 8000 $PROJECT_PATH"
-RUN_REQUESTED=0
-SKIP_BUILD=0
-
-for arg in "$@"
+while [[ $# -gt 0 ]]
 do
-    if   [ $arg = '-r' ]; then
-        RUN_REQUESTED=1
+key="$1"
 
-    elif [ $arg = '-s' ]; then
-        SKIP_BUILD=1
-    fi
+case $key in
+    -r|--run)
+    RUN_REQUESTED=1
+    shift
+    ;;
+    -s|--skip-build)
+    SKIP_BUILD=1
+    shift
+    ;;
+    -a|--args-file)
+    ARGS_FILE=$2 
+    shift # past argument
+    shift # past value
+    ;;
+esac
 done
 
 cd $BUILD_DIR
@@ -37,8 +53,31 @@ else
     echo "++ Skipping build (requested)"
 fi
 
-if [ "$RUN_REQUESTED" -eq "1" ]; then
-    echo "++ Running program..."
-    ./$EXECUTABLE
+if [ "$RUN_REQUESTED" -eq "0" ]; then
+    exit 0
 fi
+
+
+# Read server arguments from file
+declare -a args=()
+i=0
+if [ -n "$ARGS_FILE" ]; then
+    # Convert to absolute path
+    absolute_path="$(cd $PROJECT_PATH/$(dirname $ARGS_FILE); pwd)/$(basename $ARGS_FILE)"
+    echo Reading arguments from file: $absolute_path
+    # Read line by line
+    while IFS= read -r line; do
+        args[i++]=$line
+    done < $absolute_path
+fi
+
+if [ ${#args[@]} -eq 0 ]; then
+    echo Using default server arguments.
+else
+    SERVER_ARGS=${args[@]}
+    echo Using arguments defined in the input file "$(basename $ARGS_FILE)"
+fi    
+echo Server arguments: $SERVER_ARGS 
+echo "++ Running program..."
+./$EXECUTABLE $SERVER_ARGS
 
