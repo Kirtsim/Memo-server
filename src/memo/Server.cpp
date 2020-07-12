@@ -1,6 +1,9 @@
 #include "memo/Server.hpp"
+#include "memo/tools/RequestParser.hpp"
 #include <iostream>
+
 #include <boost/bind.hpp>
+#include <boost/asio/placeholders.hpp>
 
 namespace memo {
 
@@ -11,7 +14,7 @@ Server::Server(const std::string& iAddress,
     signals(ioService),
     acceptor(ioService),
     connectionManager(),
-    newConnection(),
+    nextReceiver(),
     requestHandler(iDocRoot)
 {
   // Register to handle the signals that indicate when the server should exit.
@@ -48,10 +51,8 @@ void Server::run()
 
 void Server::startAccept()
 {
-    newConnection.reset(new Connection(ioService,
-                                       connectionManager, 
-                                       requestHandler));
-    acceptor.async_accept(newConnection->accessSocket(),
+    nextReceiver.reset(new boost::asio::ip::tcp::socket(ioService));
+    acceptor.async_accept(*nextReceiver,
                           boost::bind(&Server::handleAccept, this,
                                       boost::asio::placeholders::error));
 }
@@ -64,7 +65,7 @@ void Server::handleAccept(const boost::system::error_code& iErrorCode)
         return;
 
     if (!iErrorCode)
-        connectionManager.start(newConnection);
+        connectionManager.openConnection(nextReceiver, *this);
     startAccept();
 }
 
@@ -74,8 +75,44 @@ void Server::handleStop()
     // operations. Once all operations have finished the io_service::run() call
     // will exit.
     acceptor.close();
-    connectionManager.stop_all();
+    connectionManager.closeAll();
     std::cout << "Server shutdown" << std::endl;
 }
+
+void Server::receiveData(const std::string& iData,
+                         const std::string& iConnectionId)
+{
+    std::cout << "[Server] Received data:\n" << iData << std::endl;
+    tools::RequestParser aParser;
+    Request aRequest;
+    boost::tribool aResult;
+    boost::tie(aResult, boost::tuples::ignore) =
+        aParser.parse(aRequest, iData.data(), iData.data() + iData.size());
+
+    if (!aResult || aResult == boost::indeterminate)
+    {
+        std::cout << "[Server] Failed to parse incoming request." << std::endl;
+        return;
+    }
+    Reply::Ptr aReply = replies.insert({iConnectionId, std::make_shared<Reply>()}).first->second;
+    requestHandler.handleRequest(aRequest, *aReply);
+    connectionManager.getConnectionById(iConnectionId).sendData(aReply->toBuffers());
+}
+
+void Server::onConnectionError(const boost::system::error_code& iErrorCode,
+                               const std::string& iConnectionId)
+{
+    std::cout << "Connection error code: " << iErrorCode << std::endl;
+    connectionManager.closeConnection(iConnectionId);
+}
+
+void Server::onDataSent(const std::string& iConnectionId)
+{
+    connectionManager.closeConnection(iConnectionId);
+    auto aIt = replies.find(iConnectionId);
+    if (aIt != std::end(replies))
+            replies.erase(aIt);
+}
+
 
 } // namespace memo

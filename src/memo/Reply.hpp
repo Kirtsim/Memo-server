@@ -2,6 +2,7 @@
 #include "memo/Header.hpp"
 #include <boost/asio.hpp>
 
+#include <memory>
 #include <vector>
 #include <string>
 
@@ -10,6 +11,8 @@ namespace memo {
 class Reply
 {
 public:
+    using Ptr = std::shared_ptr<Reply>;
+
     enum Status {
         ok = 200,
         created = 201,

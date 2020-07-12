@@ -1,105 +1,99 @@
 #include "memo/Connection.hpp"
-#include "memo/tools/RequestHandler.hpp"
-#include "memo/manager/ConnectionManager.hpp"
 
 #include <iostream>
 #include <boost/bind.hpp>
+#include <boost/asio/write.hpp>
+#include <boost/asio/placeholders.hpp>
 
-namespace memo{
+namespace memo {
 
-Connection::Connection(boost::asio::io_service& ioIOService,
-                       manager::ConnectionManager& ioConnectionManager, 
-                       tools::RequestHandler& ioRequestHandler) :
-    socket(ioIOService),
-    connectionManager(ioConnectionManager),
-    requestHandler(ioRequestHandler)
+Connection::Connection(const SocketPtr& ioSocket,
+                       Callback& ioCallback) :
+    socket(ioSocket),
+    callback(ioCallback)
 {}
 
-boost::asio::ip::tcp::socket& Connection::accessSocket()
+Connection::~Connection()
 {
-    return socket;
+    close();
 }
 
-void Connection::start()
+void Connection::setId(const std::string& iConnectionId)
 {
-    socket.async_read_some(
+    id = iConnectionId;
+}
+
+void Connection::open()
+{
+    std::cout << "[Connection] Opening..." << std::endl;
+    socket->async_read_some(
             boost::asio::buffer(dataBuffer),
-            boost::bind(&Connection::handleRead, shared_from_this(),
+            boost::bind(&Connection::handleRead, this,
                         boost::asio::placeholders::error,
                         boost::asio::placeholders::bytes_transferred));
     std::cout << "[Connection] started." << std::endl;
 }
 
-void Connection::stop()
+void Connection::close()
 {
-    socket.close();
+    socket->close();
     std::cout << "[Connection] stopped." << std::endl;
+}
+
+namespace {
+bool DataReadComplete(const std::string& iData)
+{
+    return iData.empty() || iData.rfind("\r\n\r\n") != std::string::npos;
+}
 }
 
 void Connection::handleRead(const boost::system::error_code& iErrorCode,
                             size_t iTransferredBytesCount)
 {
     std::cout << "[Connection] Handling request..." << std::endl;
-    if (iErrorCode)
+
+    auto aData = std::string(dataBuffer.data(), iTransferredBytesCount);
+    dataStream << aData;
+
+    if (DataReadComplete(aData))
     {
-        if (iErrorCode != boost::asio::error::operation_aborted)
-            connectionManager.stop(shared_from_this());
+        std::cout << "[Connection] Reading request data complete." << std::endl;
+        callback.receiveData(dataStream.str(), id);
         return;
     }
 
-    std::cout << "[Connection] parsing request..." << std::endl;
-    boost::tribool aResult;
-
-    boost::tie(aResult, boost::tuples::ignore) =
-        requestParser.parse(request,
-                            dataBuffer.data(),
-                            dataBuffer.data() + iTransferredBytesCount);
-
-    if (aResult)
+    if (!iErrorCode)
     {
-        std::cout << "[Connection] parsing Success." << std::endl;
-
-        requestHandler.handleRequest(request, reply);
-        const auto aHandler = boost::bind(&Connection::handleWrite,
-                                          shared_from_this(),
-                                          boost::asio::placeholders::error,
-                                          boost::asio::placeholders::bytes_transferred);
-        boost::asio::async_write(socket, reply.toBuffers(), aHandler);
-    }
-    else if (!aResult)
-    {
-        std::cout << "[Connection] parsing Failure;" << std::endl;
-        reply = Reply::StockReply(Reply::Status::bad_request);
-        const auto& aHandler = boost::bind(&Connection::handleWrite,
-                                           shared_from_this(),
+        const auto& aHandler = boost::bind(&Connection::handleRead, this,
                                            boost::asio::placeholders::error,
                                            boost::asio::placeholders::bytes_transferred);
-        boost::asio::async_write(socket, reply.toBuffers(), aHandler);
+
+        socket->async_read_some(boost::asio::buffer(dataBuffer), aHandler);
+        return;
     }
-    else
-    {
-        const auto& aHandler = boost::bind(&Connection::handleRead,
-                                           shared_from_this(),
-                                           boost::asio::placeholders::error,
-                                           boost::asio::placeholders::bytes_transferred);
-        socket.async_read_some(boost::asio::buffer(dataBuffer), aHandler);
-    }
+
+    callback.onConnectionError(iErrorCode, id);
+}
+
+void Connection::sendData(const std::vector<boost::asio::const_buffer>& iDataBuffers)
+{
+    const auto aHandler = boost::bind(&Connection::handleWrite, this,
+                                      boost::asio::placeholders::error,
+                                      boost::asio::placeholders::bytes_transferred);
+    boost::asio::async_write(*socket, iDataBuffers, aHandler);
 }
 
 void Connection::handleWrite(const boost::system::error_code& iErrorCode,
                              const size_t iTransferredBytesCount)
 {
     std::cout << "[Connection] Transferred bytes: " << iTransferredBytesCount << std::endl;
-	if (!iErrorCode)
-    {
-        std::cout << "[Connection] Reply sent successfully." << std::endl;
-        connectionManager.stop(shared_from_this());
-    }
-    else if (iErrorCode != boost::asio::error::operation_aborted)
+    if (iErrorCode)
     {
         std::cout << "[Connection] Failed to send reply." << std::endl;
-        connectionManager.stop(shared_from_this());
+        callback.onConnectionError(iErrorCode, id);
     }
+    std::cout << "[Connection] Reply sent successfully." << std::endl;
+    callback.onDataSent(id);
 }
 
 } // namespace memo
