@@ -1,37 +1,43 @@
 #pragma once
-#include "memo/Request.hpp"
-#include "memo/Reply.hpp"
-#include "memo/tools/RequestParser.hpp"
-
-#include <boost/enable_shared_from_this.hpp>
-#include <boost/asio/io_service.hpp>
 #include <boost/asio/ip/tcp.hpp>
 #include <boost/array.hpp>
 
-namespace memo {
-namespace manager {
-    class ConnectionManager;
-} // namespace manager
-namespace tools {
-    class RequestHandler;
-} // namespace tools
+#include <sstream>
+#include <memory>
 
-class Connection : public boost::enable_shared_from_this<Connection>
+namespace memo {
+
+class Connection
 {
 public:
-    using Ptr = boost::shared_ptr<Connection>;
+    using Ptr = std::shared_ptr<Connection>;
+    using SocketPtr = std::shared_ptr<boost::asio::ip::tcp::socket>;
 
-    explicit Connection(boost::asio::io_service& ioIOService,
-                        manager::ConnectionManager& ioConnectionManager,
-                        tools::RequestHandler& ioRequestHandler);
+    class Callback
+    {
+    public:
+        virtual void receiveData(const std::string& iData,
+                                 const std::string& iConnectionId) = 0;
 
-    boost::asio::ip::tcp::socket& accessSocket();
+        virtual void onConnectionError(const boost::system::error_code& iErrorCode,
+                                       const std::string& iConnectionId) = 0;
+
+        virtual void onDataSent(const std::string& iConnectionId) = 0;
+    };
+
+    Connection(const SocketPtr& ioSocket,
+               Callback& ioDataReceiver);
+    ~Connection();
+
+    void setId(const std::string& iConnectionId);
 
     /// Start the first asynchronous operation for the connection.
-    void start();
+    void open();
 
     /// Stop all asynchronous operations associated with the connection.
-    void stop();
+    void close();
+
+    void sendData(const std::vector<boost::asio::const_buffer>& iDataBuffers);
 
     Connection(const Connection&) = delete;
     Connection& operator=(const Connection&) = delete;
@@ -44,14 +50,12 @@ private:
     void handleWrite(const boost::system::error_code& iErrorCode,
                      size_t iTransferredBytesCount);
 
-    boost::asio::ip::tcp::socket socket;
-    boost::array<char, 8192>     dataBuffer;
-    manager::ConnectionManager&  connectionManager;
-    tools::RequestHandler&       requestHandler;
+    SocketPtr socket;
+    boost::array<char, 8192> dataBuffer;
+    std::stringstream        dataStream;
 
-    Request request;
-    Reply   reply;
-    tools::RequestParser requestParser;
+    Callback& callback;
+    std::string id;
 };
 
 } // namespace memo

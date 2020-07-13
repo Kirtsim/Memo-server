@@ -1,7 +1,7 @@
 #pragma once
 #include "memo/Connection.hpp"
 
-#include <set>
+#include <map>
 
 namespace memo {
 namespace manager {
@@ -11,19 +11,20 @@ class ConnectionManager
 public:
     ConnectionManager() = default;
 
-	void start(const Connection::Ptr& iConnection);
+    Connection& getConnectionById(const std::string& iId);
 
-  	/// Stop the specified connection.
-  	void stop(const Connection::Ptr& iConnection);
+    std::string openConnection(const Connection::SocketPtr& ioSocket,
+                               Connection::Callback& iCallback);
 
-  	/// Stop all connections.
-  	void stop_all();
+    void closeConnection(const std::string& iConnectionId);
+
+    void closeAll();
 
     ConnectionManager(const ConnectionManager&) = delete;
     ConnectionManager& operator=(const ConnectionManager&) = delete;
 
 private:
-    std::set<Connection::Ptr> connections;
+    std::map<std::string, Connection::Ptr> connections;
 };
 } // namespace memo
 } // namespace manager

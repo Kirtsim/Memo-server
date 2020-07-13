@@ -2,10 +2,18 @@
 #include "memo/manager/ConnectionManager.hpp"
 #include "memo/tools/RequestHandler.hpp"
 #include "memo/Connection.hpp"
+#include "memo/Request.hpp"
+#include "memo/Reply.hpp"
+
+#include <boost/asio/ip/tcp.hpp>
+#include <boost/asio/io_service.hpp>
+#include <boost/asio/signal_set.hpp>
+
+#include <map>
 
 namespace memo {
 
-class Server
+class Server : private Connection::Callback
 {
 public:
     /// Construct the server to listen on the specified TCP address and port, and
@@ -26,6 +34,16 @@ private:
     /// Handle a request to stop the server.
     void handleStop();
 
+    // Connection::Callback methods
+    void receiveData(const std::string& iData,
+                     const std::string& iConnectionId) override;
+
+    void onConnectionError(const boost::system::error_code& iErrorCode,
+                           const std::string& iConnectionId) override;
+
+    void onDataSent(const std::string& iConnectionId) override;
+
+
     /// The io_service used to perform asynchronous operations.
     boost::asio::io_service ioService;
 
@@ -38,11 +56,12 @@ private:
     /// The connection manager which owns all live connections.
     manager::ConnectionManager connectionManager;
 
-    /// The next connection to be accepted.
-    Connection::Ptr newConnection;
+    std::shared_ptr<boost::asio::ip::tcp::socket> nextReceiver;
 
     /// The handler for all incoming requests.
     tools::RequestHandler requestHandler;
+
+    std::map<std::string, Reply::Ptr> replies;
 };
 
 } // namespace memo
