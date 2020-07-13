@@ -89,14 +89,18 @@ void Server::receiveData(const std::string& iData,
     boost::tie(aResult, boost::tuples::ignore) =
         aParser.parse(aRequest, iData.data(), iData.data() + iData.size());
 
+    Reply::Ptr aReply = replies.insert({iConnectionId, std::make_shared<Reply>()}).first->second;
+    auto& aConnection = connectionManager.getConnectionById(iConnectionId);
+
     if (!aResult || aResult == boost::indeterminate)
     {
         std::cout << "[Server] Failed to parse incoming request." << std::endl;
+        *aReply = Reply::StockReply(Reply::Status::bad_request);
+        aConnection.sendData(aReply->toBuffers());
         return;
     }
-    Reply::Ptr aReply = replies.insert({iConnectionId, std::make_shared<Reply>()}).first->second;
     requestHandler.handleRequest(aRequest, *aReply);
-    connectionManager.getConnectionById(iConnectionId).sendData(aReply->toBuffers());
+    aConnection.sendData(aReply->toBuffers());
 }
 
 void Server::onConnectionError(const boost::system::error_code& iErrorCode,
