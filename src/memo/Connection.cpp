@@ -36,7 +36,8 @@ void Connection::open()
 
 void Connection::close()
 {
-    socket->close();
+    if (socket->is_open())
+        socket->close();
     std::cout << "[Connection] stopped." << std::endl;
 }
 
