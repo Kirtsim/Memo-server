@@ -1,34 +1,28 @@
 #include "memo/tools/Receptor.hpp"
 
-#include <boost/asio/placeholders.hpp>
-
 #include <iostream>
-#include <exception>
 #include <functional>
 
 namespace memo {
 namespace tools {
 
-Receptor::Ptr Receptor::Create(IoServicePtr_t iIoService, const Address& iAddress, Callback& iCallback)
-{
-    if (!iIoService)
-        throw std::invalid_argument("IOService is not defined.");
-    return Ptr(new Receptor(std::move(iIoService), iAddress, iCallback));
-}
-
-Receptor::Receptor(IoServicePtr_t iIoService, const Address& iAddress, Callback& iCallback) :
+Receptor::Receptor(const Address& iAddress, Callback& iCallback) :
+    ioService(),
+    acceptor(ioService),
     callback(iCallback),
-    socket(),
-    ioService(std::move(iIoService)),
-    acceptor(*ioService)
+    socket()
 {
     using namespace boost::asio::ip;
-    tcp::resolver        aResolver(*ioService);
-    tcp::resolver::query aQuery(iAddress.address, iAddress.port);
-    endpoint = std::make_unique<tcp::endpoint>(*aResolver.resolve(aQuery));
 
+    tcp::resolver        aResolver(ioService);
+    tcp::resolver::query aQuery(iAddress.address, iAddress.port);
+    tcp::endpoint aEndpoint = *aResolver.resolve(aQuery);
+
+    acceptor.open(aEndpoint.protocol());
     acceptor.set_option(boost::asio::ip::tcp::acceptor::reuse_address(true));
-    acceptor.bind(*endpoint);
+    acceptor.bind(aEndpoint);
+    acceptor.listen();
+    listen();
 }
 
 Receptor::~Receptor()
@@ -36,32 +30,14 @@ Receptor::~Receptor()
     close();
 }
 
-void Receptor::listen()
+bool Receptor::isOpen()
 {
-    openAcceptor();
-    socket = std::make_shared<boost::asio::ip::tcp::socket>(*ioService);
-
-    auto aFunction = std::bind(&Receptor::notify, this, std::placeholders::_1);
-    acceptor.async_accept(*socket, aFunction);
+    return !ioService.stopped() && acceptor.is_open();
 }
 
-void Receptor::openAcceptor()
+void Receptor::open()
 {
-    if (!acceptor.is_open())
-    {
-        acceptor.open(endpoint->protocol());
-        acceptor.listen();
-    }
-}
-
-void Receptor::notify(const boost::system::error_code& iErrorCode)
-{
-    if (!iErrorCode)
-    {
-        std::cout << "[Receptor] Received error:\n" << iErrorCode << std::endl;
-    }
-    callback.acceptIncomingRequest(socket);        
-    listen();
+    ioService.run();
 }
 
 void Receptor::close()
@@ -70,10 +46,34 @@ void Receptor::close()
     {
         acceptor.close();
     }
-    socket->cancel();
-    socket->close();
+    ioService.stop();
 }
 
+boost::asio::io_service& Receptor::accessIoService()
+{
+    return ioService;
+}
+
+void Receptor::listen()
+{
+    socket = std::make_shared<boost::asio::ip::tcp::socket>(ioService);
+
+    auto aFunction = std::bind(&Receptor::notify, this, std::placeholders::_1);
+    acceptor.async_accept(*socket, aFunction);
+}
+
+
+void Receptor::notify(const boost::system::error_code& iErrorCode)
+{
+    std::cout << "[Receptor] Incoming connection request..." << std::endl;
+    if (iErrorCode)
+    {
+        std::cout << "[Receptor] Received error:\n" << iErrorCode << std::endl;
+        return;
+    }
+    callback.acceptIncomingRequest(socket);        
+    listen();
+}
 
 } // namespace tools
 } // namespace memo

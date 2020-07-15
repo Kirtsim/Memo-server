@@ -7,9 +7,7 @@ namespace tools {
 
 class Receptor 
 {
-    using SocketPtr_t    = std::shared_ptr<boost::asio::ip::tcp::socket>;
-    using IoServicePtr_t = std::unique_ptr<boost::asio::io_service>;
-    using EndpointPtr_t  = std::unique_ptr<boost::asio::ip::tcp::endpoint>;
+    using SocketPtr_t = std::shared_ptr<boost::asio::ip::tcp::socket>;
 public:
     using Ptr = std::shared_ptr<Receptor>;
 
@@ -25,24 +23,29 @@ public:
         std::string port;
     };
 
-    static Ptr Create(IoServicePtr_t iIoService, const Address& iAddress, Callback& iCallback);
-
+    Receptor(const Address& iAddress, Callback& iCallback);
     ~Receptor();
 
-    void listen();
+    bool isOpen();
+
+    // A blocking operation running until all asynchronous operations
+    // have finished. Can be stopped by calling close(). While running,
+    // there is always at least one asynchronous accept call waiting
+    // for new incoming connections.
+    void open();
+
     void close();
 
+    boost::asio::io_service& accessIoService();
+
 private:
-    Receptor(IoServicePtr_t iIoService, const Address& iAddress, Callback& iCallback);
-
+    void listen();
     void notify(const boost::system::error_code& iErrorCode);
-    void openAcceptor();
 
-    Callback&      callback;
-    SocketPtr_t    socket;
-    IoServicePtr_t ioService;
-    EndpointPtr_t  endpoint;
+    boost::asio::io_service ioService;
     boost::asio::ip::tcp::acceptor acceptor;
+    Callback&   callback;
+    SocketPtr_t socket;
 };
 
 } // namespace tools
