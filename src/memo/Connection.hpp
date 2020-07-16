@@ -16,6 +16,7 @@ public:
     class Callback
     {
     public:
+        virtual ~Callback() = default;
         virtual void receiveData(const std::string& iData,
                                  const std::string& iConnectionId) = 0;
 

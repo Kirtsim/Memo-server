@@ -71,7 +71,7 @@ void Receptor::notify(const boost::system::error_code& iErrorCode)
         std::cout << "[Receptor] Received error:\n" << iErrorCode << std::endl;
         return;
     }
-    callback.acceptIncomingRequest(socket);        
+    callback.acceptIncomingRequest(socket);
     listen();
 }
 

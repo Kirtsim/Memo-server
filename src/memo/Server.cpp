@@ -1,5 +1,4 @@
 #include "memo/Server.hpp"
-#include "memo/tools/RequestParser.hpp"
 
 #include <iostream>
 #include <exception>
@@ -9,12 +8,12 @@
 
 namespace memo {
 
-Server::Server(const std::string& iAddress, 
+Server::Server(const std::string& iAddress,
                const std::string& iPort,
                const std::string& iDocRoot) :
+    documentRoot(iDocRoot),
     receptor({ iAddress, iPort }, *this),
-    signals(receptor.accessIoService()),
-    requestHandler(iDocRoot)
+    signals(receptor.accessIoService())
 {
     std::cout << "[Server] Starting on address: " << iAddress << ":" << iPort << std::endl;
 
@@ -38,52 +37,46 @@ void Server::handleStop()
     std::cout << "[Server] Shutdown" << std::endl;
 }
 
+
+// ###############################################################
+// # Receptor::Callback methods
+// ###############################################################
+
 void Server::acceptIncomingRequest(const SocketPtr_t& ioSocket)
 {
     if (!receptor.isOpen())
         return;
 
-    connectionManager.openConnection(ioSocket, *this);
+    Transaction::Ptr aTransaction = std::make_shared<Transaction>(connectionManager, *this, documentRoot);
+    std::string aTxnId = aTransaction->open(ioSocket);
+    transactions.insert({ aTxnId, aTransaction });
 }
 
-void Server::receiveData(const std::string& iData,
-                         const std::string& iConnectionId)
+
+// ###############################################################
+// # Transaction::Callback methods
+// ###############################################################
+
+void Server::onTransactionComplete(const std::string& iTxnId)
 {
-    std::cout << "[Server] Received data:\n" << iData << std::endl;
-    tools::RequestParser aParser;
-    Request aRequest;
-    boost::tribool aResult;
-    boost::tie(aResult, boost::tuples::ignore) =
-        aParser.parse(aRequest, iData.data(), iData.data() + iData.size());
-
-    Reply::Ptr aReply = replies.insert({iConnectionId, std::make_shared<Reply>()}).first->second;
-    auto& aConnection = connectionManager.getConnectionById(iConnectionId);
-
-    if (!aResult || aResult == boost::indeterminate)
-    {
-        std::cout << "[Server] Failed to parse incoming request." << std::endl;
-        *aReply = Reply::StockReply(Reply::Status::bad_request);
-        aConnection.sendData(aReply->toBuffers());
-        return;
-    }
-    requestHandler.handleRequest(aRequest, *aReply);
-    aConnection.sendData(aReply->toBuffers());
+    std::cout << "[Server] Transaction complete." << std::endl;
+    removeTransaction(iTxnId);
 }
 
-void Server::onConnectionError(const boost::system::error_code& iErrorCode,
-                               const std::string& iConnectionId)
+void Server::onTransactionError(const boost::system::error_code& iErrorCode,
+                                const std::string& iTxnId)
 {
-    std::cout << "[Server] Connection error code: " << iErrorCode << std::endl;
-    connectionManager.closeConnection(iConnectionId);
+    std::cout << "[Server] Transaction error: " << iErrorCode << std::endl;
+    removeTransaction(iTxnId);
 }
 
-void Server::onDataSent(const std::string& iConnectionId)
+// ###############################################################
+
+void Server::removeTransaction(const std::string& iTxnId)
 {
-    connectionManager.closeConnection(iConnectionId);
-    auto aIt = replies.find(iConnectionId);
-    if (aIt != std::end(replies))
-        replies.erase(aIt);
+    auto aTxnIter = transactions.find(iTxnId);
+    if (aTxnIter != std::end(transactions))
+        transactions.erase(aTxnIter);
 }
-
 
 } // namespace memo

@@ -37,8 +37,10 @@ void Connection::open()
 void Connection::close()
 {
     if (socket->is_open())
+    {
         socket->close();
-    std::cout << "[Connection] stopped." << std::endl;
+        std::cout << "[Connection] stopped." << std::endl;
+    }
 }
 
 namespace {
