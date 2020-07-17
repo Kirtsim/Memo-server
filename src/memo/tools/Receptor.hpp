@@ -5,7 +5,7 @@
 namespace memo {
 namespace tools {
 
-class Receptor 
+class Receptor
 {
     using SocketPtr_t = std::shared_ptr<boost::asio::ip::tcp::socket>;
 public:
