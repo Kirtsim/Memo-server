@@ -1,5 +1,7 @@
 #include "memo/Transaction.hpp"
+#include "memo/Resources.hpp"
 #include "memo/Request.hpp"
+#include "memo/Reply.hpp"
 #include "memo/tools/RequestParser.hpp"
 #include "memo/manager/ConnectionManager.hpp"
 
@@ -7,13 +9,17 @@
 
 namespace memo {
 
-Transaction::Transaction(manager::ConnectionManager& iConnectionManager,
-                         Callback& iCallback,
-                         const std::string& iDocRoot) :
-    connectionManager(iConnectionManager),
+Transaction::Transaction(const ResourcesPtr_t& iResources,
+                         Callback& iCallback) :
+    resources(iResources),
+    connectionManager(resources->getConnectionManager()),
     callback(iCallback),
-    requestHandler(iDocRoot)
+    requestHandler(resources->getDocumentRoot())
 {}
+
+// Required to be explicitly declared/defined. Otherwise forward declaring
+// memo::Reply won't work when using std::unique_ptr. o_O
+Transaction::~Transaction() = default;
 
 std::string Transaction::open(const SocketPtr_t& iSocket)
 {
@@ -52,15 +58,16 @@ void Transaction::receiveData(const std::string& iData,
 
     auto& aConnection = connectionManager.getConnectionById(iConnectionId);
 
+    reply = std::make_unique<Reply>();
     if (!aResult || aResult == boost::indeterminate)
     {
         std::cout << "[Transaction] Failed to parse incoming request." << std::endl;
-        reply = Reply::StockReply(Reply::Status::bad_request);
-        aConnection.sendData(reply.toBuffers());
+        reply = std::make_unique<Reply>(Reply::StockReply(Reply::Status::bad_request));
+        aConnection.sendData(reply->toBuffers());
         return;
     }
-    requestHandler.handleRequest(aRequest, reply);
-    aConnection.sendData(reply.toBuffers());
+    requestHandler.handleRequest(aRequest, *reply);
+    aConnection.sendData(reply->toBuffers());
 }
 
 void Transaction::onConnectionError(const boost::system::error_code& iErrorCode,

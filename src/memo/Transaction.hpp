@@ -1,11 +1,13 @@
 #pragma once
 #include "memo/tools/RequestHandler.hpp"
 #include "memo/Connection.hpp"
-#include "memo/Reply.hpp"
 
 #include <boost/asio/ip/tcp.hpp>
 
 namespace memo {
+    class Reply;
+    class Resources;
+
 namespace manager {
     class ConnectionManager;
 } // namespace manager
@@ -13,6 +15,7 @@ namespace manager {
 class Transaction : private Connection::Callback
 {
     using SocketPtr_t = std::shared_ptr<boost::asio::ip::tcp::socket>;
+    using ResourcesPtr_t = std::shared_ptr<Resources>;
 
 public:
     using Ptr = std::shared_ptr<Transaction>;
@@ -26,10 +29,9 @@ public:
                                         const std::string& iTxnId) = 0;
     };
 
-    // TODO: Pack ConnectionManager and Document root in a Resource class
-    Transaction(manager::ConnectionManager& iConnectionManager,
-                Callback& iCallback,
-                const std::string& iDocRoot);
+    Transaction(const ResourcesPtr_t& iResources, Callback& iCallback);
+    ~Transaction();
+
 
     // Creates and opens a connection and returns the connection's id.
     // Throws std::runtime_error if opened second time.
@@ -56,10 +58,11 @@ public:
     Transaction& operator=(const Transaction&) = delete;
 
 private:
+    ResourcesPtr_t resources;
+    manager::ConnectionManager& connectionManager;
     SocketPtr_t socket;
     std::string connectionId;
-    Reply reply;
-    manager::ConnectionManager& connectionManager;
+    std::unique_ptr<Reply> reply;
     Callback& callback;
     tools::RequestHandler requestHandler;
 };

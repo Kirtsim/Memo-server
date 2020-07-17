@@ -9,6 +9,7 @@ set(BASEPATH "${CMAKE_SOURCE_DIR}/src/")
 set(SOURCES src/main.cpp
             src/memo/Reply.cpp
             src/memo/Server.cpp
+            src/memo/Resources.cpp
             src/memo/Connection.cpp
             src/memo/Transaction.cpp
             src/memo/tools/Tools.cpp
@@ -20,8 +21,9 @@ set(HEADERS src/memo/Header.hpp
             src/memo/Request.hpp
             src/memo/Reply.hpp
             src/memo/Server.hpp
+            src/memo/Resources.hpp
             src/memo/Connection.hpp
-            src/memo/Transaction.cpp
+            src/memo/Transaction.hpp
             src/memo/tools/Tools.hpp
             src/memo/tools/Receptor.hpp
             src/memo/tools/RequestParser.hpp
@@ -30,9 +32,9 @@ set(HEADERS src/memo/Header.hpp
 
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
-set(Boost_USE_STATIC_LIBS ON) 
-set(Boost_USE_MULTITHREADED ON)  
-set(Boost_USE_STATIC_RUNTIME OFF) 
+set(Boost_USE_STATIC_LIBS ON)
+set(Boost_USE_MULTITHREADED ON)
+set(Boost_USE_STATIC_RUNTIME OFF)
 find_package(Boost 1.72.0 REQUIRED)
 
 add_executable(memo_server ${SOURCES} ${HEADERS})
