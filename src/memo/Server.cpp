@@ -1,4 +1,5 @@
 #include "memo/Server.hpp"
+#include "memo/manager/ConnectionManager.hpp"
 
 #include <iostream>
 #include <exception>
@@ -8,10 +9,21 @@
 
 namespace memo {
 
+namespace {
+Resources::Ptr ConstructResources(const std::string& iAddress,
+                                  const std::string& iPortNumber,
+                                  const std::string& iDocRoot)
+{
+    auto aConnectionManager = std::make_unique<manager::ConnectionManager>();
+    return Resources::Create(iAddress, iPortNumber, iDocRoot, std::move(aConnectionManager));
+}
+
+} // namespace
+
 Server::Server(const std::string& iAddress,
                const std::string& iPort,
                const std::string& iDocRoot) :
-    documentRoot(iDocRoot),
+    resources(ConstructResources(iAddress, iPort, iDocRoot)),
     receptor({ iAddress, iPort }, *this),
     signals(receptor.accessIoService())
 {
@@ -32,7 +44,7 @@ void Server::run()
 
 void Server::handleStop()
 {
-    connectionManager.closeAll();
+    resources->getConnectionManager().closeAll();
     receptor.close();
     std::cout << "[Server] Shutdown" << std::endl;
 }
@@ -47,7 +59,7 @@ void Server::acceptIncomingRequest(const SocketPtr_t& ioSocket)
     if (!receptor.isOpen())
         return;
 
-    Transaction::Ptr aTransaction = std::make_shared<Transaction>(connectionManager, *this, documentRoot);
+    Transaction::Ptr aTransaction = std::make_shared<Transaction>(resources, *this);
     std::string aTxnId = aTransaction->open(ioSocket);
     transactions.insert({ aTxnId, aTransaction });
 }

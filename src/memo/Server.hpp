@@ -1,7 +1,7 @@
 #pragma once
-#include "memo/manager/ConnectionManager.hpp"
 #include "memo/tools/Receptor.hpp"
 #include "memo/Transaction.hpp"
+#include "memo/Resources.hpp"
 
 #include <boost/asio/signal_set.hpp>
 
@@ -40,18 +40,13 @@ private:
                             const std::string& iTxnId) override;
 
 
-    // ---------------------------------------------------------------
-    // Attributes
-    // ---------------------------------------------------------------
-
-    const std::string documentRoot;
+private:
+    Resources::Ptr resources;
 
     tools::Receptor receptor;
 
     // Used to register termination signals
     boost::asio::signal_set signals;
-
-    manager::ConnectionManager connectionManager;
 
     // Cached replies (need to be stored while being sent)
     std::map<std::string, Transaction::Ptr> transactions;
