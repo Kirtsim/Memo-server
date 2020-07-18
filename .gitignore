@@ -1,5 +1,6 @@
 .clangd
 build
+docs
 compile_commands.json
 compile_flags.txt
 
