@@ -1,0 +1,13 @@
+POST /tag-search
+{
+    "title": {
+        # Parameters that can be combined
+        "startsWith": "sub-string",
+        "contains":   "keyword",
+
+        # Used alone (discards parameters above)
+        "exactMatch": "tag-name"
+    },
+    # Colors of tags in format #FFFFFF
+    "colors": [ Color1, Color2, ... ]
+}

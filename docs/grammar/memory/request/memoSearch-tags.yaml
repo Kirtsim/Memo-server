@@ -1,0 +1,4 @@
+POST /memo-search/tags
+{
+    "tags": [ "tag-name1", "tag-name2", ... ]
+}
