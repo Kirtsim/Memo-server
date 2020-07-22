@@ -1,4 +1,5 @@
 POST /memo-search/ids
 {
-    "ids": [ "memo-id1", "memo-id2", ... ]
+  # Required
+  "ids": [ "memo-id1", "memo-id2", ... ]
 }

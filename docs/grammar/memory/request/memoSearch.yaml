@@ -1,5 +1,7 @@
 POST /memo-search
 {
+  # Filters (optional)
+  "filters": {
     "title": {
         # Parameters that can be combined
         "startsWith": "sub-string",
@@ -14,4 +16,5 @@ POST /memo-search
         "from": 1921029121212,
         "to":   1921029121221
     }
+  }
 }
