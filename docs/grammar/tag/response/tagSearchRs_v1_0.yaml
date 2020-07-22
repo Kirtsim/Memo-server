@@ -1,0 +1,12 @@
+RS /tag-search
+{
+  "tags": [
+    {
+      "title": "tag-name",
+      # Color in format #FFFFFF
+      "color": Color,
+      "creationDate": 1921029121212
+    },
+    ...
+  ]
+}

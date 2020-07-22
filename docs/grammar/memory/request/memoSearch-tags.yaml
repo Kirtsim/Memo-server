@@ -1,4 +1,5 @@
 POST /memo-search/tags
 {
-    "tags": [ "tag-name1", "tag-name2", ... ]
+  # Required
+  "tags": [ "tag-name1", "tag-name2", ... ]
 }
