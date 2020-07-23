@@ -1,0 +1,4 @@
+POST /tag-delete
+{
+  "titles": ["tag-name1", "tag-name2", ... ]
+}

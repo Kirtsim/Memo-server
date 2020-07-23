@@ -1,0 +1,7 @@
+POST /tag-update
+{
+  "title": "tag-title",
+  "data": {
+    "color": "#FFFFFF"
+  }
+}

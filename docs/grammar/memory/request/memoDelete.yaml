@@ -1,0 +1,5 @@
+POST /memo-delete
+{
+  # Required
+  "ids": [ "memo-id1", "memo-id2", ... ]
+}

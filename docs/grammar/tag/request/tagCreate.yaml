@@ -1,0 +1,7 @@
+POST /tag-create
+{
+  "tag": {
+    "title": "tag-name",
+    "color": "#FFFFFF"
+  }
+}

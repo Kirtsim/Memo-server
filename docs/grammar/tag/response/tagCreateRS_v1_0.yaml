@@ -1,0 +1,8 @@
+RS /tag-create
+{
+  "status": "OK/KO",
+  "data": {
+      "title": "tag-name",
+      "creationDate": 1921029121212
+  }
+}

@@ -1,13 +1,9 @@
-RS /memo-search
+POST /memo-create
 {
- "memories": [
-   {
-     "id": "memory-id",
+  # Mandatory
+ "memory": {
      "title": "Title",
      "description": "long string containing a description of the memory",
-     "creationDate": 1921029121212,
      "tags": ["tag-id1", "tag-id2", ...]
-   }
-   ...
- ]
+ }
 }
