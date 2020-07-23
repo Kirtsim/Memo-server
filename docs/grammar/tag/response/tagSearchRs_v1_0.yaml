@@ -3,8 +3,7 @@ RS /tag-search
   "tags": [
     {
       "title": "tag-name",
-      # Color in format #FFFFFF
-      "color": Color,
+      "color": "#FFFFFF",
       "creationDate": 1921029121212
     },
     ...

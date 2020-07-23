@@ -10,7 +10,6 @@ POST /tag-search
         # Used alone (discards parameters above)
         "exactMatch": "tag-name"
     },
-    # Colors of tags in format #FFFFFF
-    "colors": [ Color1, Color2, ... ]
+    "colors": [ "#FFFFFF", "#000000", ... ]
   }
 }

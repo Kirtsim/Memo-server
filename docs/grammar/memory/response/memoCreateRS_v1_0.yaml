@@ -1,0 +1,8 @@
+RS /memo-create
+{
+  "status": "OK/KO",
+  "data": {
+    "memoryId": "memory-id",
+    "creationDate": 1921029121212
+  }
+}
