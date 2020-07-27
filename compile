@@ -57,6 +57,7 @@ if [ "$RUN_REQUESTED" -eq "0" ]; then
     exit 0
 fi
 
+rm $PROJECT_PATH/log/*.log
 
 # Read server arguments from file
 declare -a args=()
