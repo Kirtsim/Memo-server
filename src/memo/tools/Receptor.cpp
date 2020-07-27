@@ -1,4 +1,5 @@
 #include "memo/tools/Receptor.hpp"
+#include "logger/logger.hpp"
 
 #include <iostream>
 #include <functional>
@@ -65,10 +66,10 @@ void Receptor::listen()
 
 void Receptor::notify(const boost::system::error_code& iErrorCode)
 {
-    std::cout << "[Receptor] Incoming connection request..." << std::endl;
+    LOG_TRC("[Receptor] Incoming connection request...");
     if (iErrorCode)
     {
-        std::cout << "[Receptor] Received error:\n" << iErrorCode << std::endl;
+        LOG_WRN("[Receptor] Received error:\n" << iErrorCode);
         return;
     }
     callback.acceptIncomingRequest(socket);

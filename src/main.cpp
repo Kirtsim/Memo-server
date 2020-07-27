@@ -21,8 +21,8 @@ int main(int argc, char* argv[])
   	    }
         memo::logger::Init("../log/memo.log");
 
-        memo::Server aServer(argv[1], argv[2], argv[3]);
         LOG_TRC("Launching server...");
+        memo::Server aServer(argv[1], argv[2], argv[3]);
   	    aServer.run();
   	}
   	catch (std::exception& e)

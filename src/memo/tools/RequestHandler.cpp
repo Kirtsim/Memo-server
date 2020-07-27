@@ -2,6 +2,7 @@
 #include "memo/tools/Tools.hpp"
 #include "memo/Request.hpp"
 #include "memo/Reply.hpp"
+#include "logger/logger.hpp"
 
 #include <iostream>
 #include <fstream>
@@ -18,16 +19,16 @@ void RequestHandler::handleRequest(const Request& iRequest, Reply& ioReply)
     std::string aRequestPath;
     if (!DecodeUrl(iRequest.getUri(), aRequestPath))
     {
-        std::cout << "[RequestHandler] could not decode uri." << std::endl;
+        LOG_WRN("[RequestHandler] could not decode uri.");
         ioReply = Reply::StockReply(Reply::Status::bad_request);
         return;
     }
-    std::cout << "[RequestHandler] Decoded uri: " << aRequestPath << std::endl;
+    LOG_INF("[RequestHandler] Decoded uri: " << aRequestPath);
 
     // Request path must be absolute and must not contain "..".
     if (not IsAbsolute(aRequestPath))
     {
-        std::cout << "[RequestHandler] Uri is not an absolute path." << std::endl;
+        LOG_WRN("[RequestHandler] Uri is not an absolute path.");
         ioReply = Reply::StockReply(Reply::Status::bad_request);
         return;
     }
@@ -36,7 +37,7 @@ void RequestHandler::handleRequest(const Request& iRequest, Reply& ioReply)
     if (aRequestPath[aRequestPath.size() - 1] == '/')
     {
         aRequestPath += "index.html";
-        std::cout << "[RequestHandler] Setting uri to : " << aRequestPath << std::endl;
+        LOG_INF("[RequestHandler] Setting uri to : " << aRequestPath);
     }
 
     std::string aFileExtension = FileExtensionOf(aRequestPath);
@@ -45,7 +46,7 @@ void RequestHandler::handleRequest(const Request& iRequest, Reply& ioReply)
     bool aReadSuccess = ReadFileContent(aFullFilePath, aContent);
     if (!aReadSuccess)
     {
-        std::cout << "[RequestHandler] Could not read file content." << std::endl;
+        LOG_WRN("[RequestHandler] Could not read file content.");
         ioReply = Reply::StockReply(Reply::Status::not_found);
         return;
     }
@@ -96,8 +97,8 @@ bool RequestHandler::DecodeUrl(const std::string& iUrlStr, std::string& oOutput)
 
 bool RequestHandler::IsAbsolute(const std::string& iPath)
 {
-    return !iPath.empty()  && 
-           iPath[0] == '/' && 
+    return !iPath.empty()  &&
+           iPath[0] == '/' &&
            iPath.find("..") == std::string::npos;
 }
 

@@ -1,5 +1,6 @@
 #include "memo/Server.hpp"
 #include "memo/manager/ConnectionManager.hpp"
+#include "logger/logger.hpp"
 
 #include <iostream>
 #include <exception>
@@ -27,7 +28,7 @@ Server::Server(const std::string& iAddress,
     receptor({ iAddress, iPort }, *this),
     signals(receptor.accessIoService())
 {
-    std::cout << "[Server] Starting on address: " << iAddress << ":" << iPort << std::endl;
+    LOG_INF("[Server] Starting on address: " << iAddress << ":" << iPort);
 
     signals.add(SIGINT);
     signals.add(SIGTERM);
@@ -46,7 +47,7 @@ void Server::handleStop()
 {
     resources->getConnectionManager().closeAll();
     receptor.close();
-    std::cout << "[Server] Shutdown" << std::endl;
+    LOG_TRC("[Server] Shutdown");
 }
 
 
@@ -71,14 +72,14 @@ void Server::acceptIncomingRequest(const SocketPtr_t& ioSocket)
 
 void Server::onTransactionComplete(const std::string& iTxnId)
 {
-    std::cout << "[Server] Transaction complete." << std::endl;
+    LOG_TRC("[Server] Transaction complete.");
     removeTransaction(iTxnId);
 }
 
 void Server::onTransactionError(const boost::system::error_code& iErrorCode,
                                 const std::string& iTxnId)
 {
-    std::cout << "[Server] Transaction error: " << iErrorCode << std::endl;
+    LOG_WRN("[Server] Transaction error: " << iErrorCode);
     removeTransaction(iTxnId);
 }
 

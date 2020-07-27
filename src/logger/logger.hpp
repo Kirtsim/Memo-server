@@ -1,7 +1,6 @@
 #pragma once
 #include "logger/easylogging++.h"
 
-#include <iostream>
 #include <string>
 
 namespace memo {
