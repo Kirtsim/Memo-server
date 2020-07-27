@@ -4,6 +4,7 @@
 #include "memo/Reply.hpp"
 #include "memo/tools/RequestParser.hpp"
 #include "memo/manager/ConnectionManager.hpp"
+#include "logger/logger.hpp"
 
 #include <iostream>
 
@@ -49,7 +50,7 @@ void Transaction::cancel(bool iSilent)
 void Transaction::receiveData(const std::string& iData,
                               const std::string& iConnectionId)
 {
-    std::cout << "[Transaction] Received data:\n" << iData << std::endl;
+    LOG_INF("[Transaction] Received data:\n" << iData);
     tools::RequestParser aParser;
     Request aRequest;
     boost::tribool aResult;
@@ -61,7 +62,7 @@ void Transaction::receiveData(const std::string& iData,
     reply = std::make_unique<Reply>();
     if (!aResult || aResult == boost::indeterminate)
     {
-        std::cout << "[Transaction] Failed to parse incoming request." << std::endl;
+        LOG_WRN("[Transaction] Failed to parse incoming request.");
         reply = std::make_unique<Reply>(Reply::StockReply(Reply::Status::bad_request));
         aConnection.sendData(reply->toBuffers());
         return;
@@ -73,7 +74,7 @@ void Transaction::receiveData(const std::string& iData,
 void Transaction::onConnectionError(const boost::system::error_code& iErrorCode,
                                const std::string& iConnectionId)
 {
-    std::cout << "[Transaction] Connection error code: " << iErrorCode << std::endl;
+    LOG_WRN("[Transaction] Connection error code: " << iErrorCode);
     connectionManager.closeConnection(iConnectionId);
     callback.onTransactionError(iErrorCode, iConnectionId);
 }

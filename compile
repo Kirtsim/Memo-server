@@ -31,7 +31,7 @@ case $key in
     shift
     ;;
     -a|--args-file)
-    ARGS_FILE=$2 
+    ARGS_FILE=$2
     shift # past argument
     shift # past value
     ;;
@@ -76,8 +76,8 @@ if [ ${#args[@]} -eq 0 ]; then
 else
     SERVER_ARGS=${args[@]}
     echo Using arguments defined in the input file "$(basename $ARGS_FILE)"
-fi    
-echo Server arguments: $SERVER_ARGS 
+fi
+echo Server arguments: $SERVER_ARGS
 echo "++ Running program..."
 ./$EXECUTABLE $SERVER_ARGS
 

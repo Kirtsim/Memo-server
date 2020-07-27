@@ -1,4 +1,5 @@
 #include "memo/manager/ConnectionManager.hpp"
+#include "logger/logger.hpp"
 
 #include <boost/bind.hpp>
 
@@ -24,7 +25,7 @@ std::string ConnectionManager::openConnection(const Connection::SocketPtr& ioSoc
     std::string aStrId = std::to_string(aPointerAdress);
     connections.insert({ aStrId, aConnection });
 
-    std::cout << "[Manager] Opening connection [" << aStrId << "]" << std::endl;
+    LOG_TRC("[Manager] Opening connection [" << aStrId << "]");
     aConnection->setId(aStrId);
     aConnection->open();
     return aStrId;
@@ -32,7 +33,7 @@ std::string ConnectionManager::openConnection(const Connection::SocketPtr& ioSoc
 
 void ConnectionManager::closeConnection(const std::string& iConnectionId)
 {
-    std::cout << "[Manager] Closing connection [" << iConnectionId << "]..." << std::endl;
+    LOG_TRC("[Manager] Closing connection [" << iConnectionId << "]...");
     auto aIt = connections.find(iConnectionId);
     if (aIt != std::end(connections))
     {
@@ -43,7 +44,7 @@ void ConnectionManager::closeConnection(const std::string& iConnectionId)
 
 void ConnectionManager::closeAll()
 {
-    std::cout << "[Manager] Closing all connections..." << std::endl;
+    LOG_TRC("[Manager] Closing all connections...");
     for (auto aId2Connection : connections)
         aId2Connection.second->close();
     connections.clear();

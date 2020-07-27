@@ -16,7 +16,7 @@ const std::map<std::string, std::string> kExtension2MimeMap {
 };
 } // namespace
 
-    
+
 std::string Tools::Extension2Mime(const std::string& iExtension)
 {
     auto aIt = kExtension2MimeMap.find(iExtension);

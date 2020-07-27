@@ -7,6 +7,8 @@ add_compile_options(-std=c++17 -Wall -Wextra -Wsign-conversion)
 set(BASEPATH "${CMAKE_SOURCE_DIR}/src/")
 
 set(SOURCES src/main.cpp
+            src/logger/logger.cpp
+            src/logger/easylogging++.cc
             src/memo/Reply.cpp
             src/memo/Server.cpp
             src/memo/Resources.cpp
@@ -17,7 +19,8 @@ set(SOURCES src/main.cpp
             src/memo/tools/RequestParser.cpp
             src/memo/tools/RequestHandler.cpp
             src/memo/manager/ConnectionManager.cpp)
-set(HEADERS src/memo/Header.hpp
+set(HEADERS src/logger/logger.hpp
+            src/memo/Header.hpp
             src/memo/Request.hpp
             src/memo/Reply.hpp
             src/memo/Server.hpp
@@ -38,6 +41,7 @@ set(Boost_USE_STATIC_RUNTIME OFF)
 find_package(Boost 1.72.0 REQUIRED)
 
 add_executable(memo_server ${SOURCES} ${HEADERS})
+add_definitions(-DBOOST_LOG_DYN_LINK)
 
 # needed for "absolute" include paths
 target_include_directories(memo_server PRIVATE ${BASEPATH})

@@ -9,9 +9,9 @@ Resources::Ptr Resources::Create(const std::string& iAddress,
 {
     if (!iConnectionManager)
         throw std::invalid_argument("Failed to create Resources class. "
-                                    "Reason: ConnectionManager is NULL"); 
+                                    "Reason: ConnectionManager is NULL");
 
-    return Ptr(new Resources(iAddress, iPortNumber, iDocumentRoot, 
+    return Ptr(new Resources(iAddress, iPortNumber, iDocumentRoot,
                              std::move(iConnectionManager)));
 }
 
@@ -45,4 +45,4 @@ const std::string& Resources::getDocumentRoot() const
     return documentRoot;
 }
 
-} // namespace memo 
+} // namespace memo

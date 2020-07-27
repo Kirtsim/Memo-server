@@ -1,4 +1,5 @@
 #include "memo/Connection.hpp"
+#include "logger/logger.hpp"
 
 #include <iostream>
 #include <boost/bind.hpp>
@@ -25,13 +26,13 @@ void Connection::setId(const std::string& iConnectionId)
 
 void Connection::open()
 {
-    std::cout << "[Connection] Opening..." << std::endl;
+    LOG_TRC("[Connection] Opening...");
     socket->async_read_some(
             boost::asio::buffer(dataBuffer),
             boost::bind(&Connection::handleRead, this,
                         boost::asio::placeholders::error,
                         boost::asio::placeholders::bytes_transferred));
-    std::cout << "[Connection] started." << std::endl;
+    LOG_TRC("[Connection] started.");
 }
 
 void Connection::close()
@@ -39,7 +40,7 @@ void Connection::close()
     if (socket->is_open())
     {
         socket->close();
-        std::cout << "[Connection] stopped." << std::endl;
+        LOG_TRC("[Connection] stopped.");
     }
 }
 
@@ -53,14 +54,14 @@ bool DataReadComplete(const std::string& iData)
 void Connection::handleRead(const boost::system::error_code& iErrorCode,
                             size_t iTransferredBytesCount)
 {
-    std::cout << "[Connection] Handling request..." << std::endl;
+    LOG_TRC("[Connection] Handling request...");
 
     auto aData = std::string(dataBuffer.data(), iTransferredBytesCount);
     dataStream << aData;
 
     if (DataReadComplete(aData))
     {
-        std::cout << "[Connection] Reading request data complete." << std::endl;
+        LOG_TRC("[Connection] Reading request data complete.");
         callback.receiveData(dataStream.str(), id);
         return;
     }
@@ -89,13 +90,13 @@ void Connection::sendData(const std::vector<boost::asio::const_buffer>& iDataBuf
 void Connection::handleWrite(const boost::system::error_code& iErrorCode,
                              const size_t iTransferredBytesCount)
 {
-    std::cout << "[Connection] Transferred bytes: " << iTransferredBytesCount << std::endl;
+    LOG_INF("[Connection] Transferred bytes: " << iTransferredBytesCount);
     if (iErrorCode)
     {
-        std::cout << "[Connection] Failed to send reply." << std::endl;
+        LOG_WRN("[Connection] Failed to send reply.");
         callback.onConnectionError(iErrorCode, id);
     }
-    std::cout << "[Connection] Reply sent successfully." << std::endl;
+    LOG_TRC("[Connection] Reply sent successfully.");
     callback.onDataSent(id);
 }
 

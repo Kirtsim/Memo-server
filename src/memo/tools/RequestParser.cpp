@@ -1,5 +1,7 @@
 #include "memo/tools/RequestParser.hpp"
 #include "memo/Request.hpp"
+#include "logger/logger.hpp"
+
 #include <iostream>
 
 namespace memo {
@@ -226,7 +228,7 @@ boost::tribool RequestParser::consume(char iInputChar)
             return boost::indeterminate;
         }
         return false;
-      
+
     case State::kExpecting_newline_3:
         return (iInputChar == '\n');
 
@@ -237,12 +239,12 @@ boost::tribool RequestParser::consume(char iInputChar)
 
 void RequestParser::updateRequest(Request& oRequest)
 {
-    std::cout << "[RequestParser] Received request:" << std::endl;
-    std::cout << "[RequestParser] -----------------" << std::endl;
-    std::cout << "[RequestParser]  method:       " << method << std::endl;
-    std::cout << "[RequestParser]  uri:          " << uri << std::endl;
-    std::cout << "[RequestParser]  http version: " << httpVersionMajor << "." << httpVersionMinor << std::endl;
-    std::cout << "[RequestParser]  headers: " <<  std::endl;
+    LOG_INF("[RequestParser] Received request:");
+    LOG_INF("[RequestParser] -----------------");
+    LOG_INF("[RequestParser]  method:       " << method);
+    LOG_INF("[RequestParser]  uri:          " << uri);
+    LOG_INF("[RequestParser]  http version: " << httpVersionMajor << "." << httpVersionMinor);
+    LOG_INF("[RequestParser]  headers: ");
 
     oRequest.setMethod(method);
     oRequest.setUri(uri);
@@ -250,10 +252,10 @@ void RequestParser::updateRequest(Request& oRequest)
     oRequest.setHttpVersionMinor(httpVersionMinor);
     for (const auto& aHeader : headers)
     {
-        std::cout << "[RequestParser]     +-  " << aHeader.name << ": " << aHeader.value <<  std::endl;
+        LOG_INF("[RequestParser]     +-  " << aHeader.name << ": " << aHeader.value);
         oRequest.addToHeaders( { aHeader.name, aHeader.value } );
-    } 
-    std::cout << "[RequestParser] +++++++++++++++++" << std::endl;
+    }
+    LOG_INF("[RequestParser] +++++++++++++++++");
 }
 
 bool RequestParser::IsChar(int c)

@@ -1,7 +1,10 @@
 #include "memo/Server.hpp"
+#include "logger/logger.hpp"
 
 #include <iostream>
 #include <string>
+
+INITIALIZE_EASYLOGGINGPP
 
 int main(int argc, char* argv[])
 {
@@ -16,16 +19,16 @@ int main(int argc, char* argv[])
   	      std::cerr << "    receiver 0::0 80 .\n";
   	      return 1;
   	    }
+        memo::logger::Init("../log/memo.log");
 
+        LOG_TRC("Launching server...");
         memo::Server aServer(argv[1], argv[2], argv[3]);
-        std::cout << "Launching server..." << std::endl;
   	    aServer.run();
   	}
   	catch (std::exception& e)
   	{
-  	    std::cerr << "exception: " << e.what() << "\n";
+        LOG_ERR("exception:\n" << e.what());
   	}
-    std::cout << "Server stopped." << std::endl;
-
+    LOG_TRC("Server stopped.");
     return 0;
 }
