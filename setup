@@ -29,7 +29,7 @@ exit_on_fail
 
 cd $PROJECT_DIR_PATH
 if [ -f $COMPILE_COMMANDS_FILE ]; then
-    rm $COMPILE_COMMANDS_FILE 
+    rm $COMPILE_COMMANDS_FILE
 fi
 
 ln $BUILD_DIR/compile_commands.json
