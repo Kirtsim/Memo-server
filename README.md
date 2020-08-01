@@ -5,6 +5,7 @@
 - Cmake 3.0+
 - Boost 1.72.0+
 - C++17
+- proto3
 
 #### Build steps:
 1) $ ./setup
@@ -12,3 +13,6 @@
 
 #### Running the server:
 - $ ./compile -r
+
+#### Shut down:
+- hit CTRL+C
