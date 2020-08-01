@@ -1,13 +1,11 @@
 syntax = "proto3";
 
-import "Tag.proto";
-
 package memo.model;
 
-message Memory {
+message Memo {
     string id = 1;
     string title = 2;
     string comment = 3;
-    repeated Tag tags = 4;
+    repeated string tagNames = 4;
     int64  timestamp = 5;
 }

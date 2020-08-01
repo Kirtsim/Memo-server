@@ -1,9 +1,0 @@
-POST /memo-create
-{
-  # Mandatory
- "memory": {
-     "title": "Title",
-     "description": "long string containing a description of the memory",
-     "tags": ["tag-id1", "tag-id2", ...]
- }
-}

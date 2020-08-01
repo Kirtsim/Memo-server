@@ -1,5 +1,0 @@
-POST /memo-search/ids
-{
-  # Required
-  "ids": [ "memo-id1", "memo-id2", ... ]
-}

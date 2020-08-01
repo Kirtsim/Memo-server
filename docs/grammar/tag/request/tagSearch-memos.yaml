@@ -1,5 +1,0 @@
-POST /tag-search/memos
-{
-  # Required
-  "ids": [ "memo-id1", "memo-id2", ... ]
-}
