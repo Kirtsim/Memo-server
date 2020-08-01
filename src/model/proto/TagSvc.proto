@@ -1,0 +1,35 @@
+syntax = "proto3";
+
+import "Tag.proto";
+import "OperationStatus.proto";
+
+package memo.model;
+
+service TagSvc {
+    rpc search(TagSearchRq) returns (TagSearchRs) {}
+    rpc create(Tag) returns (OperationStatus) {}
+    rpc update(Tag) returns (OperationStatus) {}
+    rpc delete(TagName) returns (OperationStatus) {}
+}
+
+message TagName {
+    string value = 1;
+}
+
+message TagSearchRq {
+    message NameOptions {
+        string startsWith = 1;
+        string contains = 2;
+    }
+
+    NameOptions nameOptions = 1;
+    repeated string memoryIds = 2;
+    repeated string colors = 3;
+
+    int32 resultsPerPage = 4;
+}
+
+message TagSearchRs {
+    repeated Tag tags = 1;
+    int32 page = 2;
+}

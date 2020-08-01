@@ -1,0 +1,44 @@
+syntax = "proto3";
+
+import "Memo.proto";
+import "OperationStatus.proto";
+
+package memo.model;
+
+service MemoSvc {
+    rpc search(MemoSearchRq) returns (MemoSearchRs) {}
+    rpc searchById(IdList) returns (MemoSearchRs) {}
+    rpc create(Memo) returns (Id) {}
+    rpc update(Memo) returns (OperationStatus) {}
+    rpc delete(Id) returns (OperationStatus) {}
+}
+
+message IdList {
+    repeated Id ids = 1;
+}
+
+message Id {
+    string value = 1;
+}
+
+message MemoSearchRq {
+    message TitleOptions {
+        string startsWith = 1;
+        repeated string contains = 2;
+    }
+
+    message DateRange {
+        int64 start = 1;
+        int64 end   = 2;
+    }
+
+    TitleOptions titleOptions = 1;
+    repeated string tags = 2;
+    DateRange dateRange = 3;
+    int32 resultsPerPage = 4;
+}
+
+message MemoSearchRs {
+    repeated Memo memos = 1;
+    int32 page = 2;
+}

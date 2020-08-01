@@ -1,7 +1,0 @@
-RS /tag-update
-{
-  "status": "OK/KO",
-  "data": {
-      "title": "tag-name",
-  }
-}
