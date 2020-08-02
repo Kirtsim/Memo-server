@@ -24,7 +24,7 @@ rm -rf $BUILD_DIR/*
 
 cd $BUILD_DIR
 echo $(pwd)
-cmake -DCMAKE_EXPORT_COMPILE_COMMANDS=ON ..
+cmake -DCMAKE_EXPORT_COMPILE_COMMANDS=ON -DCMAKE_PREFIX_PATH=~/.local/ ..
 exit_on_fail
 
 cd $PROJECT_DIR_PATH
