@@ -3,7 +3,6 @@
 # Arguments
 RUN_REQUESTED=0
 SKIP_BUILD=0
-GENERATE_MODEL=0
 ARGS_FILE=""
 
 # Variables
@@ -11,8 +10,6 @@ BUILD_DIR="./build"
 PROJECT_PATH=$(pwd)
 EXECUTABLE="memo_server"
 SERVER_ARGS="127.0.0.1 8000 $PROJECT_PATH"
-MODEL_DIR_PATH="$PROJECT_PATH/src/model"
-PROTO_DIR_PATH="$MODEL_DIR_PATH/proto"
 
 exit_on_fail() {
     if ! [ $? -eq 0 ]; then
@@ -33,10 +30,6 @@ case $key in
     SKIP_BUILD=1
     shift
     ;;
-    -m|--generate-model)
-    GENERATE_MODEL=1
-    shift
-    ;;
     -a|--args-file)
     ARGS_FILE=$2
     shift # past argument
@@ -44,24 +37,6 @@ case $key in
     ;;
 esac
 done
-
-# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
-# * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
-# ===============  GENERATION OF MODEL FILES ==================
-# * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
-# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
-if [ "$GENERATE_MODEL" -eq "1" ]; then
-    echo "-- Generating model files"
-    echo "*******************************"
-    protoc --proto_path=$PROTO_DIR_PATH/ --cpp_out=$MODEL_DIR_PATH/ $PROTO_DIR_PATH/*.proto
-    exit_on_fail
-    echo "*******************************"
-    echo "++ Files generated"
-    echo ""
-else
-    echo "-- Skipping generation of model files "
-fi
-
 
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 # * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *

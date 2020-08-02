@@ -6,10 +6,10 @@ import "OperationStatus.proto";
 package memo.model;
 
 service TagSvc {
-    rpc search(TagSearchRq) returns (TagSearchRs) {}
-    rpc create(Tag) returns (OperationStatus) {}
-    rpc update(Tag) returns (OperationStatus) {}
-    rpc delete(TagName) returns (OperationStatus) {}
+    rpc Search(TagSearchRq) returns (TagSearchRs) {}
+    rpc Create(Tag) returns (OperationStatus) {}
+    rpc Update(Tag) returns (OperationStatus) {}
+    rpc Delete(TagName) returns (OperationStatus) {}
 }
 
 message TagName {

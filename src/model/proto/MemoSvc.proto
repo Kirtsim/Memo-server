@@ -6,11 +6,11 @@ import "OperationStatus.proto";
 package memo.model;
 
 service MemoSvc {
-    rpc search(MemoSearchRq) returns (MemoSearchRs) {}
-    rpc searchById(IdList) returns (MemoSearchRs) {}
-    rpc create(Memo) returns (Id) {}
-    rpc update(Memo) returns (OperationStatus) {}
-    rpc delete(Id) returns (OperationStatus) {}
+    rpc Search(MemoSearchRq) returns (MemoSearchRs) {}
+    rpc SearchById(IdList) returns (MemoSearchRs) {}
+    rpc Create(Memo) returns (Id) {}
+    rpc Update(Memo) returns (OperationStatus) {}
+    rpc Delete(Id) returns (OperationStatus) {}
 }
 
 message IdList {
