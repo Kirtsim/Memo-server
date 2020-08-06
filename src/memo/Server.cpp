@@ -1,95 +1,55 @@
 #include "memo/Server.hpp"
 #include "memo/manager/ConnectionManager.hpp"
+
 #include "logger/logger.hpp"
+
+#include <grpcpp/server_builder.h>
 
 #include <iostream>
 #include <exception>
-
-#include <boost/bind.hpp>
-#include <boost/asio/placeholders.hpp>
 
 namespace memo {
 
 namespace {
 Resources::Ptr ConstructResources(const std::string& iAddress,
-                                  const std::string& iPortNumber,
-                                  const std::string& iDocRoot)
+                                  const std::string& iPortNumber)
 {
     auto aConnectionManager = std::make_unique<manager::ConnectionManager>();
-    return Resources::Create(iAddress, iPortNumber, iDocRoot, std::move(aConnectionManager));
+    return Resources::Create(iAddress, iPortNumber, "", std::move(aConnectionManager));
 }
 
 } // namespace
 
-Server::Server(const std::string& iAddress,
-               const std::string& iPort,
-               const std::string& iDocRoot) :
-    resources(ConstructResources(iAddress, iPort, iDocRoot)),
-    receptor({ iAddress, iPort }, *this),
-    signals(receptor.accessIoService())
-{
-    LOG_INF("[Server] Starting on address: " << iAddress << ":" << iPort);
+Server::Server(const std::string& iIpAddress, const std::string& iPort) :
+    ipAddress_(iIpAddress),
+    port_(iPort),
+    resources_(ConstructResources(ipAddress_, port_))
+{}
 
-    signals.add(SIGINT);
-    signals.add(SIGTERM);
-#if defined(SIGQUIT)
-    signals.add(SIGQUIT);
-#endif // defined(SIGQUIT)
-    signals.async_wait(boost::bind(&Server::handleStop, this));
+Server::~Server()
+{
+    server_->Shutdown();
+    memoService_->disable();
 }
 
 void Server::run()
 {
-    receptor.open();
+    LOG_TRC("[Server] Launching server ...");
+    std::string serverAddress = ipAddress_ + ":" + port_;
+
+    grpc::ServerBuilder builder;
+
+    builder.AddListeningPort(serverAddress, grpc::InsecureServerCredentials());
+
+    auto completionQueue = builder.AddCompletionQueue();
+
+    memoService_ = std::make_unique<memo::service::MemoSvc>(resources_, completionQueue);
+    builder.RegisterService(memoService_.get());
+
+    server_ = builder.BuildAndStart();
+
+    LOG_TRC("[Server] Server listening on " << ipAddress_ << ":" << port_);
+    memoService_->enable();
+    LOG_TRC("[Server] Run complete.");
 }
-
-void Server::handleStop()
-{
-    resources->getConnectionManager().closeAll();
-    receptor.close();
-    LOG_TRC("[Server] Shutdown");
-}
-
-
-// ###############################################################
-// # Receptor::Callback methods
-// ###############################################################
-
-void Server::acceptIncomingRequest(const SocketPtr_t& ioSocket)
-{
-    if (!receptor.isOpen())
-        return;
-
-    Transaction::Ptr aTransaction = std::make_shared<Transaction>(resources, *this);
-    std::string aTxnId = aTransaction->open(ioSocket);
-    transactions.insert({ aTxnId, aTransaction });
-}
-
-
-// ###############################################################
-// # Transaction::Callback methods
-// ###############################################################
-
-void Server::onTransactionComplete(const std::string& iTxnId)
-{
-    LOG_TRC("[Server] Transaction complete.");
-    removeTransaction(iTxnId);
-}
-
-void Server::onTransactionError(const boost::system::error_code& iErrorCode,
-                                const std::string& iTxnId)
-{
-    LOG_WRN("[Server] Transaction error: " << iErrorCode);
-    removeTransaction(iTxnId);
-}
-
-// ###############################################################
-
-void Server::removeTransaction(const std::string& iTxnId)
-{
-    auto aTxnIter = transactions.find(iTxnId);
-    if (aTxnIter != std::end(transactions))
-        transactions.erase(aTxnIter);
-}
-
 } // namespace memo

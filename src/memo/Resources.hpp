@@ -27,12 +27,12 @@ public:
     Resources(const Resources&) = delete;
     Resources& operator=(const Resources&) = delete;
 
-private:    
+private:
     Resources(const std::string& iAddress,
               const std::string& iPortNumber,
               const std::string& iDocumentRoot,
               ConnectionManagerPtr_t iConnectionManager);
-    
+
 private:
     std::string address;
     std::string portNumber;

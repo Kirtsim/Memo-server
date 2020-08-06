@@ -1,56 +1,27 @@
 #pragma once
-#include "memo/tools/Receptor.hpp"
-#include "memo/Transaction.hpp"
+#include "memo/service/memo/MemoSvc.hpp"
 #include "memo/Resources.hpp"
 
-#include <boost/asio/signal_set.hpp>
+#include <grpcpp/server.h>
 
 #include <map>
 
 namespace memo {
 
-class Server : private tools::Receptor::Callback,
-               public Transaction::Callback
+class Server
 {
-    using SocketPtr_t = std::shared_ptr<boost::asio::ip::tcp::socket>;
-
 public:
-    explicit Server(const std::string& iAddress,
-                    const std::string& iPort,
-                    const std::string& iDocRoot);
+    Server(const std::string& iIpAddress, const std::string& iPort);
+    ~Server();
 
-    // Opens the receptor (blocking call)
     void run();
 private:
-    // Handle a request to stop the server.
-    void handleStop();
+    std::string ipAddress_;
+    std::string port_;
+    memo::Resources::Ptr resources_;
 
-    void removeTransaction(const std::string& iTxnId);
-
-    // ---------------------------------------------------------------
-    // Receptor::Callback methods
-    // ---------------------------------------------------------------
-    void acceptIncomingRequest(const SocketPtr_t& ioSocket) override;
-
-    // ---------------------------------------------------------------
-    // Transaction::Callback methods
-    // ---------------------------------------------------------------
-    void onTransactionComplete(const std::string& iTxnId) override;
-    void onTransactionError(const boost::system::error_code& iErrorCode,
-                            const std::string& iTxnId) override;
-
-
-private:
-    Resources::Ptr resources;
-
-    tools::Receptor receptor;
-
-    // Used to register termination signals
-    boost::asio::signal_set signals;
-
-    // Cached replies (need to be stored while being sent)
-    std::map<std::string, Transaction::Ptr> transactions;
-
+    std::unique_ptr<service::MemoSvc> memoService_;
+    std::unique_ptr<grpc::Server> server_;
 };
 
 } // namespace memo
