@@ -9,6 +9,8 @@ set(BASEPATH "${CMAKE_SOURCE_DIR}/src/")
 set(SOURCES src/main.cpp
             src/logger/logger.cpp
             src/logger/easylogging++.cc
+            src/memo/service/memo/MemoSvc.cpp
+            src/memo/service/memo/process/SearchProcess.cpp
             src/memo/Reply.cpp
             src/memo/Server.cpp
             src/memo/Resources.cpp
@@ -20,6 +22,10 @@ set(SOURCES src/main.cpp
             src/memo/tools/RequestHandler.cpp
             src/memo/manager/ConnectionManager.cpp)
 set(HEADERS src/logger/logger.hpp
+            src/memo/service/Service.hpp
+            src/memo/service/Process.hpp
+            src/memo/service/memo/MemoSvc.hpp
+            src/memo/service/memo/process/SearchProcess.hpp
             src/memo/Header.hpp
             src/memo/Request.hpp
             src/memo/Reply.hpp
@@ -32,13 +38,11 @@ set(HEADERS src/logger/logger.hpp
             src/memo/tools/RequestParser.hpp
             src/memo/tools/RequestHandler.hpp
             src/memo/manager/ConnectionManager.hpp)
-set(PROTO_SVC_FILES
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/model/proto/TagSvc.proto
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/model/proto/MemoSvc.proto)
-set(PROTO_FILES
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/model/proto/Tag.proto
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/model/proto/Memo.proto
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/model/proto/OperationStatus.proto)
+set(PROTO_SVC_FILES TagSvc.proto
+                    MemoSvc.proto)
+set(PROTO_FILES     Tag.proto
+                    Memo.proto
+                    OperationStatus.proto)
 list(APPEND PROTO_FILES ${PROTO_SVC_FILES})
 
 
@@ -50,16 +54,83 @@ set(Boost_USE_STATIC_RUNTIME OFF)
 find_package(Boost 1.72.0 REQUIRED)
 
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_LIST_DIR}/cmake")
-find_package(Protobuf REQUIRED)
-find_package(GRPC REQUIRED)
 
+
+find_package(Threads REQUIRED)
+
+# Find Protobuf installation
+# Looks for protobuf-config.cmake file installed by Protobuf's cmake installation.
+set(protobuf_MODULE_COMPATIBLE TRUE)
+find_package(Protobuf CONFIG REQUIRED)
+message(STATUS "Using protobuf ${protobuf_VERSION}")
+
+set(_PROTOBUF_LIBPROTOBUF protobuf::libprotobuf)
+set(_REFLECTION gRPC::grpc++_reflection)
+if(CMAKE_CROSSCOMPILING)
+  find_program(_PROTOBUF_PROTOC protoc)
+else()
+  set(_PROTOBUF_PROTOC $<TARGET_FILE:protobuf::protoc>)
+endif()
+
+# Find gRPC installation
+# Looks for gRPCConfig.cmake file installed by gRPC's cmake installation.
+find_package(gRPC CONFIG REQUIRED)
+message(STATUS "Using gRPC ${gRPC_VERSION}")
+
+set(_GRPC_GRPCPP gRPC::grpc++)
+if(CMAKE_CROSSCOMPILING)
+  find_program(_GRPC_CPP_PLUGIN_EXECUTABLE grpc_cpp_plugin)
+else()
+  set(_GRPC_CPP_PLUGIN_EXECUTABLE $<TARGET_FILE:gRPC::grpc_cpp_plugin>)
+endif()
+
+# Proto file
+set(BLAH ${CMAKE_CURRENT_SOURCE_DIR}/src/model/proto/TagSvc.proto)
+list(APPEND BLAH ${CMAKE_CURRENT_SOURCE_DIR}/src/model/proto/MemoSvc.proto)
+
+# Generated sources
+set(PROTO_SRCS)
+set(PROTO_HDRS)
+set(GRPC_SRCS)
+set(GRPC_HRDS)
 set(PROTO_SRC_DIR ${CMAKE_CURRENT_SOURCE_DIR}/src/model)
+set(PROTO_DIR ${PROTO_SRC_DIR}/proto)
+foreach(proto_file ${PROTO_FILES})
+    get_filename_component(file_name ${proto_file} NAME_WE)
 
-file(MAKE_DIRECTORY ${PROTO_SRC_DIR})
-include_directories(${PROTO_SRC_DIR})
+    list(APPEND PROTO_SRCS "${PROTO_SRC_DIR}/${file_name}.pb.cc")
+    list(APPEND PROTO_HDRS "${PROTO_SRC_DIR}/${file_name}.pb.h")
+    add_custom_command(
+          OUTPUT "${PROTO_SRC_DIR}/${file_name}.pb.cc"
+                 "${PROTO_SRC_DIR}/${file_name}.pb.h"
+          COMMAND ${_PROTOBUF_PROTOC}
+          ARGS
+            --cpp_out "${PROTO_SRC_DIR}"
+            -I "${PROTO_DIR}"
+            "${PROTO_DIR}/${proto_file}"
+          DEPENDS "${PROTO_DIR}/${proto_file}")
+endforeach()
 
-protobuf_generate_cpp(PROTO_SRCS PROTO_HDRS ${PROTO_SRC_DIR} ${PROTO_FILES})
-grpc_generate_cpp(GRPC_SRCS GRPC_HDRS ${PROTO_SRC_DIR} ${PROTO_SVC_FILES})
+foreach(proto_file ${PROTO_SVC_FILES})
+    get_filename_component(file_name ${proto_file} NAME_WE)
+
+    list(APPEND GRPC_SRCS "${PROTO_SRC_DIR}/${file_name}.grpc.pb.cc")
+    list(APPEND GRPC_HDRS "${PROTO_SRC_DIR}/${file_name}.grpc.pb.h")
+
+    add_custom_command(
+          OUTPUT "${PROTO_SRC_DIR}/${file_name}.grpc.pb.cc"
+                 "${PROTO_SRC_DIR}/${file_name}.grpc.pb.h"
+          COMMAND ${_PROTOBUF_PROTOC}
+          ARGS --grpc_out "${PROTO_SRC_DIR}"
+               --cpp_out "${PROTO_SRC_DIR}"
+               -I "${PROTO_DIR}"
+               --plugin=protoc-gen-grpc="${_GRPC_CPP_PLUGIN_EXECUTABLE}"
+                "${PROTO_DIR}/${proto_file}"
+          DEPENDS "${PROTO_DIR}/${proto_file}")
+endforeach()
+
+# Include generated *.pb.h files
+include_directories("${PROTO_SRC_DIR}")
 
 # Building server
 add_executable(memo_server
@@ -68,8 +139,21 @@ add_executable(memo_server
     ${GRPC_SRCS})
 
 target_link_libraries(memo_server
-    gRPC::grpc++_reflection
-    protobuf::libprotobuf)
+    ${_REFLECTION}
+    ${_GRPC_GRPCPP}
+    ${_PROTOBUF_LIBPROTOBUF})
+
+add_executable(memo_client
+    "src/client.cpp"
+    "src/logger/logger.hpp"
+    ${PROTO_SRCS}
+    ${GRPC_SRCS})
+
+target_link_libraries(memo_client
+    ${_REFLECTION}
+    ${_GRPC_GRPCPP}
+    ${_PROTOBUF_LIBPROTOBUF})
+
 
 add_definitions(-DBOOST_LOG_DYN_LINK)
 

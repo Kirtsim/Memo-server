@@ -5,7 +5,7 @@ package memo.model;
 message Memo {
     string id = 1;
     string title = 2;
-    string comment = 3;
+    string description = 3;
     repeated string tagNames = 4;
     int64  timestamp = 5;
 }
