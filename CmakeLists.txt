@@ -9,7 +9,8 @@ set(BASEPATH "${CMAKE_SOURCE_DIR}/src/")
 set(SOURCES src/main.cpp
             src/logger/logger.cpp
             src/logger/easylogging++.cc
-            src/memo/service/MemoSvc.cpp
+            src/memo/service/memo/MemoSvc.cpp
+            src/memo/service/memo/process/SearchProcess.cpp
             src/memo/Reply.cpp
             src/memo/Server.cpp
             src/memo/Resources.cpp
@@ -21,9 +22,10 @@ set(SOURCES src/main.cpp
             src/memo/tools/RequestHandler.cpp
             src/memo/manager/ConnectionManager.cpp)
 set(HEADERS src/logger/logger.hpp
-            src/memo/service/MemoSvc.hpp
             src/memo/service/Service.hpp
             src/memo/service/Process.hpp
+            src/memo/service/memo/MemoSvc.hpp
+            src/memo/service/memo/process/SearchProcess.hpp
             src/memo/Header.hpp
             src/memo/Request.hpp
             src/memo/Reply.hpp
@@ -137,6 +139,17 @@ add_executable(memo_server
     ${GRPC_SRCS})
 
 target_link_libraries(memo_server
+    ${_REFLECTION}
+    ${_GRPC_GRPCPP}
+    ${_PROTOBUF_LIBPROTOBUF})
+
+add_executable(memo_client
+    "src/client.cpp"
+    "src/logger/logger.hpp"
+    ${PROTO_SRCS}
+    ${GRPC_SRCS})
+
+target_link_libraries(memo_client
     ${_REFLECTION}
     ${_GRPC_GRPCPP}
     ${_PROTOBUF_LIBPROTOBUF})

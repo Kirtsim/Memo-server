@@ -24,7 +24,7 @@ class MemoSvc : public model::MemoSvc::AsyncService,
                 public memo::service::Service
 {
 public:
-    MemoSvc(const std::shared_ptr<Resources>& ioResources, CompletionQueuePtr_t& ioCompletionQueue);
+    MemoSvc(const std::shared_ptr<Resources>& ioResources, CompletionQueuePtr_t ioCompletionQueue);
 
     ~MemoSvc();
 
@@ -61,7 +61,7 @@ public:
 private:
     void registerProcess(Process::Ptr iProcess);
 
-    CompletionQueuePtr_t& completionQueue_;
+    CompletionQueuePtr_t completionQueue_;
     std::unordered_map<Process*, Process::Ptr> processes_;
     std::shared_ptr<Resources> resources_;
 };

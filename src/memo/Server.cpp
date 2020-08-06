@@ -28,6 +28,7 @@ Server::Server(const std::string& iIpAddress, const std::string& iPort) :
 
 Server::~Server()
 {
+    LOG_TRC("[Server] Shutting down server ...");
     server_->Shutdown();
     memoService_->disable();
 }
@@ -43,7 +44,7 @@ void Server::run()
 
     auto completionQueue = builder.AddCompletionQueue();
 
-    memoService_ = std::make_unique<memo::service::MemoSvc>(resources_, completionQueue);
+    memoService_ = std::make_unique<memo::service::MemoSvc>(resources_, std::move(completionQueue));
     builder.RegisterService(memoService_.get());
 
     server_ = builder.BuildAndStart();

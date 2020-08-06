@@ -7,9 +7,7 @@
 
 namespace memo {
 namespace service {
-
     class MemoSvc;
-
 namespace process {
 
 

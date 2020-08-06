@@ -6,18 +6,14 @@
 namespace memo {
 namespace service {
 
-MemoSvc::MemoSvc(const Resources::Ptr& ioResources, CompletionQueuePtr_t& ioCompletionQueue) :
+MemoSvc::MemoSvc(const Resources::Ptr& ioResources, CompletionQueuePtr_t ioCompletionQueue) :
     resources_(ioResources),
-    completionQueue_(ioCompletionQueue)
-    //completionQueue_(std::move(ioCompletionQueue))
+    completionQueue_(std::move(ioCompletionQueue))
 {
     LOG_TRC("[MemoSvc] MemoSvc created");
 }
 
-MemoSvc::~MemoSvc()
-{
-    LOG_TRC("[MemoSvc] Destoryed");
-}
+MemoSvc::~MemoSvc() = default;
 
 namespace {
 void InitMemo(model::Memo& ioMemo, const std::string& iTitle)
@@ -83,9 +79,9 @@ grpc::Status MemoSvc::Delete(grpc::ServerContext* ioContext,
 
 void MemoSvc::enable()
 {
-    LOG_TRC("[MemoSvc] Enabling service.");
     registerProcess(process::SearchProcess::Create(*this));
 
+    LOG_TRC("[MemoSvc] Service enabled.");
     void* tag;
     bool  isOk;
     while (completionQueue_->Next(&tag, &isOk))
@@ -109,6 +105,7 @@ void MemoSvc::enable()
 
 void MemoSvc::disable()
 {
+    LOG_TRC("[MemoSvc] Disabling service ...");
     completionQueue_->Shutdown();
 
     void* ignoredTag;
@@ -117,6 +114,7 @@ void MemoSvc::disable()
     {}
 
     processes_.clear();
+    LOG_TRC("[MemoSvc] Service disabled");
 }
 
 int MemoSvc::getId() const

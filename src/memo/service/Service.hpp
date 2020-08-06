@@ -4,8 +4,6 @@
 namespace memo {
 namespace service {
 
-class Process;
-
 class Service
 {
 public:
