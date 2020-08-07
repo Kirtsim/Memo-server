@@ -61,9 +61,9 @@ public:
 private:
     void registerProcess(Process::Ptr iProcess);
 
+    std::shared_ptr<Resources> resources_;
     CompletionQueuePtr_t completionQueue_;
     std::unordered_map<Process*, Process::Ptr> processes_;
-    std::shared_ptr<Resources> resources_;
 };
 
 } // namespace service
