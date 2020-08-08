@@ -1,5 +1,9 @@
 #include "memo/service/memo/MemoSvc.hpp"
 #include "memo/service/memo/process/SearchProcess.hpp"
+#include "memo/service/memo/process/SearchByIdProcess.hpp"
+#include "memo/service/memo/process/CreateProcess.hpp"
+#include "memo/service/memo/process/UpdateProcess.hpp"
+#include "memo/service/memo/process/DeleteProcess.hpp"
 #include "memo/Resources.hpp"
 #include "logger/logger.hpp"
 
@@ -80,6 +84,10 @@ grpc::Status MemoSvc::Delete(grpc::ServerContext* ioContext,
 void MemoSvc::enable()
 {
     registerProcess(process::SearchProcess::Create(*this));
+    registerProcess(process::SearchByIdProcess::Create(*this));
+    registerProcess(process::CreateProcess::Create(*this));
+    registerProcess(process::UpdateProcess::Create(*this));
+    registerProcess(process::DeleteProcess::Create(*this));
 
     LOG_TRC("[MemoSvc] Service enabled.");
     void* tag;

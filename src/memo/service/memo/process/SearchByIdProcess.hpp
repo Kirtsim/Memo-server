@@ -1,4 +1,5 @@
 #pragma once
+
 #include "memo/service/memo/process/BaseProcess.hpp"
 #include "model/MemoSvc.grpc.pb.h"
 
@@ -10,13 +11,13 @@ namespace service {
 namespace process {
 
 
-class SearchProcess : public BaseProcess<model::MemoSearchRq, model::MemoSearchRs>
+class SearchByIdProcess : public BaseProcess<model::IdList, model::MemoSearchRs>
 {
 public:
     static Ptr Create(MemoSvc& iSvc);
 
-    SearchProcess(MemoSvc& iSvc);
-    ~SearchProcess();
+    SearchByIdProcess(MemoSvc& iSvc);
+    ~SearchByIdProcess();
 
     void init(grpc::ServerCompletionQueue& ioCompletionQueue) override;
 

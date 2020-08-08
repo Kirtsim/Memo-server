@@ -33,7 +33,154 @@ using grpc::CompletionQueue;
 using grpc::Status;
 using memo::model::MemoSearchRq;
 using memo::model::MemoSearchRs;
+using memo::model::IdList;
+using memo::model::Memo;
+using memo::model::Id;
+using memo::model::OperationStatus;
 using memo::model::MemoSvc;
+
+class Call
+{
+public:
+    virtual ~Call() = default;
+    virtual void exec() = 0;
+    virtual void registerIn(MemoSvc::Stub& iStub, CompletionQueue* icompletionQueue) = 0;
+    virtual void startCall() = 0;
+    virtual void finish() = 0;
+
+    virtual Status getStatus() const = 0;
+};
+
+template<class Reply>
+class BaseCall : public Call
+{
+public:
+    virtual ~BaseCall() = default;
+    void startCall() override
+    {
+        reader->StartCall();
+    }
+
+    void finish() override
+    {
+        reader->Finish(&reply, &status_, (void*)this);
+    }
+
+    Status getStatus() const override
+    {
+        return status_;
+    }
+protected:
+    Reply reply;
+    ClientContext context;
+    Status status_;
+    std::unique_ptr<ClientAsyncResponseReader<Reply>> reader;
+};
+
+class MemoSearchCall : public BaseCall<MemoSearchRs>
+{
+public:
+    MemoSearchCall(MemoSearchRq iRequest) : BaseCall(), request_(iRequest) {}
+    ~MemoSearchCall() = default;
+
+    void registerIn(MemoSvc::Stub& iStub, CompletionQueue* iCompletionQueue) override
+    {
+        reader = iStub.PrepareAsyncSearch(&context, request_, iCompletionQueue);
+    }
+
+    void exec() override
+    {
+        std::cout << "[svc.search()] Received response." << std::endl;
+        std::cout << " - contains " << reply.memos().size() << " memos." << std::endl;
+        for (const auto& memo : reply.memos())
+            std::cout << "Memo titled: \"" << memo.title() << "\"" << std::endl;
+    }
+private:
+    MemoSearchRq request_;
+};
+
+class MemoSearchByIdCall : public BaseCall<MemoSearchRs>
+{
+public:
+    MemoSearchByIdCall(IdList iRequest) : BaseCall(), request_(iRequest) {}
+    ~MemoSearchByIdCall() = default;
+
+    void registerIn(MemoSvc::Stub& iStub, CompletionQueue* iCompletionQueue) override
+    {
+        reader = iStub.PrepareAsyncSearchById(&context, request_, iCompletionQueue);
+    }
+
+    void exec() override
+    {
+        std::cout << "[svc.search()] Received response." << std::endl;
+        std::cout << " - contains " << reply.memos().size() << " memos." << std::endl;
+        for (const auto& memo : reply.memos())
+            std::cout << "Memo titled: \"" << memo.title() << "\"" << std::endl;
+    }
+private:
+    IdList request_;
+};
+
+class MemoCreateCall : public BaseCall<Id>
+{
+public:
+    MemoCreateCall(Memo iRequest): BaseCall(), request_(iRequest) {}
+    ~MemoCreateCall() = default;
+
+    void registerIn(MemoSvc::Stub& iStub, CompletionQueue* iCompletionQueue) override
+    {
+        reader = iStub.PrepareAsyncCreate(&context, request_, iCompletionQueue);
+    }
+
+    void exec() override
+    {
+        std::cout << "[svc.create()] Received response containing id: ";
+        std::cout << reply.value() << std::endl;
+    }
+private:
+    Memo request_;
+};
+
+class MemoUpdateCall : public BaseCall<OperationStatus>
+{
+public:
+    MemoUpdateCall(Memo iRequest) : BaseCall(), request_(iRequest) {}
+    ~MemoUpdateCall() = default;
+
+    void registerIn(MemoSvc::Stub& iStub, CompletionQueue* iCompletionQueue) override
+    {
+        reader = iStub.PrepareAsyncUpdate(&context, request_, iCompletionQueue);
+    }
+
+    void exec() override
+    {
+        std::cout << "[svc.update()] Received response with status: ";
+        std::cout << reply.status() << std::endl;
+    }
+private:
+    Memo request_;
+};
+
+class MemoDeleteCall : public BaseCall<OperationStatus>
+{
+public:
+    MemoDeleteCall(Id iRequest) : BaseCall(), request_(iRequest) {}
+    ~MemoDeleteCall() = default;
+
+    void registerIn(MemoSvc::Stub& iStub, CompletionQueue* iCompletionQueue) override
+    {
+        reader = iStub.PrepareAsyncDelete(&context, request_, iCompletionQueue);
+    }
+
+    void exec() override
+    {
+        std::cout << "[svc.update()] Received response with status: ";
+        std::cout << reply.status() << std::endl;
+    }
+private:
+    Id request_;
+};
+
 
 class MemoClient {
   public:
@@ -46,24 +193,54 @@ class MemoClient {
         MemoSearchRq request;
         request.mutable_titleoptions()->set_startswith(iTitle);
 
-        // Call object to store rpc data
-        AsyncClientCall* call = new AsyncClientCall;
+        MemoSearchCall* call = new MemoSearchCall(request);
+        call->registerIn(*stub_, &cq_);
+        call->startCall();
+        call->finish();
+    }
 
-        // stub_->PrepareAsyncSayHello() creates an RPC object, returning
-        // an instance to store in "call" but does not actually start the RPC
-        // Because we are using the asynchronous API, we need to hold on to
-        // the "call" instance in order to get updates on the ongoing RPC.
-        call->response_reader =
-            stub_->PrepareAsyncSearch(&call->context, request, &cq_);
+    void searchById(const std::string& iId) {
+        // Data we are sending to the server.
+        IdList request;
+        request.mutable_ids()->Add()->set_value(iId);
 
-        // StartCall initiates the RPC call
-        call->response_reader->StartCall();
+        MemoSearchByIdCall* call = new MemoSearchByIdCall(request);
+        call->registerIn(*stub_, &cq_);
+        call->startCall();
+        call->finish();
+    }
 
-        // Request that, upon completion of the RPC, "reply" be updated with the
-        // server's response; "status" with the indication of whether the operation
-        // was successful. Tag the request with the memory address of the call object.
-        call->response_reader->Finish(&call->reply, &call->status, (void*)call);
+    void create(const std::string& iTitle)
+    {
+        Memo request;
+        request.set_title(iTitle);
 
+        MemoCreateCall* call = new MemoCreateCall(request);
+        call->registerIn(*stub_, &cq_);
+        call->startCall();
+        call->finish();
+    }
+
+    void update(const std::string& iTitle)
+    {
+        Memo request;
+        request.set_title(iTitle);
+
+        MemoUpdateCall* call = new MemoUpdateCall(request);
+        call->registerIn(*stub_, &cq_);
+        call->startCall();
+        call->finish();
+    }
+
+    void deleteMemo(const std::string& iId)
+    {
+        Id request;
+        request.set_value(iId);
+
+        MemoDeleteCall* call = new MemoDeleteCall(request);
+        call->registerIn(*stub_, &cq_);
+        call->startCall();
+        call->finish();
     }
 
     // Loop while listening for completed responses.
@@ -75,17 +252,15 @@ class MemoClient {
         // Block until the next result is available in the completion queue "cq".
         while (cq_.Next(&got_tag, &ok)) {
             // The tag in this example is the memory location of the call object
-            AsyncClientCall* call = static_cast<AsyncClientCall*>(got_tag);
+            Call* call = static_cast<Call*>(got_tag);
 
             // Verify that the request was completed successfully. Note that "ok"
             // corresponds solely to the request for updates introduced by Finish().
             GPR_ASSERT(ok);
 
-            if (call->status.ok())
+            if (call->getStatus().ok())
             {
-                std::cout << "Received response with : " << call->reply.memos().size() << " memos." << std::endl;
-                for (const auto& memo : call->reply.memos())
-                    std::cout << "Memo titled: \"" << memo.title() << "\"" << std::endl;
+                call->exec();
             }
             else
                 std::cout << "RPC failed" << std::endl;
@@ -97,28 +272,8 @@ class MemoClient {
 
   private:
 
-    // struct for keeping state and data information
-    struct AsyncClientCall {
-        // Container for the data we expect from the server.
-        MemoSearchRs reply;
-
-        // Context for the client. It could be used to convey extra information to
-        // the server and/or tweak certain RPC behaviors.
-        ClientContext context;
-
-        // Storage for the status of the RPC upon completion.
-        Status status;
-
-
-        std::unique_ptr<ClientAsyncResponseReader<MemoSearchRs>> response_reader;
-    };
-
-    // Out of the passed in Channel comes the stub, stored here, our view of the
-    // server's exposed services.
     std::unique_ptr<MemoSvc::Stub> stub_;
 
-    // The producer-consumer queue we use to communicate asynchronously with the
-    // gRPC runtime.
     CompletionQueue cq_;
 };
 
@@ -141,12 +296,6 @@ int main(int argc, char* argv[]) {
         std::cout << "exception:\n" << e.what() << std::endl;
   	}
 
-    // Instantiate the client. It requires a channel, out of which the actual RPCs
-    // are created. This channel models a connection to an endpoint (in this case,
-    // localhost at port 50051). We indicate that the channel isn't authenticated
-    // (use of InsecureChannelCredentials()).
-        //Server server(argv[1], argv[2]);
-
     const std::string ipAddress = argv[1];
     const std::string port = argv[2];
     MemoClient client(grpc::CreateChannel(
@@ -155,10 +304,11 @@ int main(int argc, char* argv[]) {
     // Spawn reader thread that loops indefinitely
     std::thread thread_ = std::thread(&MemoClient::AsyncCompleteRpc, &client);
 
-    for (int i = 0; i < 3; i++) {
-        std::string title("Title " + std::to_string(i));
-        client.search(title);  // The actual RPC call!
-    }
+    client.search("Test title1");
+    client.searchById("Test-id-102934048320");
+    client.create("Test-title-create");
+    client.update("Test-title-update");
+    client.deleteMemo("Test-id-delete-102930143290");
 
     std::cout << "Press control-c to quit" << std::endl << std::endl;
     thread_.join();  //blocks forever
