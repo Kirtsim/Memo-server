@@ -10,7 +10,7 @@ namespace memo {
 namespace service {
 namespace process {
 
-class CreateProcess : public BaseProcess<model::Memo, model::Id>
+class CreateProcess : public BaseProcess<service::MemoSvc, model::Memo, model::Id>
 {
 public:
     static Ptr Create(MemoSvc& iSvc);

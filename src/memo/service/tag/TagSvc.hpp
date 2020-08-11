@@ -1,7 +1,7 @@
 #pragma once
 #include "memo/service/Service.hpp"
 #include "memo/service/Process.hpp"
-#include "model/MemoSvc.grpc.pb.h"
+#include "model/TagSvc.grpc.pb.h"
 
 #include <grpcpp/impl/codegen/completion_queue.h>
 #include <grpcpp/impl/codegen/async_unary_call_impl.h>
@@ -18,37 +18,31 @@ class CreateProcess;
 class DeleteProcess;
 class UpdateProcess;
 
-;
-
-class MemoSvc : public model::MemoSvc::AsyncService,
-                public memo::service::Service
+class TagSvc : public model::TagSvc::AsyncService,
+               public memo::service::Service
 {
 public:
-    MemoSvc(const std::shared_ptr<Resources>& ioResources, grpc::ServerCompletionQueue& ioCompletionQueue);
+    TagSvc(const std::shared_ptr<Resources>& ioResources, grpc::ServerCompletionQueue& ioCompletionQueue);
 
-    ~MemoSvc();
+    ~TagSvc();
 
-    MemoSvc(const MemoSvc&) = delete;
-    MemoSvc& operator=(const MemoSvc&) = delete;
+    TagSvc(const TagSvc&) = delete;
+    TagSvc& operator=(const TagSvc&) = delete;
 
     grpc::Status Search(grpc::ServerContext* context,
-                        const model::MemoSearchRq* request,
-                        model::MemoSearchRs* response) override;
-
-    grpc::Status SearchById(grpc::ServerContext* context,
-                            const model::IdList* request,
-                            model::MemoSearchRs* response) override;
+                        const model::TagSearchRq* request,
+                        model::TagSearchRs* response) override;
 
     grpc::Status Create(grpc::ServerContext* context,
-                        const model::Memo* request,
-                        model::Id* response) override;
+                        const model::Tag* request,
+                        model::OperationStatus* response) override;
 
     grpc::Status Update(grpc::ServerContext* context,
-                        const model::Memo* request,
+                        const model::Tag* request,
                         model::OperationStatus* response) override;
 
     grpc::Status Delete(grpc::ServerContext* context,
-                        const model::Id* request,
+                        const model::TagName* request,
                         model::OperationStatus* response) override;
 
     /// Service interface

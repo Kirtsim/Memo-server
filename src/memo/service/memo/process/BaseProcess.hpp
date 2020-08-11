@@ -1,10 +1,10 @@
 #pragma once
 #include "memo/service/Process.hpp"
-#include "model/MemoSvc.grpc.pb.h"
-#include "memo/service/memo/MemoSvc.hpp"
+//#include "model/MemoSvc.grpc.pb.h"
 
 #include <grpcpp/impl/codegen/completion_queue.h>
-#include <grpcpp/impl/codegen/async_unary_call_impl.h>
+#include <grpcpp/impl/codegen/server_context.h>
+#include <grpcpp/impl/codegen/async_unary_call.h>
 
 namespace memo {
 namespace service {
@@ -12,13 +12,13 @@ namespace service {
 namespace process {
 
 
-template<class RequestType, class ResponseType>
+template<class ServiceType, class RequestType, class ResponseType>
 class BaseProcess : public Process
 {
     using ResponseWriter_t = grpc::ServerAsyncResponseWriter<ResponseType>;
 
 public:
-    BaseProcess(MemoSvc& iSvc);
+    BaseProcess(ServiceType& iSvc);
     ~BaseProcess();
 
     bool isFinished() const override;
@@ -29,29 +29,29 @@ protected:
     enum State { PROCESSING, FINISHED };
 
     grpc::ServerContext context_;
-    MemoSvc& svc_;
+    ServiceType& svc_;
     ResponseWriter_t writer_;
     RequestType request_;
     ResponseType response_;
     State state_;
 };
 
-template<class ResponseType, class RequestType>
-BaseProcess<ResponseType, RequestType>::BaseProcess(MemoSvc& iSvc) :
+template<class ServiceType, class RequestType, class ResponseType>
+BaseProcess<ServiceType, RequestType, ResponseType>::BaseProcess(ServiceType& iSvc) :
     svc_(iSvc), writer_(&context_)
 {}
 
-template<class ResponseType, class RequestType>
-BaseProcess<ResponseType, RequestType>::~BaseProcess() = default;
+template<class ServiceType, class RequestType, class ResponseType>
+BaseProcess<ServiceType, RequestType, ResponseType>::~BaseProcess() = default;
 
-template<class ResponseType, class RequestType>
-bool BaseProcess<ResponseType, RequestType>::isFinished() const
+template<class ServiceType, class RequestType, class ResponseType>
+bool BaseProcess<ServiceType, RequestType, ResponseType>::isFinished() const
 {
     return state_ == FINISHED;
 }
 
-template<class ResponseType, class RequestType>
-int BaseProcess<ResponseType, RequestType>::serviceId() const
+template<class ServiceType, class RequestType, class ResponseType>
+int BaseProcess<ServiceType, RequestType, ResponseType>::serviceId() const
 {
     return svc_.getId();
 }
