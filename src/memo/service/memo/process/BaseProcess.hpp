@@ -1,6 +1,5 @@
 #pragma once
 #include "memo/service/Process.hpp"
-//#include "model/MemoSvc.grpc.pb.h"
 
 #include <grpcpp/impl/codegen/completion_queue.h>
 #include <grpcpp/impl/codegen/server_context.h>

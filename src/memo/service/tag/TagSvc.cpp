@@ -32,7 +32,6 @@ grpc::Status TagSvc::Search(grpc::ServerContext* iContext,
                              const model::TagSearchRq* iRequest,
                              model::TagSearchRs* ioResponse)
 {
-
     LOG_TRC("[TagSvc] Search");
     InitTag(*ioResponse->add_tags(), iRequest->nameoptions().startswith());
     return grpc::Status::OK;
@@ -71,7 +70,11 @@ bool TagSvc::executeProcess(Process* process)
 {
     auto it = processes_.find(process);
     if (it == end(processes_))
+    {
+        LOG_WRN("[TagSvc] Process not found");
         return false;
+    }
+
     if (process->isFinished())
     {
         LOG_TRC("[TagSvc] Process finished");
@@ -92,7 +95,7 @@ void TagSvc::enable()
     registerProcess(process::tag::DeleteProcess::Create(*this));
 
     LOG_TRC("[TagSvc] Service enabled.");
-    LOG_DBG("[TagSvc] Number of active processes: " <<  processes_.size());
+    LOG_INF("[TagSvc] Number of active processes: " <<  processes_.size());
 }
 
 void TagSvc::disable()

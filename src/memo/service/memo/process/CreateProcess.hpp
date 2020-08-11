@@ -9,6 +9,7 @@
 namespace memo {
 namespace service {
 namespace process {
+namespace memo {
 
 class CreateProcess : public BaseProcess<service::MemoSvc, model::Memo, model::Id>
 {
@@ -25,6 +26,7 @@ public:
     Ptr duplicate() const override;
 };
 
+} // namespace memo
 } // namespace process
 } // namespace service
 } // namespace memo

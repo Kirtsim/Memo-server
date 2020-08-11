@@ -16,6 +16,7 @@
  *
  */
 #include "model/MemoSvc.grpc.pb.h"
+#include "model/TagSvc.grpc.pb.h"
 
 #include <iostream>
 #include <memory>
@@ -38,31 +39,33 @@ using memo::model::Memo;
 using memo::model::Id;
 using memo::model::OperationStatus;
 using memo::model::MemoSvc;
+using memo::model::Tag;
+using memo::model::TagSvc;
+using memo::model::TagName;
+using memo::model::TagSearchRq;
+using memo::model::TagSearchRs;
 
 class Call
 {
 public:
     virtual ~Call() = default;
     virtual void exec() = 0;
-    virtual void registerIn(MemoSvc::Stub& iStub, CompletionQueue* icompletionQueue) = 0;
+    virtual void registerIn(CompletionQueue* icompletionQueue) = 0;
     virtual void startCall() = 0;
-    virtual void finish() = 0;
 
     virtual Status getStatus() const = 0;
 };
 
-template<class Reply>
+template<class Stub, class Reply>
 class BaseCall : public Call
 {
 public:
+    BaseCall(Stub& ioStub) :
+        stub_(ioStub) {}
     virtual ~BaseCall() = default;
     void startCall() override
     {
         reader->StartCall();
-    }
-
-    void finish() override
-    {
         reader->Finish(&reply, &status_, (void*)this);
     }
 
@@ -71,26 +74,28 @@ public:
         return status_;
     }
 protected:
+    Stub& stub_;
     Reply reply;
     ClientContext context;
     Status status_;
     std::unique_ptr<ClientAsyncResponseReader<Reply>> reader;
 };
 
-class MemoSearchCall : public BaseCall<MemoSearchRs>
+class MemoSearchCall : public BaseCall<MemoSvc::Stub, MemoSearchRs>
 {
 public:
-    MemoSearchCall(MemoSearchRq iRequest) : BaseCall(), request_(iRequest) {}
+    MemoSearchCall(MemoSvc::Stub& ioStub, MemoSearchRq iRequest) :
+        BaseCall(ioStub), request_(iRequest) {}
     ~MemoSearchCall() = default;
 
-    void registerIn(MemoSvc::Stub& iStub, CompletionQueue* iCompletionQueue) override
+    void registerIn(CompletionQueue* iCompletionQueue) override
     {
-        reader = iStub.PrepareAsyncSearch(&context, request_, iCompletionQueue);
+        reader = stub_.PrepareAsyncSearch(&context, request_, iCompletionQueue);
     }
 
     void exec() override
     {
-        std::cout << "[svc.search()] Received response." << std::endl;
+        std::cout << "[MemoSearch] Received response." << std::endl;
         std::cout << " - contains " << reply.memos().size() << " memos." << std::endl;
         for (const auto& memo : reply.memos())
             std::cout << "Memo titled: \"" << memo.title() << "\"" << std::endl;
@@ -99,20 +104,21 @@ private:
     MemoSearchRq request_;
 };
 
-class MemoSearchByIdCall : public BaseCall<MemoSearchRs>
+class MemoSearchByIdCall : public BaseCall<MemoSvc::Stub, MemoSearchRs>
 {
 public:
-    MemoSearchByIdCall(IdList iRequest) : BaseCall(), request_(iRequest) {}
+    MemoSearchByIdCall(MemoSvc::Stub& ioStub, IdList iRequest) :
+        BaseCall(ioStub), request_(iRequest) {}
     ~MemoSearchByIdCall() = default;
 
-    void registerIn(MemoSvc::Stub& iStub, CompletionQueue* iCompletionQueue) override
+    void registerIn(CompletionQueue* iCompletionQueue) override
     {
-        reader = iStub.PrepareAsyncSearchById(&context, request_, iCompletionQueue);
+        reader = stub_.PrepareAsyncSearchById(&context, request_, iCompletionQueue);
     }
 
     void exec() override
     {
-        std::cout << "[svc.search()] Received response." << std::endl;
+        std::cout << "[MemoSearchById] Received response." << std::endl;
         std::cout << " - contains " << reply.memos().size() << " memos." << std::endl;
         for (const auto& memo : reply.memos())
             std::cout << "Memo titled: \"" << memo.title() << "\"" << std::endl;
@@ -121,115 +127,206 @@ private:
     IdList request_;
 };
 
-class MemoCreateCall : public BaseCall<Id>
+class MemoCreateCall : public BaseCall<MemoSvc::Stub, Id>
 {
 public:
-    MemoCreateCall(Memo iRequest): BaseCall(), request_(iRequest) {}
+    MemoCreateCall(MemoSvc::Stub& ioStub, Memo iRequest):
+        BaseCall(ioStub), request_(iRequest) {}
     ~MemoCreateCall() = default;
 
-    void registerIn(MemoSvc::Stub& iStub, CompletionQueue* iCompletionQueue) override
+    void registerIn(CompletionQueue* iCompletionQueue) override
     {
-        reader = iStub.PrepareAsyncCreate(&context, request_, iCompletionQueue);
+        reader = stub_.PrepareAsyncCreate(&context, request_, iCompletionQueue);
     }
 
     void exec() override
     {
-        std::cout << "[svc.create()] Received response containing id: ";
+        std::cout << "[MemoCreate] Received response containing id: ";
         std::cout << reply.value() << std::endl;
     }
 private:
     Memo request_;
 };
 
-class MemoUpdateCall : public BaseCall<OperationStatus>
+class MemoUpdateCall : public BaseCall<MemoSvc::Stub, OperationStatus>
 {
 public:
-    MemoUpdateCall(Memo iRequest) : BaseCall(), request_(iRequest) {}
+    MemoUpdateCall(MemoSvc::Stub& ioStub, Memo iRequest) :
+        BaseCall(ioStub), request_(iRequest) {}
     ~MemoUpdateCall() = default;
 
-    void registerIn(MemoSvc::Stub& iStub, CompletionQueue* iCompletionQueue) override
+    void registerIn(CompletionQueue* iCompletionQueue) override
     {
-        reader = iStub.PrepareAsyncUpdate(&context, request_, iCompletionQueue);
+        reader = stub_.PrepareAsyncUpdate(&context, request_, iCompletionQueue);
     }
 
     void exec() override
     {
-        std::cout << "[svc.update()] Received response with status: ";
+        std::cout << "[MemoUpdate] Received response with status: ";
         std::cout << reply.status() << std::endl;
     }
 private:
     Memo request_;
 };
 
-class MemoDeleteCall : public BaseCall<OperationStatus>
+class MemoDeleteCall : public BaseCall<MemoSvc::Stub, OperationStatus>
 {
 public:
-    MemoDeleteCall(Id iRequest) : BaseCall(), request_(iRequest) {}
+    MemoDeleteCall(MemoSvc::Stub& ioStub, Id iRequest) :
+        BaseCall(ioStub), request_(iRequest) {}
     ~MemoDeleteCall() = default;
 
-    void registerIn(MemoSvc::Stub& iStub, CompletionQueue* iCompletionQueue) override
+    void registerIn(CompletionQueue* iCompletionQueue) override
     {
-        reader = iStub.PrepareAsyncDelete(&context, request_, iCompletionQueue);
+        reader = stub_.PrepareAsyncDelete(&context, request_, iCompletionQueue);
     }
 
     void exec() override
     {
-        std::cout << "[svc.update()] Received response with status: ";
+        std::cout << "[MemoDelete] Received response with status: ";
         std::cout << reply.status() << std::endl;
     }
 private:
     Id request_;
 };
 
+class TagSearchCall : public BaseCall<TagSvc::Stub, TagSearchRs>
+{
+public:
+    TagSearchCall(TagSvc::Stub& ioStub, TagSearchRq iRequest) :
+        BaseCall(ioStub), request_(iRequest) {}
+    ~TagSearchCall() = default;
 
-class MemoClient {
+    void registerIn(CompletionQueue* iCompletionQueue) override
+    {
+        reader = stub_.PrepareAsyncSearch(&context, request_, iCompletionQueue);
+    }
+
+    void exec() override
+    {
+        std::cout << "[TagSearch] Received response." << std::endl;
+        std::cout << " - contains " << reply.tags().size() << " tags." << std::endl;
+        for (const auto& memo : reply.tags())
+            std::cout << "Tag named: \"" << memo.name() << "\"" << std::endl;
+    }
+private:
+    TagSearchRq request_;
+};
+
+class TagCreateCall : public BaseCall<TagSvc::Stub, OperationStatus>
+{
+public:
+    TagCreateCall(TagSvc::Stub& ioStub, Tag iRequest):
+        BaseCall(ioStub), request_(iRequest) {}
+    ~TagCreateCall() = default;
+
+    void registerIn(CompletionQueue* iCompletionQueue) override
+    {
+        reader = stub_.PrepareAsyncCreate(&context, request_, iCompletionQueue);
+    }
+
+    void exec() override
+    {
+        std::cout << "[TagCreate] Received response with status: ";
+        std::cout << reply.status() << std::endl;
+    }
+private:
+    Tag request_;
+};
+
+class TagUpdateCall : public BaseCall<TagSvc::Stub, OperationStatus>
+{
+public:
+    TagUpdateCall(TagSvc::Stub& ioStub, Tag iRequest) :
+        BaseCall(ioStub), request_(iRequest) {}
+    ~TagUpdateCall() = default;
+
+    void registerIn(CompletionQueue* iCompletionQueue) override
+    {
+        reader = stub_.PrepareAsyncUpdate(&context, request_, iCompletionQueue);
+    }
+
+    void exec() override
+    {
+        std::cout << "[TagUpdate] Received response with status: ";
+        std::cout << reply.status() << std::endl;
+    }
+private:
+    Tag request_;
+};
+
+class TagDeleteCall : public BaseCall<TagSvc::Stub, OperationStatus>
+{
+public:
+    TagDeleteCall(TagSvc::Stub& ioStub, TagName iRequest) :
+        BaseCall(ioStub), request_(iRequest) {}
+    ~TagDeleteCall() = default;
+
+    void registerIn(CompletionQueue* iCompletionQueue) override
+    {
+        reader = stub_.PrepareAsyncDelete(&context, request_, iCompletionQueue);
+    }
+
+    void exec() override
+    {
+        std::cout << "[TagDelete] Received response with status: ";
+        std::cout << reply.status() << std::endl;
+    }
+private:
+    TagName request_;
+};
+
+
+class Client {
   public:
-    explicit MemoClient(std::shared_ptr<Channel> channel)
-            : stub_(MemoSvc::NewStub(channel)) {}
+    explicit Client(const std::string& iAddress) :
+        memoStub_(MemoSvc::NewStub(grpc::CreateChannel(
+                                   iAddress,
+                                   grpc::InsecureChannelCredentials()))),
+        tagStub_(TagSvc::NewStub(grpc::CreateChannel(
+                                   iAddress,
+                                   grpc::InsecureChannelCredentials())))
+    {}
 
     // Assembles the client's payload and sends it to the server.
-    void search(const std::string& iTitle) {
+    void memoSearch(const std::string& iTitle) {
         // Data we are sending to the server.
         MemoSearchRq request;
         request.mutable_titleoptions()->set_startswith(iTitle);
 
-        MemoSearchCall* call = new MemoSearchCall(request);
-        call->registerIn(*stub_, &cq_);
+        MemoSearchCall* call = new MemoSearchCall(*memoStub_, request);
+        call->registerIn(&cq_);
         call->startCall();
-        call->finish();
     }
 
-    void searchById(const std::string& iId) {
+    void memoSearchById(const std::string& iId) {
         // Data we are sending to the server.
         IdList request;
         request.mutable_ids()->Add()->set_value(iId);
 
-        MemoSearchByIdCall* call = new MemoSearchByIdCall(request);
-        call->registerIn(*stub_, &cq_);
+        MemoSearchByIdCall* call = new MemoSearchByIdCall(*memoStub_, request);
+        call->registerIn(&cq_);
         call->startCall();
-        call->finish();
     }
 
-    void create(const std::string& iTitle)
+    void createMemo(const std::string& iTitle)
     {
         Memo request;
         request.set_title(iTitle);
 
-        MemoCreateCall* call = new MemoCreateCall(request);
-        call->registerIn(*stub_, &cq_);
+        MemoCreateCall* call = new MemoCreateCall(*memoStub_, request);
+        call->registerIn(&cq_);
         call->startCall();
-        call->finish();
     }
 
-    void update(const std::string& iTitle)
+    void updateMemo(const std::string& iTitle)
     {
         Memo request;
         request.set_title(iTitle);
 
-        MemoUpdateCall* call = new MemoUpdateCall(request);
-        call->registerIn(*stub_, &cq_);
+        MemoUpdateCall* call = new MemoUpdateCall(*memoStub_, request);
+        call->registerIn(&cq_);
         call->startCall();
-        call->finish();
     }
 
     void deleteMemo(const std::string& iId)
@@ -237,11 +334,51 @@ class MemoClient {
         Id request;
         request.set_value(iId);
 
-        MemoDeleteCall* call = new MemoDeleteCall(request);
-        call->registerIn(*stub_, &cq_);
+        MemoDeleteCall* call = new MemoDeleteCall(*memoStub_, request);
+        call->registerIn(&cq_);
         call->startCall();
-        call->finish();
     }
+
+    void tagSearch(const std::string& iTitle) {
+        // Data we are sending to the server.
+        TagSearchRq request;
+        request.mutable_nameoptions()->set_startswith(iTitle);
+
+        TagSearchCall* call = new TagSearchCall(*tagStub_, request);
+        call->registerIn(&cq_);
+        call->startCall();
+    }
+
+    void createTag(const std::string& iName)
+    {
+        Tag request;
+        request.set_name(iName);
+
+        TagCreateCall* call = new TagCreateCall(*tagStub_, request);
+        call->registerIn(&cq_);
+        call->startCall();
+    }
+
+    void updateTag(const std::string& iName)
+    {
+        Tag request;
+        request.set_name(iName);
+
+        TagUpdateCall* call = new TagUpdateCall(*tagStub_, request);
+        call->registerIn(&cq_);
+        call->startCall();
+    }
+
+    void deleteTag(const std::string& iName)
+    {
+        TagName request;
+        request.set_value(iName);
+
+        TagDeleteCall* call = new TagDeleteCall(*tagStub_, request);
+        call->registerIn(&cq_);
+        call->startCall();
+    }
+
 
     // Loop while listening for completed responses.
     // Prints out the response from the server.
@@ -272,7 +409,8 @@ class MemoClient {
 
   private:
 
-    std::unique_ptr<MemoSvc::Stub> stub_;
+    std::unique_ptr<MemoSvc::Stub> memoStub_;
+    std::unique_ptr<TagSvc::Stub> tagStub_;
 
     CompletionQueue cq_;
 };
@@ -298,17 +436,20 @@ int main(int argc, char* argv[]) {
 
     const std::string ipAddress = argv[1];
     const std::string port = argv[2];
-    MemoClient client(grpc::CreateChannel(
-            (ipAddress+":"+port), grpc::InsecureChannelCredentials()));
+    Client client(ipAddress+":"+port);
 
     // Spawn reader thread that loops indefinitely
-    std::thread thread_ = std::thread(&MemoClient::AsyncCompleteRpc, &client);
+    std::thread thread_ = std::thread(&Client::AsyncCompleteRpc, &client);
 
-    client.search("Test title1");
-    client.searchById("Test-id-102934048320");
-    client.create("Test-title-create");
-    client.update("Test-title-update");
-    client.deleteMemo("Test-id-delete-102930143290");
+    client.memoSearch("Test title1");
+    client.tagSearch("Test tagName");
+    client.memoSearchById("Test-id-102934048320");
+    client.createMemo("Test-memo-create");
+    client.createTag("Test-tag-create");
+    client.updateMemo("Test-memo-update");
+    client.updateTag("Test-tag-update");
+    client.deleteMemo("Test-memo-id-delete-102930143290");
+    client.deleteTag("Test-tag-name-delete-");
 
     std::cout << "Press control-c to quit" << std::endl << std::endl;
     thread_.join();  //blocks forever

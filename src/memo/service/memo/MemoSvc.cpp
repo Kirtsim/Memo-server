@@ -86,7 +86,11 @@ bool MemoSvc::executeProcess(Process* process)
 {
     auto it = processes_.find(process);
     if (it == end(processes_))
+    {
+        LOG_WRN("[MemoSvc] Process not found");
         return false;
+    }
+
     if (process->isFinished())
     {
         LOG_TRC("[MemoSvc] Process finished");
@@ -104,12 +108,12 @@ void MemoSvc::enable()
 {
     registerProcess(process::memo::SearchProcess::Create(*this));
     registerProcess(process::memo::SearchByIdProcess::Create(*this));
-    registerProcess(process::CreateProcess::Create(*this));
-    registerProcess(process::UpdateProcess::Create(*this));
-    registerProcess(process::DeleteProcess::Create(*this));
+    registerProcess(process::memo::CreateProcess::Create(*this));
+    registerProcess(process::memo::UpdateProcess::Create(*this));
+    registerProcess(process::memo::DeleteProcess::Create(*this));
 
     LOG_TRC("[MemoSvc] Service enabled.");
-    LOG_DBG("[MemoSvc] Number of active processes: " <<  processes_.size());
+    LOG_INF("[MemoSvc] Number of active processes: " <<  processes_.size());
 }
 
 void MemoSvc::disable()
