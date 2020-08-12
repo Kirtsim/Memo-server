@@ -35,7 +35,7 @@ set(HEADERS src/logger/logger.hpp
             src/memo/service/Process.hpp
             src/memo/service/tag/TagSvc.hpp
             src/memo/service/memo/MemoSvc.hpp
-            src/memo/service/memo/process/BaseProcess.hpp
+            src/memo/service/BaseProcess.hpp
             src/memo/service/memo/process/SearchProcess.hpp
             src/memo/service/memo/process/SearchByIdProcess.hpp;
             src/memo/service/memo/process/CreateProcess.hpp;
