@@ -9,9 +9,10 @@
 namespace memo {
 namespace service {
 namespace process {
+namespace memo {
 
 
-class SearchByIdProcess : public BaseProcess<model::IdList, model::MemoSearchRs>
+class SearchByIdProcess : public BaseProcess<service::MemoSvc, model::IdList, model::MemoSearchRs>
 {
 public:
     static Ptr Create(MemoSvc& iSvc);
@@ -26,6 +27,7 @@ public:
     Ptr duplicate() const override;
 };
 
+} // namespace memo
 } // namespace process
 } // namespace service
 } // namespace memo

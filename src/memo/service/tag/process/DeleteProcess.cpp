@@ -1,19 +1,19 @@
-#include "memo/service/memo/process/DeleteProcess.hpp"
-#include "memo/service/memo/MemoSvc.hpp"
+#include "memo/service/tag/process/DeleteProcess.hpp"
+#include "memo/service/tag/TagSvc.hpp"
 #include "logger/logger.hpp"
 
 namespace memo {
 namespace service {
 namespace process {
-namespace memo {
+namespace tag {
 
-Process::Ptr DeleteProcess::Create(MemoSvc& iSvc)
+Process::Ptr DeleteProcess::Create(service::TagSvc& iSvc)
 {
     auto process = std::make_shared<DeleteProcess>(iSvc);
     return std::static_pointer_cast<Process>(process);
 }
 
-DeleteProcess::DeleteProcess(MemoSvc& iSvc) : BaseProcess(iSvc)
+DeleteProcess::DeleteProcess(service::TagSvc& iSvc) : BaseProcess(iSvc)
 {}
 
 DeleteProcess::~DeleteProcess() = default;
@@ -38,7 +38,7 @@ Process::Ptr DeleteProcess::duplicate() const
     return Create(svc_);
 }
 
-} // namespace memo
+} // namespace tag
 } // namespace process
 } // namespace service
 } // namespace memo

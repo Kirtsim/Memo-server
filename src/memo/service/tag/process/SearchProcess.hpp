@@ -1,7 +1,7 @@
 #pragma once
 #include "memo/service/memo/process/BaseProcess.hpp"
-#include "memo/service/memo/MemoSvc.hpp"
-#include "model/MemoSvc.grpc.pb.h"
+#include "memo/service/tag/TagSvc.hpp"
+#include "model/TagSvc.grpc.pb.h"
 
 #include <grpcpp/impl/codegen/completion_queue.h>
 #include <grpcpp/impl/codegen/async_unary_call_impl.h>
@@ -9,14 +9,14 @@
 namespace memo {
 namespace service {
 namespace process {
-namespace memo {
+namespace tag {
 
-class SearchProcess : public BaseProcess<service::MemoSvc, model::MemoSearchRq, model::MemoSearchRs>
+class SearchProcess : public BaseProcess<service::TagSvc, model::TagSearchRq, model::TagSearchRs>
 {
 public:
-    static Ptr Create(MemoSvc& iSvc);
+    static Ptr Create(service::TagSvc& iSvc);
 
-    SearchProcess(MemoSvc& iSvc);
+    SearchProcess(service::TagSvc& iSvc);
     ~SearchProcess();
 
     void init(grpc::ServerCompletionQueue& ioCompletionQueue) override;
@@ -26,7 +26,7 @@ public:
     Ptr duplicate() const override;
 };
 
-} // namespace memo
+} // namespace tag
 } // namespace process
 } // namespace service
 } // namespace memo

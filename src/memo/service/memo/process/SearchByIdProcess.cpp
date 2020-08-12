@@ -5,6 +5,7 @@
 namespace memo {
 namespace service {
 namespace process {
+namespace memo {
 
 Process::Ptr SearchByIdProcess::Create(MemoSvc& iSvc)
 {
@@ -37,6 +38,7 @@ Process::Ptr SearchByIdProcess::duplicate() const
     return Create(svc_);
 }
 
+} // namespace memo
 } // namespace process
 } // namespace service
 } // namespace memo
