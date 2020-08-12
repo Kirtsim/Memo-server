@@ -1,6 +1,5 @@
 #pragma once
-#include "memo/service/memo/process/BaseProcess.hpp"
-#include "memo/service/tag/TagSvc.hpp"
+#include "memo/service/BaseProcess.hpp"
 #include "model/TagSvc.grpc.pb.h"
 
 #include <grpcpp/impl/codegen/completion_queue.h>
@@ -8,6 +7,7 @@
 
 namespace memo {
 namespace service {
+    class TagSvc;
 namespace process {
 namespace tag {
 
