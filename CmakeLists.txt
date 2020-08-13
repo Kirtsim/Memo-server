@@ -12,24 +12,16 @@ set(SOURCES src/main.cpp
             src/memo/service/tag/TagSvc.cpp
             src/memo/service/memo/MemoSvc.cpp
             src/memo/service/memo/process/SearchProcess.cpp
-            src/memo/service/memo/process/SearchByIdProcess.cpp;
-            src/memo/service/memo/process/CreateProcess.cpp;
-            src/memo/service/memo/process/DeleteProcess.cpp;
-            src/memo/service/memo/process/UpdateProcess.cpp;
+            src/memo/service/memo/process/SearchByIdProcess.cpp
+            src/memo/service/memo/process/CreateProcess.cpp
+            src/memo/service/memo/process/DeleteProcess.cpp
+            src/memo/service/memo/process/UpdateProcess.cpp
             src/memo/service/tag/process/SearchProcess.cpp
-            src/memo/service/tag/process/CreateProcess.cpp;
-            src/memo/service/tag/process/DeleteProcess.cpp;
-            src/memo/service/tag/process/UpdateProcess.cpp;
-            src/memo/Reply.cpp
+            src/memo/service/tag/process/CreateProcess.cpp
+            src/memo/service/tag/process/DeleteProcess.cpp
+            src/memo/service/tag/process/UpdateProcess.cpp
             src/memo/Server.cpp
-            src/memo/Resources.cpp
-            src/memo/Connection.cpp
-            src/memo/Transaction.cpp
-            src/memo/tools/Tools.cpp
-            src/memo/tools/Receptor.cpp
-            src/memo/tools/RequestParser.cpp
-            src/memo/tools/RequestHandler.cpp
-            src/memo/manager/ConnectionManager.cpp)
+            src/memo/Resources.cpp)
 set(HEADERS src/logger/logger.hpp
             src/memo/service/Service.hpp
             src/memo/service/Process.hpp
@@ -37,26 +29,16 @@ set(HEADERS src/logger/logger.hpp
             src/memo/service/memo/MemoSvc.hpp
             src/memo/service/BaseProcess.hpp
             src/memo/service/memo/process/SearchProcess.hpp
-            src/memo/service/memo/process/SearchByIdProcess.hpp;
-            src/memo/service/memo/process/CreateProcess.hpp;
-            src/memo/service/memo/process/DeleteProcess.hpp;
-            src/memo/service/memo/process/UpdateProcess.hpp;
+            src/memo/service/memo/process/SearchByIdProcess.hpp
+            src/memo/service/memo/process/CreateProcess.hpp
+            src/memo/service/memo/process/DeleteProcess.hpp
+            src/memo/service/memo/process/UpdateProcess.hpp
             src/memo/service/tag/process/SearchProcess.hpp
-            src/memo/service/tag/process/CreateProcess.hpp;
-            src/memo/service/tag/process/DeleteProcess.hpp;
-            src/memo/service/tag/process/UpdateProcess.hpp;
-            src/memo/Header.hpp
-            src/memo/Request.hpp
-            src/memo/Reply.hpp
+            src/memo/service/tag/process/CreateProcess.hpp
+            src/memo/service/tag/process/DeleteProcess.hpp
+            src/memo/service/tag/process/UpdateProcess.hpp
             src/memo/Server.hpp
-            src/memo/Resources.hpp
-            src/memo/Connection.hpp
-            src/memo/Transaction.hpp
-            src/memo/tools/Tools.hpp
-            src/memo/tools/Receptor.hpp
-            src/memo/tools/RequestParser.hpp
-            src/memo/tools/RequestHandler.hpp
-            src/memo/manager/ConnectionManager.hpp)
+            src/memo/Resources.hpp)
 set(PROTO_SVC_FILES TagSvc.proto
                     MemoSvc.proto)
 set(PROTO_FILES     Tag.proto
@@ -66,11 +48,6 @@ list(APPEND PROTO_FILES ${PROTO_SVC_FILES})
 
 
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
-
-set(Boost_USE_STATIC_LIBS ON)
-set(Boost_USE_MULTITHREADED ON)
-set(Boost_USE_STATIC_RUNTIME OFF)
-find_package(Boost 1.72.0 REQUIRED)
 
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_LIST_DIR}/cmake")
 
@@ -174,8 +151,5 @@ target_link_libraries(memo_client
     ${_PROTOBUF_LIBPROTOBUF})
 
 
-add_definitions(-DBOOST_LOG_DYN_LINK)
-
 # needed for "absolute" include paths
 target_include_directories(memo_server PRIVATE ${BASEPATH})
-target_include_directories(memo_server PRIVATE ${Boost_INCLUDE_DIR})
