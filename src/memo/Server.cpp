@@ -2,7 +2,6 @@
 #include "memo/service/memo/MemoSvc.hpp"
 #include "memo/service/tag/TagSvc.hpp"
 #include "memo/service/Process.hpp"
-#include "memo/manager/ConnectionManager.hpp"
 
 #include "logger/logger.hpp"
 
@@ -17,8 +16,7 @@ namespace {
 Resources::Ptr ConstructResources(const std::string& iAddress,
                                   const std::string& iPortNumber)
 {
-    auto aConnectionManager = std::make_unique<manager::ConnectionManager>();
-    return Resources::Create(iAddress, iPortNumber, "", std::move(aConnectionManager));
+    return Resources::Create(iAddress, iPortNumber);
 }
 
 } // namespace
