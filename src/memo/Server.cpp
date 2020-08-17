@@ -42,10 +42,25 @@ void Server::run()
 {
     LOG_TRC("[Server] Launching server ...");
     std::string serverAddress = ipAddress_ + ":" + port_;
+    initialize(serverAddress);
 
+    void* tag;
+    bool  isOk;
+    while (completionQueue_->Next(&tag, &isOk))
+    {
+        if (!tag) continue;
+        service::Process* process = static_cast<service::Process*>(tag);
+        executeProcess(process);
+    }
+
+    LOG_TRC("[Server] Run complete.");
+}
+
+void Server::initialize(const std::string iServerAddress)
+{
     grpc::ServerBuilder builder;
 
-    builder.AddListeningPort(serverAddress, grpc::InsecureServerCredentials());
+    builder.AddListeningPort(iServerAddress, grpc::InsecureServerCredentials());
 
     completionQueue_ = builder.AddCompletionQueue();
 
@@ -60,27 +75,23 @@ void Server::run()
     memoService->enable();
     tagService->enable();
 
-    LOG_TRC("[Server] Server listening on " << ipAddress_ << ":" << port_);
+    LOG_TRC("[Server] Server listening on " << iServerAddress);
+}
 
-    void* tag;
-    bool  isOk;
-    while (completionQueue_->Next(&tag, &isOk))
+void Server::executeProcess(service::Process* ioProcess)
+{
+    auto it = services_.find(ioProcess->serviceId());
+    if (it == end(services_))
     {
-        service::Process* process = static_cast<service::Process*>(tag);
-        auto it = services_.find(process->serviceId());
-        if (it == end(services_))
-        {
-            delete process;
-            continue;
-        }
-
-        bool processFound = it->second->executeProcess(process);
-        if (!processFound)
-        {
-            delete process;
-        }
+        delete ioProcess;
+        return;
     }
 
-    LOG_TRC("[Server] Run complete.");
+    bool processFound = it->second->executeProcess(ioProcess);
+    if (!processFound)
+    {
+        delete ioProcess;
+    }
 }
+
 } // namespace memo
