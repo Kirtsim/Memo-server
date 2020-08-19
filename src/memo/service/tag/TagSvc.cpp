@@ -10,8 +10,7 @@ namespace memo {
 namespace service {
 
 TagSvc::TagSvc(const Resources::Ptr& ioResources, grpc::ServerCompletionQueue& ioCompletionQueue) :
-    resources_(ioResources),
-    completionQueue_(ioCompletionQueue)
+    BaseService(ioResources, ioCompletionQueue)
 {
     LOG_TRC("[TagSvc] TagSvc created");
 }
@@ -65,57 +64,14 @@ grpc::Status TagSvc::Delete(grpc::ServerContext* ioContext,
     return grpc::Status::OK;
 }
 
-// TODO: Extract this to a "base" Service class
-bool TagSvc::executeProcess(Process* process)
-{
-    auto it = processes_.find(process);
-    if (it == end(processes_))
-    {
-        LOG_WRN("[TagSvc] Process not found");
-        return false;
-    }
-
-    if (process->isFinished())
-    {
-        LOG_TRC("[TagSvc] Process finished");
-        processes_.erase(process);
-        return true;
-    }
-
-    registerProcess(process->duplicate());
-    process->execute();
-    return true;
-}
-
-void TagSvc::enable()
+void TagSvc::registerProcesses()
 {
     registerProcess(process::tag::SearchProcess::Create(*this));
     registerProcess(process::tag::CreateProcess::Create(*this));
     registerProcess(process::tag::UpdateProcess::Create(*this));
     registerProcess(process::tag::DeleteProcess::Create(*this));
 
-    LOG_TRC("[TagSvc] Service enabled.");
-    LOG_INF("[TagSvc] Number of active processes: " <<  processes_.size());
-}
-
-void TagSvc::disable()
-{
-    LOG_TRC("[TagSvc] Disabling service ...");
-    processes_.clear();
-    LOG_TRC("[TagSvc] Service disabled");
-}
-
-int TagSvc::getId() const
-{
-    size_t pointerAddress = reinterpret_cast<size_t>(this);
-    return pointerAddress;
-}
-
-void TagSvc::registerProcess(Process::Ptr iProcess)
-{
-    LOG_TRC("[TagSvc] Registering new process");
-    iProcess->init(completionQueue_);
-    processes_.insert({ iProcess.get(), iProcess });
+    LOG_INF("[TagSvc] Registered " <<  processes_.size() << " processes.");
 }
 
 } // namespace service

@@ -1,10 +1,6 @@
 #pragma once
-#include "memo/service/Service.hpp"
-#include "memo/service/Process.hpp"
+#include "memo/service/BaseService.hpp"
 #include "model/TagSvc.grpc.pb.h"
-
-#include <grpcpp/impl/codegen/completion_queue.h>
-#include <grpcpp/impl/codegen/async_unary_call_impl.h>
 
 #include <unordered_map>
 
@@ -19,7 +15,7 @@ class DeleteProcess;
 class UpdateProcess;
 
 class TagSvc : public model::TagSvc::AsyncService,
-               public memo::service::Service
+               public memo::service::BaseService
 {
 public:
     TagSvc(const std::shared_ptr<Resources>& ioResources, grpc::ServerCompletionQueue& ioCompletionQueue);
@@ -45,21 +41,8 @@ public:
                         const model::TagName* request,
                         model::OperationStatus* response) override;
 
-    /// Service interface
-    bool executeProcess(Process* process) override;
-
-    void enable() override;
-
-    void disable() override;
-
-    int getId() const override;
-
-private:
-    void registerProcess(Process::Ptr iProcess);
-
-    std::shared_ptr<Resources> resources_;
-    grpc::ServerCompletionQueue& completionQueue_;
-    std::unordered_map<Process*, Process::Ptr> processes_;
+    /// BaseService methods
+    void registerProcesses() override;
 };
 
 } // namespace service

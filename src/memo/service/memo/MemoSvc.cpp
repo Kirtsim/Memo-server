@@ -11,8 +11,7 @@ namespace memo {
 namespace service {
 
 MemoSvc::MemoSvc(const Resources::Ptr& ioResources, grpc::ServerCompletionQueue& ioCompletionQueue) :
-    resources_(ioResources),
-    completionQueue_(ioCompletionQueue)
+    BaseService(ioResources, ioCompletionQueue)
 {
     LOG_TRC("[MemoSvc] MemoSvc created");
 }
@@ -81,30 +80,7 @@ grpc::Status MemoSvc::Delete(grpc::ServerContext* ioContext,
     return grpc::Status::OK;
 }
 
-
-bool MemoSvc::executeProcess(Process* process)
-{
-    auto it = processes_.find(process);
-    if (it == end(processes_))
-    {
-        LOG_WRN("[MemoSvc] Process not found");
-        return false;
-    }
-
-    if (process->isFinished())
-    {
-        LOG_TRC("[MemoSvc] Process finished");
-        processes_.erase(it);
-        return true;
-    }
-
-    registerProcess(process->duplicate());
-
-    process->execute();
-    return true;
-}
-
-void MemoSvc::enable()
+void MemoSvc::registerProcesses()
 {
     registerProcess(process::memo::SearchProcess::Create(*this));
     registerProcess(process::memo::SearchByIdProcess::Create(*this));
@@ -112,28 +88,7 @@ void MemoSvc::enable()
     registerProcess(process::memo::UpdateProcess::Create(*this));
     registerProcess(process::memo::DeleteProcess::Create(*this));
 
-    LOG_TRC("[MemoSvc] Service enabled.");
-    LOG_INF("[MemoSvc] Number of active processes: " <<  processes_.size());
-}
-
-void MemoSvc::disable()
-{
-    LOG_TRC("[MemoSvc] Disabling service ...");
-    processes_.clear();
-    LOG_TRC("[MemoSvc] Service disabled");
-}
-
-int MemoSvc::getId() const
-{
-    size_t pointerAddress = reinterpret_cast<size_t>(this);
-    return pointerAddress;
-}
-
-void MemoSvc::registerProcess(Process::Ptr iProcess)
-{
-    LOG_TRC("[MemoSvc] Registering new process");
-    iProcess->init(completionQueue_);
-    processes_.insert({ iProcess.get(), iProcess });
+    LOG_INF("[MemoSvc] Registered " <<  processes_.size() << " processes.");
 }
 
 } // namespace service
