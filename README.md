@@ -1,19 +1,22 @@
 ## Memo server
-- server for a Memo app
+C++ implementation of a server for the Memo application.
 
 #### Pre-requirements:
-- Cmake 3.0+
-- Boost 1.72.0+
-- C++17
-- proto3
-- gRPC (installation expected in $HOME/.local/bin/ directory)
+- Docker
 
-#### Build steps:
-1) $ ./setup
-2) $ ./compile
+#### Build steps
+```
+$ git clone https://github.com/Kirtsim/Memo-server
+$ cd Memo-server
+$ docker pull kirtsim/memo-server:dev
+$ docker run -it --privileged --rm -w /home/memo-server -v `pwd`:/home/memo-server kirtsim/memo-server:dev ./setup
+$ docker run -it --privileged --rm -w /home/memo-server -v `pwd`:/home/memo-server kirtsim/memo-server:dev ./compile
+```
 
 #### Running the server:
-- $ ./compile -r
+```
+$ ./build/memo\_server 127.0.0.1 8000 "\_"
+```
 
 #### Shut down:
 - hit CTRL+C
