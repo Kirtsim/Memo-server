@@ -3,6 +3,7 @@ cmake_minimum_required (VERSION 3.0)
 project (Memo-server LANGUAGES CXX)
 add_compile_options(-std=c++17 -Wall -Wextra -Wsign-conversion)
 
+set(CMAKE_CXX_COMPILER /usr/bin/clang++)
 # variable denoting where the "absolute" include paths start in
 set(BASEPATH "${CMAKE_SOURCE_DIR}/src/")
 
@@ -129,6 +130,7 @@ endforeach()
 
 # Include generated *.pb.h files
 include_directories("${PROTO_SRC_DIR}")
+message("Proto src directory: ${PROTO_SRC_DIR}")
 
 # Building server
 add_executable(memo_server
@@ -155,3 +157,7 @@ target_link_libraries(memo_client
 
 # needed for "absolute" include paths
 target_include_directories(memo_server PRIVATE ${BASEPATH})
+
+target_include_directories(memo_server PRIVATE /usr/include/mysql-cppconn-8)
+target_link_directories(memo_server PRIVATE /usr/lib/x86_64-linux-gnu)
+target_link_libraries(memo_server mysqlcppconn8)
