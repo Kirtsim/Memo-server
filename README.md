@@ -15,7 +15,7 @@ $ docker run -it --privileged --rm -w /home/memo-server -v `pwd`:/home/memo-serv
 
 #### Running the server:
 ```
-$ ./build/memo\_server 127.0.0.1 8000 "\_"
+$ ./build/memo_server 127.0.0.1 8000 "_"
 ```
 
 #### Shut down:
