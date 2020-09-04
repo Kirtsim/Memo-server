@@ -379,6 +379,17 @@ class Client {
         call->startCall();
     }
 
+    void stop()
+    {
+        cq_.Shutdown();
+        void* ignoredTag;
+        bool ignoredOk;
+        while (cq_.Next(&ignoredTag, &ignoredOk))
+        {
+            Call* call = static_cast<Call*>(ignoredTag);
+            delete call;
+        }
+    }
 
     // Loop while listening for completed responses.
     // Prints out the response from the server.
@@ -421,11 +432,8 @@ int main(int argc, char* argv[]) {
   	{
   	    if (argc != 3)
   	    {
-  	      std::cerr << "Usage: http_server <address> <port> <doc_root>\n";
-  	      std::cerr << "  For IPv4, try:\n";
-  	      std::cerr << "    receiver 0.0.0.0 80 .\n";
-  	      std::cerr << "  For IPv6, try:\n";
-  	      std::cerr << "    receiver 0::0 80 .\n";
+  	      std::cerr << "Usage: http_server <address> <port>\n";
+  	      std::cerr << "Ex   : http_server 127.0.0.1 8000\n";
   	      return 1;
         }
   	}
@@ -451,8 +459,10 @@ int main(int argc, char* argv[]) {
     client.deleteMemo("Test-memo-id-delete-102930143290");
     client.deleteTag("Test-tag-name-delete-");
 
-    std::cout << "Press control-c to quit" << std::endl << std::endl;
-    thread_.join();  //blocks forever
+    std::cout << "Press <Enter> to stop the client." << std::endl << std::endl;
+    std::cin.ignore();
 
+    client.stop();
+    thread_.join();
     return 0;
 }
