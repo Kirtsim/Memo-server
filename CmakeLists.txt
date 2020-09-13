@@ -143,17 +143,6 @@ target_link_libraries(memo_server
     ${_GRPC_GRPCPP}
     ${_PROTOBUF_LIBPROTOBUF})
 
-add_executable(memo_client
-    "src/client.cpp"
-    "src/logger/logger.hpp"
-    ${PROTO_SRCS}
-    ${GRPC_SRCS})
-
-target_link_libraries(memo_client
-    ${_REFLECTION}
-    ${_GRPC_GRPCPP}
-    ${_PROTOBUF_LIBPROTOBUF})
-
 
 # needed for "absolute" include paths
 target_include_directories(memo_server PRIVATE ${BASEPATH})

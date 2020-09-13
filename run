@@ -1,0 +1,82 @@
+#!/bin/bash
+
+RUN_CMAKE=0
+RUN_BUILD=0
+RUN_SERVER=0
+
+exit_on_fail() {
+    if ! [ $? -eq 0 ]; then
+        exit 1
+    fi
+}
+
+print_help() {
+    echo "Usage: ./run [OPTIONS]"
+    echo "OPTIONS:"
+    echo "cmake     - run cmake on the project"
+    echo "build     - build project"
+    echo "server    - runs the server"
+    echo "-----------------------------------------------------"
+    echo "Example: ./run"
+    echo "         		// runs all 3 stages"
+    echo "         ./run server"
+    echo "         		// runs the server only, without any build"
+}
+if [ "$#" -eq 0 ]
+then
+	RUN_CMAKE=1
+	RUN_BUILD=1
+	RUN_SERVER=1
+fi
+
+# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
+# * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+# ===============  Parse arguments =====================
+# * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
+while [[ $# -gt 0 ]]
+do
+key="$1"
+
+case $key in
+    build)
+    RUN_BUILD=1
+    shift
+    ;;
+    cmake)
+    RUN_CMAKE=1
+    shift
+    ;;
+    server)
+    RUN_SERVER=1
+    shift # past argument
+    ;;
+esac
+done
+
+if [ $RUN_CMAKE -eq 1 ]
+then
+    docker run -it --privileged --rm -w /home/memo-server -v `pwd`:/home/memo-server kirtsim/memo-server:dev ./scripts/setup
+    exit_on_fail
+fi
+
+if [ $RUN_BUILD -eq 1 ]
+then
+    docker run -it --privileged --rm -w /home/memo-server -v `pwd`:/home/memo-server kirtsim/memo-server:dev ./scripts/compile
+	exit_on_fail
+fi
+
+if [ $RUN_SERVER -eq 1 ]
+then
+	echo "Running server ..."
+	echo "To stop the server use 'docker stop server' (in another terminal window)."
+    docker run --rm --privileged -it \
+    	-w /home/memo-server \
+    	-v `pwd`:/home/memo-server \
+    	--net memo_network \
+    	--name server \
+    	--ip 172.20.20.20 \
+    	kirtsim/memo-server:dev \
+    	bash -c "./build/memo_server 172.20.20.20 8000"
+    exit_on_fail
+fi
