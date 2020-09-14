@@ -1,0 +1,26 @@
+#!/bin/bash
+
+BUILD_DIR="./build"
+PROJECT_PATH=$(pwd)
+
+exit_on_fail() {
+    if ! [ $? -eq 0 ]; then
+        exit 1
+    fi
+}
+
+# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
+# * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+# ===============  COMPILATION/BUILD/MAKE =====================
+# * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
+cd $BUILD_DIR
+exit_on_fail
+
+echo "++ Building project"
+echo "*******************************"
+make -j4
+exit_on_fail
+echo "*******************************"
+echo "++ Build successfull"
+echo ""
