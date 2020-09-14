@@ -21,6 +21,7 @@ $ docker network create --subnet 172.20.0.0/16 --ip-range 172.20.240.0/20 memo_n
 ```
 $ ./run server
 ```
+To test the server, you can use the [client](https://github.com/Kirtsim/Memo-client-cli).
 
 #### Shutdown running server
 Open a new terminal window and execute:
