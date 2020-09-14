@@ -68,6 +68,10 @@ fi
 
 if [ $RUN_SERVER -eq 1 ]
 then
+	if [ -d $PROJECT_PATH/log ]
+	then
+	    rm $PROJECT_PATH/log/*.log
+	fi
 	echo "Running server ..."
 	echo "To stop the server use 'docker stop server' (in another terminal window)."
     docker run --rm --privileged -it \

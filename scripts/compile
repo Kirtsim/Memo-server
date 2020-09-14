@@ -1,42 +1,13 @@
 #!/bin/bash
 
-# Arguments
-RUN_REQUESTED=0
-SKIP_BUILD=0
-ARGS_FILE=""
-
-# Variables
 BUILD_DIR="./build"
 PROJECT_PATH=$(pwd)
-EXECUTABLE="memo_server"
-SERVER_ARGS="127.0.0.1 8000 $PROJECT_PATH"
 
 exit_on_fail() {
     if ! [ $? -eq 0 ]; then
         exit 1
     fi
 }
-
-while [[ $# -gt 0 ]]
-do
-key="$1"
-
-case $key in
-    -r|--run)
-    RUN_REQUESTED=1
-    shift
-    ;;
-    -s|--skip-build)
-    SKIP_BUILD=1
-    shift
-    ;;
-    -a|--args-file)
-    ARGS_FILE=$2
-    shift # past argument
-    shift # past value
-    ;;
-esac
-done
 
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 # * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
@@ -46,55 +17,10 @@ done
 cd $BUILD_DIR
 exit_on_fail
 
-if [ "$SKIP_BUILD" -eq "0" ]; then
-    echo "++ Building project"
-    echo "*******************************"
-    make -j4
-    exit_on_fail
-    echo "*******************************"
-    echo "++ Build successfull"
-    echo ""
-else
-    echo "++ Skipping build (requested)"
-fi
-
-if [ "$RUN_REQUESTED" -eq "0" ]; then
-    exit 0
-fi
-
-rm $PROJECT_PATH/log/*.log
-
-
-# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
-# * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
-# ===============  READ SERVER ARGUMENTS ======================
-# * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
-# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
-# Read server arguments from file
-declare -a args=()
-i=0
-if [ -n "$ARGS_FILE" ]; then
-    # Convert to absolute path
-    absolute_path="$(cd $PROJECT_PATH/$(dirname $ARGS_FILE); pwd)/$(basename $ARGS_FILE)"
-    echo Reading arguments from file: $absolute_path
-    # Read line by line
-    while IFS= read -r line; do
-        args[i++]=$line
-    done < $absolute_path
-fi
-
-if [ ${#args[@]} -eq 0 ]; then
-    echo Using default server arguments.
-else
-    SERVER_ARGS=${args[@]}
-    echo Using arguments defined in the input file "$(basename $ARGS_FILE)"
-fi
-echo Server arguments: $SERVER_ARGS
-
-# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
-# * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
-# =====================  RUN SERVER  ==========================
-# * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
-# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
-echo "++ Running program..."
-./$EXECUTABLE $SERVER_ARGS
+echo "++ Building project"
+echo "*******************************"
+make -j4
+exit_on_fail
+echo "*******************************"
+echo "++ Build successfull"
+echo ""
