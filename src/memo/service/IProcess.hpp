@@ -5,12 +5,12 @@
 namespace memo {
 namespace service {
 
-class Process
+class IProcess
 {
 public:
-    using Ptr = std::shared_ptr<Process>;
+    using Ptr = std::shared_ptr<IProcess>;
 
-    virtual ~Process() = default;
+    virtual ~IProcess() = default;
 
     virtual void init(grpc::ServerCompletionQueue& ioCompletionQueue) = 0;
 

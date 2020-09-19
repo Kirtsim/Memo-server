@@ -1,5 +1,5 @@
 #pragma once
-#include "memo/service/Process.hpp"
+#include "memo/service/IProcess.hpp"
 
 #include <grpcpp/impl/codegen/completion_queue.h>
 #include <grpcpp/impl/codegen/server_context.h>
@@ -11,7 +11,7 @@ namespace process {
 
 
 template<class ServiceType, class RequestType, class ResponseType>
-class BaseProcess : public Process
+class BaseProcess : public IProcess
 {
     using ResponseWriter_t = grpc::ServerAsyncResponseWriter<ResponseType>;
 

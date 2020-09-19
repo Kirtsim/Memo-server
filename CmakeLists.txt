@@ -25,9 +25,9 @@ set(SOURCES src/main.cpp
             src/memo/Server.cpp
             src/memo/Resources.cpp)
 set(HEADERS src/logger/logger.hpp
-            src/memo/service/Service.hpp
+            src/memo/service/IService.hpp
             src/memo/service/BaseService.hpp
-            src/memo/service/Process.hpp
+            src/memo/service/IProcess.hpp
             src/memo/service/tag/TagSvc.hpp
             src/memo/service/memo/MemoSvc.hpp
             src/memo/service/BaseProcess.hpp

@@ -12,7 +12,7 @@ BaseService::BaseService(const Resources::Ptr& ioResources, grpc::ServerCompleti
 
 BaseService::~BaseService() = default;
 
-bool BaseService::executeProcess(Process* process)
+bool BaseService::executeProcess(IProcess* process)
 {
     auto it = processes_.find(process);
     if (it == end(processes_))
@@ -52,7 +52,7 @@ int BaseService::getId() const
     return pointerAddress;
 }
 
-void BaseService::registerProcess(Process::Ptr iProcess)
+void BaseService::registerProcess(IProcess::Ptr iProcess)
 {
     LOG_TRC("[BaseService] Registering new process");
     iProcess->init(completionQueue_);

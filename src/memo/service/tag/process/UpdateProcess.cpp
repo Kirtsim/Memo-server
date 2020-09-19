@@ -7,10 +7,10 @@ namespace service {
 namespace process {
 namespace tag {
 
-Process::Ptr UpdateProcess::Create(service::TagSvc& iSvc)
+IProcess::Ptr UpdateProcess::Create(service::TagSvc& iSvc)
 {
     auto process = std::make_shared<UpdateProcess>(iSvc);
-    return std::static_pointer_cast<Process>(process);
+    return std::static_pointer_cast<IProcess>(process);
 }
 
 UpdateProcess::UpdateProcess(service::TagSvc& iSvc) : BaseProcess(iSvc)
@@ -33,7 +33,7 @@ void UpdateProcess::execute()
     LOG_TRC("[UpdateProcess] Execution [end] <<<");
 }
 
-Process::Ptr UpdateProcess::duplicate() const
+IProcess::Ptr UpdateProcess::duplicate() const
 {
     return Create(svc_);
 }

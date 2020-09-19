@@ -7,10 +7,10 @@ namespace service {
 namespace process {
 namespace memo {
 
-Process::Ptr DeleteProcess::Create(MemoSvc& iSvc)
+IProcess::Ptr DeleteProcess::Create(MemoSvc& iSvc)
 {
     auto process = std::make_shared<DeleteProcess>(iSvc);
-    return std::static_pointer_cast<Process>(process);
+    return std::static_pointer_cast<IProcess>(process);
 }
 
 DeleteProcess::DeleteProcess(MemoSvc& iSvc) : BaseProcess(iSvc)
@@ -33,7 +33,7 @@ void DeleteProcess::execute()
     LOG_TRC("[DeleteProcess] Execution [end] <<<");
 }
 
-Process::Ptr DeleteProcess::duplicate() const
+IProcess::Ptr DeleteProcess::duplicate() const
 {
     return Create(svc_);
 }

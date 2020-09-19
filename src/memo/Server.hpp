@@ -1,5 +1,5 @@
 #pragma once
-#include "memo/service/Service.hpp"
+#include "memo/service/IService.hpp"
 #include "memo/Resources.hpp"
 
 #include <grpcpp/impl/codegen/completion_queue.h>
@@ -9,7 +9,7 @@
 
 namespace memo {
 namespace service {
-    class Process;
+    class IProcess;
 }
 
 using CompletionQueuePtr_t = std::unique_ptr<grpc::ServerCompletionQueue>;
@@ -23,7 +23,7 @@ public:
     void run();
 private:
     void initialize(const std::string iServerAddress);
-    void executeProcess(service::Process* ioProcess);
+    void executeProcess(service::IProcess* ioProcess);
 
     std::string ipAddress_;
     std::string port_;
@@ -31,7 +31,7 @@ private:
 
     std::unique_ptr<grpc::Server> server_;
     CompletionQueuePtr_t completionQueue_;
-    std::unordered_map<int, service::Service::Ptr> services_;
+    std::unordered_map<int, service::IService::Ptr> services_;
 };
 
 } // namespace memo

@@ -1,19 +1,19 @@
 #pragma once
-#include "memo/service/Process.hpp"
+#include "memo/service/IProcess.hpp"
 #include <memory>
 #include <vector>
 
 namespace memo {
 namespace service {
 
-class Service
+class IService
 {
 public:
-    using Ptr = std::shared_ptr<Service>;
+    using Ptr = std::shared_ptr<IService>;
 
-    virtual ~Service() = default;
+    virtual ~IService() = default;
 
-    virtual bool executeProcess(Process* process) = 0;
+    virtual bool executeProcess(IProcess* process) = 0;
 
     virtual int getId() const = 0;
 

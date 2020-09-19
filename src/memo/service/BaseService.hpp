@@ -1,6 +1,6 @@
 #pragma once
-#include "memo/service/Service.hpp"
-#include "memo/service/Process.hpp"
+#include "memo/service/IService.hpp"
+#include "memo/service/IProcess.hpp"
 
 #include <grpcpp/impl/codegen/completion_queue.h>
 #include <grpcpp/impl/codegen/async_unary_call_impl.h>
@@ -11,7 +11,7 @@ namespace memo {
     class Resources;
 namespace service {
 
-class BaseService : public memo::service::Service
+class BaseService : public memo::service::IService
 {
 public:
     BaseService(const std::shared_ptr<Resources>& ioResources, grpc::ServerCompletionQueue& ioCompletionQueue);
@@ -23,8 +23,8 @@ public:
 
     virtual void registerProcesses() = 0;
 
-    /// Service interface
-    bool executeProcess(Process* process) override;
+    /// IService interface
+    bool executeProcess(IProcess* process) override;
 
     void enable() override;
 
@@ -33,11 +33,11 @@ public:
     int getId() const override;
 
 protected:
-    void registerProcess(Process::Ptr iProcess);
+    void registerProcess(IProcess::Ptr iProcess);
 
     std::shared_ptr<Resources> resources_;
     grpc::ServerCompletionQueue& completionQueue_;
-    std::unordered_map<Process*, Process::Ptr> processes_;
+    std::unordered_map<IProcess*, IProcess::Ptr> processes_;
 };
 
 } // namespace service

@@ -1,7 +1,7 @@
 #include "memo/Server.hpp"
 #include "memo/service/memo/MemoSvc.hpp"
 #include "memo/service/tag/TagSvc.hpp"
-#include "memo/service/Process.hpp"
+#include "memo/service/IProcess.hpp"
 
 #include "logger/logger.hpp"
 
@@ -49,7 +49,7 @@ void Server::run()
     while (completionQueue_->Next(&tag, &isOk))
     {
         if (!tag) continue;
-        service::Process* process = static_cast<service::Process*>(tag);
+        service::IProcess* process = static_cast<service::IProcess*>(tag);
         executeProcess(process);
     }
 
@@ -66,8 +66,8 @@ void Server::initialize(const std::string iServerAddress)
 
     auto memoService = std::make_shared<memo::service::MemoSvc>(resources_, *completionQueue_);
     auto tagService = std::make_shared<memo::service::TagSvc>(resources_, *completionQueue_);
-    services_.insert({ memoService->getId(), std::static_pointer_cast<service::Service>(memoService) });
-    services_.insert({ tagService->getId(), std::static_pointer_cast<service::Service>(tagService) });
+    services_.insert({ memoService->getId(), std::static_pointer_cast<service::IService>(memoService) });
+    services_.insert({ tagService->getId(), std::static_pointer_cast<service::IService>(tagService) });
     builder.RegisterService(memoService.get());
     builder.RegisterService(tagService.get());
 
@@ -78,7 +78,7 @@ void Server::initialize(const std::string iServerAddress)
     LOG_TRC("[Server] Server listening on " << iServerAddress);
 }
 
-void Server::executeProcess(service::Process* ioProcess)
+void Server::executeProcess(service::IProcess* ioProcess)
 {
     auto it = services_.find(ioProcess->serviceId());
     if (it == end(services_))
