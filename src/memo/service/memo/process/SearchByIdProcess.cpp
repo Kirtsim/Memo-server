@@ -7,10 +7,10 @@ namespace service {
 namespace process {
 namespace memo {
 
-Process::Ptr SearchByIdProcess::Create(MemoSvc& iSvc)
+IProcess::Ptr SearchByIdProcess::Create(MemoSvc& iSvc)
 {
     auto process = std::make_shared<SearchByIdProcess>(iSvc);
-    return std::static_pointer_cast<Process>(process);
+    return std::static_pointer_cast<IProcess>(process);
 }
 
 SearchByIdProcess::SearchByIdProcess(MemoSvc& iSvc) : BaseProcess(iSvc)
@@ -33,7 +33,7 @@ void SearchByIdProcess::execute()
     LOG_TRC("[SearchByIdProcess] Execution [end] <<<");
 }
 
-Process::Ptr SearchByIdProcess::duplicate() const
+IProcess::Ptr SearchByIdProcess::duplicate() const
 {
     return Create(svc_);
 }
