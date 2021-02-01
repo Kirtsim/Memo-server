@@ -3,7 +3,7 @@
 #include "model/TagSvc.grpc.pb.h"
 
 #include <grpcpp/impl/codegen/completion_queue.h>
-#include <grpcpp/impl/codegen/async_unary_call_impl.h>
+#include <grpcpp/impl/codegen/async_unary_call.h>
 
 namespace memo {
 namespace service {
