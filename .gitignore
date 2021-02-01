@@ -2,6 +2,7 @@
 
 build
 log
+*.log
 docs/*.txt
 src/model/*.h
 src/model/*.cc
@@ -12,3 +13,5 @@ compile_flags.txt
 # VIM
 *.swp
 
+#VS code
+.vscode
