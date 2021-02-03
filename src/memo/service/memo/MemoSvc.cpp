@@ -37,7 +37,24 @@ grpc::Status MemoSvc::Search(grpc::ServerContext* iContext,
 {
 
     LOG_TRC("[MemoSvc] Search");
-    InitMemo(*ioResponse->add_memos(), iRequest->titleoptions().startswith());
+    if (false == iRequest->titleoptions().startswith().empty())
+    {
+        InitMemo(*ioResponse->add_memos(), iRequest->titleoptions().startswith());
+    }
+    else
+    {
+        InitMemo(*ioResponse->add_memos(), "Memo 1");
+        InitMemo(*ioResponse->add_memos(), "My trip to America");
+        InitMemo(*ioResponse->add_memos(), "Very memorable situation");
+        InitMemo(*ioResponse->add_memos(), "My first job");
+        InitMemo(*ioResponse->add_memos(), "Living in Switzerland");
+        InitMemo(*ioResponse->add_memos(), "Spending time in one of the UK's hospitals");
+        InitMemo(*ioResponse->add_memos(), "Welcome to Krispy Kreme");
+        InitMemo(*ioResponse->add_memos(), "Bojnicka zoo");
+        InitMemo(*ioResponse->add_memos(), "Being a lifeguard in America");
+        InitMemo(*ioResponse->add_memos(), "Graduation from Huddersfield university");
+        InitMemo(*ioResponse->add_memos(), "Our cat");
+    }
     return grpc::Status::OK;
 }
 
