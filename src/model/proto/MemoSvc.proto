@@ -8,7 +8,7 @@ package memo.model;
 service MemoSvc {
     rpc Search(MemoSearchRq) returns (MemoSearchRs) {}
     rpc SearchById(IdList) returns (MemoSearchRs) {}
-    rpc Create(Memo) returns (Id) {}
+    rpc Create(Memo) returns (MemoCreateRs) {}
     rpc Update(Memo) returns (OperationStatus) {}
     rpc Delete(Id) returns (OperationStatus) {}
 }
@@ -19,6 +19,11 @@ message IdList {
 
 message Id {
     string value = 1;
+}
+
+message MemoCreateRs {
+    Memo memo = 1;
+    OperationStatus operationStatus = 2;
 }
 
 message MemoSearchRq {
