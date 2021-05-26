@@ -5,19 +5,17 @@
 #include <grpcpp/impl/codegen/completion_queue.h>
 #include <grpcpp/impl/codegen/async_unary_call.h>
 
-namespace memo {
-namespace service {
+namespace memo::service {
     class MemoSvc;
-namespace process {
-namespace memo {
+namespace process::memo {
 
-class CreateProcess : public BaseProcess<service::MemoSvc, model::Memo, model::Id>
+class CreateProcess : public BaseProcess<service::MemoSvc, model::Memo, model::MemoCreateRs>
 {
 public:
     static Ptr Create(MemoSvc& iSvc);
 
-    CreateProcess(MemoSvc& iSvc);
-    ~CreateProcess();
+    explicit CreateProcess(MemoSvc& iSvc);
+    ~CreateProcess() override;
 
     void init(grpc::ServerCompletionQueue& ioCompletionQueue) override;
 
@@ -26,7 +24,5 @@ public:
     Ptr duplicate() const override;
 };
 
-} // namespace memo
-} // namespace process
-} // namespace service
-} // namespace memo
+} // namespace process::memo
+} // namespace memo::service

@@ -4,9 +4,9 @@
 
 #include <unordered_map>
 
-namespace memo {
-    class Resources;
-namespace service {
+namespace memo { class Resources; }
+
+namespace memo::service {
 
 class SearchProcess;
 class SearchByIdProcess;
@@ -20,7 +20,7 @@ class MemoSvc : public model::MemoSvc::AsyncService,
 public:
     MemoSvc(const std::shared_ptr<Resources>& ioResources, grpc::ServerCompletionQueue& ioCompletionQueue);
 
-    ~MemoSvc();
+    ~MemoSvc() override;
 
     MemoSvc(const MemoSvc&) = delete;
     MemoSvc& operator=(const MemoSvc&) = delete;
@@ -35,7 +35,7 @@ public:
 
     grpc::Status Create(grpc::ServerContext* context,
                         const model::Memo* request,
-                        model::Id* response) override;
+                        model::MemoCreateRs* response) override;
 
     grpc::Status Update(grpc::ServerContext* context,
                         const model::Memo* request,
@@ -49,5 +49,4 @@ public:
     void registerProcesses() override;
 };
 
-} // namespace service
-} // namespace memo
+} // namespace memo::service

@@ -7,8 +7,9 @@
 #include "memo/Resources.hpp"
 #include "logger/logger.hpp"
 
-namespace memo {
-namespace service {
+#include <ctime>
+#include <sstream>
+namespace memo::service {
 
 MemoSvc::MemoSvc(const Resources::Ptr& ioResources, grpc::ServerCompletionQueue& ioCompletionQueue) :
     BaseService(ioResources, ioCompletionQueue)
@@ -66,16 +67,30 @@ grpc::Status MemoSvc::SearchById(grpc::ServerContext* iContext,
     if (!iRequest->ids().empty())
         InitMemo(*ioResponse->add_memos(), "Memo with id: " + iRequest->ids(0).value());
     else
-        InitMemo(*ioResponse->add_memos(), "You did not speicify any id!!");
+        InitMemo(*ioResponse->add_memos(), "[ERROR] No id specified.");
     return grpc::Status::OK;
 }
 
-grpc::Status MemoSvc::Create(grpc::ServerContext* ioContext,
-                             const model::Memo* iRequest,
-                             model::Id* ioResponse)
+grpc::Status MemoSvc::Create(grpc::ServerContext* context,
+                             const model::Memo* memo,
+                             model::MemoCreateRs* response)
 {
     LOG_TRC("[MemoSvc] Create");
-    ioResponse->set_value("aslfdkjasldfkjasldfjasdf-id");
+    LOG_TRC("Received request to create Memo with the following details:");
+    LOG_TRC("Title:" << " " <<  memo->title());
+    LOG_TRC("Description:" << " " <<  memo->description());
+    std::stringstream stream;
+    for (const auto tag : memo->tagnames())
+    {
+        stream << "#" << tag << " ";
+    }
+    auto timestamp = static_cast<long>(std::time(nullptr));
+    LOG_TRC("Tags:" << " " << stream.str());
+    LOG_TRC("Timestamp:" << " " << timestamp);
+    (*response->mutable_memo()) = *memo;
+    response->mutable_memo()->set_id("0000-0000-0000-0001");
+    response->mutable_memo()->set_timestamp(timestamp);
+    response->mutable_operationstatus()->set_status(model::OperationStatus::SUCCESS);
     return grpc::Status::OK;
 }
 
@@ -108,5 +123,4 @@ void MemoSvc::registerProcesses()
     LOG_INF("[MemoSvc] Registered " <<  processes_.size() << " processes.");
 }
 
-} // namespace service
-} // namespace memo
+} // namespace memo::service
