@@ -1,0 +1,3 @@
+[submodule "Memo-proto"]
+	path = Memo-proto
+	url = https://github.com/Kirtsim/Memo-proto.git

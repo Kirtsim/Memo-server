@@ -1,9 +1,0 @@
-syntax = "proto3";
-
-package memo.model;
-
-message Tag {
-    string name = 1;
-    string color = 2;
-    int64 timestamp = 3;
-}
