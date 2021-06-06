@@ -20,27 +20,27 @@ MemoSvc::MemoSvc(const Resources::Ptr& ioResources, grpc::ServerCompletionQueue&
 MemoSvc::~MemoSvc() = default;
 
 namespace {
-void InitMemo(model::Memo& ioMemo, const std::string& iTitle)
+void InitMemo(proto::Memo& ioMemo, const std::string& iTitle)
 {
     ioMemo.set_id("fkasdlf-askdfjowe-sdfjkasldfj");
     ioMemo.set_title(iTitle);
     ioMemo.set_description("Lorem ipsum: short description.");
     ioMemo.set_timestamp(100L);
-    ioMemo.add_tagnames("TestTag1");
-    ioMemo.add_tagnames("#Testing");
+    ioMemo.add_tag_names("TestTag1");
+    ioMemo.add_tag_names("#Testing");
 }
 
 } // namespace
 
 grpc::Status MemoSvc::Search(grpc::ServerContext* iContext,
-                             const model::MemoSearchRq* iRequest,
-                             model::MemoSearchRs* ioResponse)
+                             const proto::MemoSearchRq* iRequest,
+                             proto::MemoSearchRs* ioResponse)
 {
 
     LOG_TRC("[MemoSvc] Search");
-    if (false == iRequest->titleoptions().startswith().empty())
+    if (false == iRequest->title_options().starts_with().empty())
     {
-        InitMemo(*ioResponse->add_memos(), iRequest->titleoptions().startswith());
+        InitMemo(*ioResponse->add_memos(), iRequest->title_options().starts_with());
     }
     else
     {
@@ -60,8 +60,8 @@ grpc::Status MemoSvc::Search(grpc::ServerContext* iContext,
 }
 
 grpc::Status MemoSvc::SearchById(grpc::ServerContext* iContext,
-                                 const model::IdList* iRequest,
-                                 model::MemoSearchRs* ioResponse)
+                                 const proto::IdList* iRequest,
+                                 proto::MemoSearchRs* ioResponse)
 {
     LOG_TRC("[MemoSvc] SearchById");
     if (!iRequest->ids().empty())
@@ -72,15 +72,15 @@ grpc::Status MemoSvc::SearchById(grpc::ServerContext* iContext,
 }
 
 grpc::Status MemoSvc::Create(grpc::ServerContext* context,
-                             const model::Memo* memo,
-                             model::MemoCreateRs* response)
+                             const proto::Memo* memo,
+                             proto::MemoCreateRs* response)
 {
     LOG_TRC("[MemoSvc] Create");
     LOG_TRC("Received request to create Memo with the following details:");
     LOG_TRC("Title:" << " " <<  memo->title());
     LOG_TRC("Description:" << " " <<  memo->description());
     std::stringstream stream;
-    for (const auto tag : memo->tagnames())
+    for (const auto tag : memo->tag_names())
     {
         stream << "#" << tag << " ";
     }
@@ -90,25 +90,25 @@ grpc::Status MemoSvc::Create(grpc::ServerContext* context,
     (*response->mutable_memo()) = *memo;
     response->mutable_memo()->set_id("0000-0000-0000-0001");
     response->mutable_memo()->set_timestamp(timestamp);
-    response->mutable_operationstatus()->set_status(model::OperationStatus::SUCCESS);
+    response->mutable_operation_status()->set_status(proto::OperationStatus::SUCCESS);
     return grpc::Status::OK;
 }
 
 grpc::Status MemoSvc::Update(grpc::ServerContext* ioContext,
-                             const model::Memo* iRequest,
-                             model::OperationStatus* ioResponse)
+                             const proto::Memo* iRequest,
+                             proto::OperationStatus* ioResponse)
 {
     LOG_TRC("[MemoSvc] Update");
-    ioResponse->set_status(model::OperationStatus::SUCCESS);
+    ioResponse->set_status(proto::OperationStatus::SUCCESS);
     return grpc::Status::OK;
 }
 
 grpc::Status MemoSvc::Delete(grpc::ServerContext* ioContext,
-                             const model::Id* iRequest,
-                             model::OperationStatus* ioResponse)
+                             const proto::Id* iRequest,
+                             proto::OperationStatus* ioResponse)
 {
     LOG_TRC("[MemoSvc] Delete");
-    ioResponse->set_status(model::OperationStatus::SUCCESS);
+    ioResponse->set_status(proto::OperationStatus::SUCCESS);
     return grpc::Status::OK;
 }
 

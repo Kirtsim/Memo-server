@@ -1,23 +1,21 @@
 #pragma once
 #include "memo/service/BaseProcess.hpp"
-#include "model/TagSvc.grpc.pb.h"
+#include "TagSvc.grpc.pb.h"
 
 #include <grpcpp/impl/codegen/completion_queue.h>
 #include <grpcpp/impl/codegen/async_unary_call.h>
 
-namespace memo {
-namespace service {
+namespace memo::service {
     class TagSvc;
-namespace process {
-namespace tag {
+namespace process::tag {
 
-class UpdateProcess : public BaseProcess<service::TagSvc, model::Tag, model::OperationStatus>
+class UpdateProcess : public BaseProcess<service::TagSvc, proto::Tag, proto::OperationStatus>
 {
 public:
     static Ptr Create(service::TagSvc& iSvc);
 
-    UpdateProcess(service::TagSvc& iSvc);
-    ~UpdateProcess();
+    explicit UpdateProcess(service::TagSvc& iSvc);
+    ~UpdateProcess() override;
 
     void init(grpc::ServerCompletionQueue& ioCompletionQueue) override;
 
@@ -26,7 +24,5 @@ public:
     Ptr duplicate() const override;
 };
 
-} // namespace tag
-} // namespace process
-} // namespace service
-} // namespace memo
+} // namespace process::tag
+} // namespace memo::service

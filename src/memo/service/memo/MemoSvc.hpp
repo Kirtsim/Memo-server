@@ -1,6 +1,6 @@
 #pragma once
 #include "memo/service/BaseService.hpp"
-#include "model/MemoSvc.grpc.pb.h"
+#include "MemoSvc.grpc.pb.h"
 
 #include <unordered_map>
 
@@ -14,7 +14,7 @@ class CreateProcess;
 class DeleteProcess;
 class UpdateProcess;
 
-class MemoSvc : public model::MemoSvc::AsyncService,
+class MemoSvc : public proto::MemoSvc::AsyncService,
                 public memo::service::BaseService
 {
 public:
@@ -26,24 +26,24 @@ public:
     MemoSvc& operator=(const MemoSvc&) = delete;
 
     grpc::Status Search(grpc::ServerContext* context,
-                        const model::MemoSearchRq* request,
-                        model::MemoSearchRs* response) override;
+                        const proto::MemoSearchRq* request,
+                        proto::MemoSearchRs* response) override;
 
     grpc::Status SearchById(grpc::ServerContext* context,
-                            const model::IdList* request,
-                            model::MemoSearchRs* response) override;
+                            const proto::IdList* request,
+                            proto::MemoSearchRs* response) override;
 
     grpc::Status Create(grpc::ServerContext* context,
-                        const model::Memo* request,
-                        model::MemoCreateRs* response) override;
+                        const proto::Memo* request,
+                        proto::MemoCreateRs* response) override;
 
     grpc::Status Update(grpc::ServerContext* context,
-                        const model::Memo* request,
-                        model::OperationStatus* response) override;
+                        const proto::Memo* request,
+                        proto::OperationStatus* response) override;
 
     grpc::Status Delete(grpc::ServerContext* context,
-                        const model::Id* request,
-                        model::OperationStatus* response) override;
+                        const proto::Id* request,
+                        proto::OperationStatus* response) override;
 
     /// BaseService methods
     void registerProcesses() override;

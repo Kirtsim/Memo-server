@@ -16,7 +16,7 @@ class BaseService : public memo::service::IService
 public:
     BaseService(const std::shared_ptr<Resources>& ioResources, grpc::ServerCompletionQueue& ioCompletionQueue);
 
-    virtual ~BaseService();
+    ~BaseService() override;
 
     BaseService(const BaseService&) = delete;
     BaseService& operator=(const BaseService&) = delete;

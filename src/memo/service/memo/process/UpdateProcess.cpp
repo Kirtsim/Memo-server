@@ -2,10 +2,7 @@
 #include "memo/service/memo/MemoSvc.hpp"
 #include "logger/logger.hpp"
 
-namespace memo {
-namespace service {
-namespace process {
-namespace memo {
+namespace memo::service::process::memo {
 
 IProcess::Ptr UpdateProcess::Create(MemoSvc& iSvc)
 {
@@ -38,7 +35,4 @@ IProcess::Ptr UpdateProcess::duplicate() const
     return Create(svc_);
 }
 
-} // namespace memo
-} // namespace process
-} // namespace service
-} // namespace memo
+} // namespace memo::service::process::memo

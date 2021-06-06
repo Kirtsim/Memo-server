@@ -6,8 +6,7 @@
 #include "memo/Resources.hpp"
 #include "logger/logger.hpp"
 
-namespace memo {
-namespace service {
+namespace memo::service {
 
 TagSvc::TagSvc(const Resources::Ptr& ioResources, grpc::ServerCompletionQueue& ioCompletionQueue) :
     BaseService(ioResources, ioCompletionQueue)
@@ -18,7 +17,7 @@ TagSvc::TagSvc(const Resources::Ptr& ioResources, grpc::ServerCompletionQueue& i
 TagSvc::~TagSvc() = default;
 
 namespace {
-void InitTag(model::Tag& ioTag, const std::string& iName)
+void InitTag(proto::Tag& ioTag, const std::string& iName)
 {
     ioTag.set_name(iName);
     ioTag.set_color("#FFFFFF");
@@ -28,39 +27,39 @@ void InitTag(model::Tag& ioTag, const std::string& iName)
 } // namespace
 
 grpc::Status TagSvc::Search(grpc::ServerContext* iContext,
-                             const model::TagSearchRq* iRequest,
-                             model::TagSearchRs* ioResponse)
+                             const proto::TagSearchRq* iRequest,
+                             proto::TagSearchRs* ioResponse)
 {
     LOG_TRC("[TagSvc] Search");
-    InitTag(*ioResponse->add_tags(), iRequest->nameoptions().startswith());
+    InitTag(*ioResponse->add_tags(), iRequest->name_options().starts_with());
     return grpc::Status::OK;
 }
 
 
 grpc::Status TagSvc::Create(grpc::ServerContext* ioContext,
-                             const model::Tag* iRequest,
-                             model::OperationStatus* ioResponse)
+                             const proto::Tag* iRequest,
+                             proto::OperationStatus* ioResponse)
 {
     LOG_TRC("[TagSvc] Create");
-    ioResponse->set_status(model::OperationStatus::SUCCESS);
+    ioResponse->set_status(proto::OperationStatus::SUCCESS);
     return grpc::Status::OK;
 }
 
 grpc::Status TagSvc::Update(grpc::ServerContext* ioContext,
-                             const model::Tag* iRequest,
-                             model::OperationStatus* ioResponse)
+                             const proto::Tag* iRequest,
+                             proto::OperationStatus* ioResponse)
 {
     LOG_TRC("[TagSvc] Update");
-    ioResponse->set_status(model::OperationStatus::SUCCESS);
+    ioResponse->set_status(proto::OperationStatus::SUCCESS);
     return grpc::Status::OK;
 }
 
 grpc::Status TagSvc::Delete(grpc::ServerContext* ioContext,
-                             const model::TagName* iRequest,
-                             model::OperationStatus* ioResponse)
+                             const proto::TagName* iRequest,
+                             proto::OperationStatus* ioResponse)
 {
     LOG_TRC("[TagSvc] Delete");
-    ioResponse->set_status(model::OperationStatus::SUCCESS);
+    ioResponse->set_status(proto::OperationStatus::SUCCESS);
     return grpc::Status::OK;
 }
 
@@ -74,5 +73,4 @@ void TagSvc::registerProcesses()
     LOG_INF("[TagSvc] Registered " <<  processes_.size() << " processes.");
 }
 
-} // namespace service
-} // namespace memo
+} // namespace memo::service

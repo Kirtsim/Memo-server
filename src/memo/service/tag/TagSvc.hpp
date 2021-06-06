@@ -1,6 +1,6 @@
 #pragma once
 #include "memo/service/BaseService.hpp"
-#include "model/TagSvc.grpc.pb.h"
+#include "TagSvc.grpc.pb.h"
 
 #include <unordered_map>
 
@@ -14,32 +14,32 @@ class CreateProcess;
 class DeleteProcess;
 class UpdateProcess;
 
-class TagSvc : public model::TagSvc::AsyncService,
+class TagSvc : public proto::TagSvc::AsyncService,
                public memo::service::BaseService
 {
 public:
     TagSvc(const std::shared_ptr<Resources>& ioResources, grpc::ServerCompletionQueue& ioCompletionQueue);
 
-    ~TagSvc();
+    ~TagSvc() override;
 
     TagSvc(const TagSvc&) = delete;
     TagSvc& operator=(const TagSvc&) = delete;
 
     grpc::Status Search(grpc::ServerContext* context,
-                        const model::TagSearchRq* request,
-                        model::TagSearchRs* response) override;
+                        const proto::TagSearchRq* request,
+                        proto::TagSearchRs* response) override;
 
     grpc::Status Create(grpc::ServerContext* context,
-                        const model::Tag* request,
-                        model::OperationStatus* response) override;
+                        const proto::Tag* request,
+                        proto::OperationStatus* response) override;
 
     grpc::Status Update(grpc::ServerContext* context,
-                        const model::Tag* request,
-                        model::OperationStatus* response) override;
+                        const proto::Tag* request,
+                        proto::OperationStatus* response) override;
 
     grpc::Status Delete(grpc::ServerContext* context,
-                        const model::TagName* request,
-                        model::OperationStatus* response) override;
+                        const proto::TagName* request,
+                        proto::OperationStatus* response) override;
 
     /// BaseService methods
     void registerProcesses() override;

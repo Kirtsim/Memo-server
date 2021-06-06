@@ -22,7 +22,7 @@ public:
 
     void run();
 private:
-    void initialize(const std::string iServerAddress);
+    void initialize(const std::string& iServerAddress);
     void executeProcess(service::IProcess* ioProcess);
 
     std::string ipAddress_;

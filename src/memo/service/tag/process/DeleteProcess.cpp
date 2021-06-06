@@ -2,10 +2,7 @@
 #include "memo/service/tag/TagSvc.hpp"
 #include "logger/logger.hpp"
 
-namespace memo {
-namespace service {
-namespace process {
-namespace tag {
+namespace memo::service::process::tag {
 
 IProcess::Ptr DeleteProcess::Create(service::TagSvc& iSvc)
 {
@@ -38,7 +35,4 @@ IProcess::Ptr DeleteProcess::duplicate() const
     return Create(svc_);
 }
 
-} // namespace tag
-} // namespace process
-} // namespace service
-} // namespace memo
+} // namespace memo::service::process::tag

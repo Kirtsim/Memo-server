@@ -7,9 +7,6 @@
 
 #include <grpcpp/server_builder.h>
 
-#include <iostream>
-#include <exception>
-
 namespace memo {
 
 namespace {
@@ -49,14 +46,14 @@ void Server::run()
     while (completionQueue_->Next(&tag, &isOk))
     {
         if (!tag) continue;
-        service::IProcess* process = static_cast<service::IProcess*>(tag);
+        auto* process = static_cast<service::IProcess*>(tag);
         executeProcess(process);
     }
 
     LOG_TRC("[Server] Run complete.");
 }
 
-void Server::initialize(const std::string iServerAddress)
+void Server::initialize(const std::string& iServerAddress)
 {
     grpc::ServerBuilder builder;
 
