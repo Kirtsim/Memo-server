@@ -22,12 +22,12 @@ MemoSvc::~MemoSvc() = default;
 namespace {
 void InitMemo(proto::Memo& ioMemo, const std::string& iTitle)
 {
-    ioMemo.set_id("fkasdlf-askdfjowe-sdfjkasldfj");
+    ioMemo.set_id(101);
     ioMemo.set_title(iTitle);
     ioMemo.set_description("Lorem ipsum: short description.");
     ioMemo.set_timestamp(100L);
-    ioMemo.add_tag_names("TestTag1");
-    ioMemo.add_tag_names("#Testing");
+    ioMemo.add_tag_ids(0);
+    ioMemo.add_tag_ids(0);
 }
 
 } // namespace
@@ -80,7 +80,7 @@ grpc::Status MemoSvc::Create(grpc::ServerContext* context,
     LOG_TRC("Title:" << " " <<  memo->title());
     LOG_TRC("Description:" << " " <<  memo->description());
     std::stringstream stream;
-    for (const auto tag : memo->tag_names())
+    for (const auto tag : memo->tag_ids())
     {
         stream << "#" << tag << " ";
     }
@@ -88,9 +88,9 @@ grpc::Status MemoSvc::Create(grpc::ServerContext* context,
     LOG_TRC("Tags:" << " " << stream.str());
     LOG_TRC("Timestamp:" << " " << timestamp);
     (*response->mutable_memo()) = *memo;
-    response->mutable_memo()->set_id("0000-0000-0000-0001");
+    response->mutable_memo()->set_id(101);
     response->mutable_memo()->set_timestamp(timestamp);
-    response->mutable_operation_status()->set_status(proto::OperationStatus::SUCCESS);
+    response->mutable_operation_status()->set_type(proto::OperationStatus::SUCCESS);
     return grpc::Status::OK;
 }
 
@@ -99,7 +99,7 @@ grpc::Status MemoSvc::Update(grpc::ServerContext* ioContext,
                              proto::OperationStatus* ioResponse)
 {
     LOG_TRC("[MemoSvc] Update");
-    ioResponse->set_status(proto::OperationStatus::SUCCESS);
+    ioResponse->set_type(proto::OperationStatus::SUCCESS);
     return grpc::Status::OK;
 }
 
@@ -108,7 +108,7 @@ grpc::Status MemoSvc::Delete(grpc::ServerContext* ioContext,
                              proto::OperationStatus* ioResponse)
 {
     LOG_TRC("[MemoSvc] Delete");
-    ioResponse->set_status(proto::OperationStatus::SUCCESS);
+    ioResponse->set_type(proto::OperationStatus::SUCCESS);
     return grpc::Status::OK;
 }
 

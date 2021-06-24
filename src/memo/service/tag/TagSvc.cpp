@@ -20,7 +20,9 @@ namespace {
 void InitTag(proto::Tag& ioTag, const std::string& iName)
 {
     ioTag.set_name(iName);
-    ioTag.set_color("#FFFFFF");
+    ioTag.mutable_colour()->set_red(100);
+    ioTag.mutable_colour()->set_green(100);
+    ioTag.mutable_colour()->set_blue(100);
     ioTag.set_timestamp(100L);
 }
 
@@ -41,7 +43,7 @@ grpc::Status TagSvc::Create(grpc::ServerContext* ioContext,
                              proto::OperationStatus* ioResponse)
 {
     LOG_TRC("[TagSvc] Create");
-    ioResponse->set_status(proto::OperationStatus::SUCCESS);
+    ioResponse->set_type(proto::OperationStatus::SUCCESS);
     return grpc::Status::OK;
 }
 
@@ -50,7 +52,7 @@ grpc::Status TagSvc::Update(grpc::ServerContext* ioContext,
                              proto::OperationStatus* ioResponse)
 {
     LOG_TRC("[TagSvc] Update");
-    ioResponse->set_status(proto::OperationStatus::SUCCESS);
+    ioResponse->set_type(proto::OperationStatus::SUCCESS);
     return grpc::Status::OK;
 }
 
@@ -59,7 +61,7 @@ grpc::Status TagSvc::Delete(grpc::ServerContext* ioContext,
                              proto::OperationStatus* ioResponse)
 {
     LOG_TRC("[TagSvc] Delete");
-    ioResponse->set_status(proto::OperationStatus::SUCCESS);
+    ioResponse->set_type(proto::OperationStatus::SUCCESS);
     return grpc::Status::OK;
 }
 
