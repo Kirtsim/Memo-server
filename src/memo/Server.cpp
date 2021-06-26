@@ -63,8 +63,8 @@ void Server::initialize(const std::string& iServerAddress)
 
     auto memoService = std::make_shared<memo::service::MemoSvc>(resources_, *completionQueue_);
     auto tagService = std::make_shared<memo::service::TagSvc>(resources_, *completionQueue_);
-    services_.insert({ memoService->getId(), std::static_pointer_cast<service::IService>(memoService) });
-    services_.insert({ tagService->getId(), std::static_pointer_cast<service::IService>(tagService) });
+    services_.insert({ memoService->getId(), memoService });
+    services_.insert({ tagService->getId(), tagService });
     builder.RegisterService(memoService.get());
     builder.RegisterService(tagService.get());
 
