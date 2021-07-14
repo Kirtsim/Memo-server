@@ -33,6 +33,6 @@ void AddMemoProcess::execute()
 
 service::IProcess::Ptr AddMemoProcess::duplicate() const
 {
-    return memo::service::IProcess::Ptr();
+    return Create(svc_);
 }
 } // namespace memo
