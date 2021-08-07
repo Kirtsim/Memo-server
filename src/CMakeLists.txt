@@ -14,6 +14,8 @@ target_sources(${exe_lib}
         ${src_dir}/memo/service/MemoService.cpp
         ${src_dir}/memo/service/process/ListMemosProcess.cpp
         ${src_dir}/memo/service/process/AddMemoProcess.cpp
+        ${src_dir}/memo/service/process/ListTagsProcess.cpp
+        ${src_dir}/memo/service/process/AddTagProcess.cpp
         ${src_dir}/memo/service/memo/process/SearchProcess.cpp
         ${src_dir}/memo/service/memo/process/SearchByIdProcess.cpp
         ${src_dir}/memo/service/memo/process/CreateProcess.cpp
@@ -36,6 +38,8 @@ target_sources(${exe_lib}
         ${src_dir}/memo/service/BaseProcess.hpp
         ${src_dir}/memo/service/process/ListMemosProcess.hpp
         ${src_dir}/memo/service/process/AddMemoProcess.hpp
+        ${src_dir}/memo/service/process/ListTagsProcess.hpp
+        ${src_dir}/memo/service/process/AddTagProcess.hpp
         ${src_dir}/memo/service/memo/process/SearchProcess.hpp
         ${src_dir}/memo/service/memo/process/SearchByIdProcess.hpp
         ${src_dir}/memo/service/memo/process/CreateProcess.hpp

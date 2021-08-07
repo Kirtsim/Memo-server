@@ -11,7 +11,8 @@ service::IProcess::Ptr ListMemosProcess::Create(MemoService& service)
 }
 
 ListMemosProcess::ListMemosProcess(MemoService& service) : BaseProcess(service)
-{}
+{
+}
 
 ListMemosProcess::~ListMemosProcess() = default;
 
