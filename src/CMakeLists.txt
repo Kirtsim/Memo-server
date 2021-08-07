@@ -12,6 +12,7 @@ target_sources(${exe_lib}
         ${src_dir}/memo/service/tag/TagSvc.cpp
         ${src_dir}/memo/service/memo/MemoSvc.cpp
         ${src_dir}/memo/service/MemoService.cpp
+        ${src_dir}/memo/service/TagService.cpp
         ${src_dir}/memo/service/process/ListMemosProcess.cpp
         ${src_dir}/memo/service/process/AddMemoProcess.cpp
         ${src_dir}/memo/service/process/ListTagsProcess.cpp
@@ -35,6 +36,7 @@ target_sources(${exe_lib}
         ${src_dir}/memo/service/tag/TagSvc.hpp
         ${src_dir}/memo/service/memo/MemoSvc.hpp
         ${src_dir}/memo/service/MemoService.hpp
+        ${src_dir}/memo/service/TagService.hpp
         ${src_dir}/memo/service/BaseProcess.hpp
         ${src_dir}/memo/service/process/ListMemosProcess.hpp
         ${src_dir}/memo/service/process/AddMemoProcess.hpp
