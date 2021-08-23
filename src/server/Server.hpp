@@ -8,9 +8,8 @@
 #include <unordered_map>
 
 namespace memo {
-namespace service {
-    class IProcess;
-}
+
+class IProcess;
 
 using CompletionQueuePtr_t = std::unique_ptr<grpc::ServerCompletionQueue>;
 
@@ -23,7 +22,7 @@ public:
     void run();
 private:
     void initialize(const std::string& iServerAddress);
-    void executeProcess(service::IProcess* ioProcess);
+    void executeProcess(IProcess* ioProcess);
 
     std::string ipAddress_;
     std::string port_;
@@ -31,7 +30,7 @@ private:
 
     std::unique_ptr<grpc::Server> server_;
     CompletionQueuePtr_t completionQueue_;
-    std::unordered_map<int, service::IService::Ptr> services_;
+    std::unordered_map<int, IService::Ptr> services_;
 };
 
 } // namespace memo

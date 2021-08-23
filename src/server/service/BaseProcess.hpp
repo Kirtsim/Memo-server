@@ -5,7 +5,7 @@
 #include <grpcpp/impl/codegen/server_context.h>
 #include <grpcpp/impl/codegen/async_unary_call.h>
 
-namespace memo::service::process {
+namespace memo::process {
 
 
 template<class ServiceType, class RequestType, class ResponseType>
@@ -52,4 +52,4 @@ int BaseProcess<ServiceType, RequestType, ResponseType>::serviceId() const
     return svc_.getId();
 }
 
-} // namespace memo::service::process
+} // namespace memo::process

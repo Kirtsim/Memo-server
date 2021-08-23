@@ -5,7 +5,7 @@
 namespace memo {
 
 class TagService : public proto::TagService::AsyncService,
-                   public service::BaseService
+                   public BaseService
 {
 public:
     TagService(const std::shared_ptr<Resources>& ioResources, grpc::ServerCompletionQueue& ioCompletionQueue);

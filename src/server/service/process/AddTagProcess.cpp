@@ -5,7 +5,7 @@
 
 namespace memo {
 
-service::IProcess::Ptr AddTagProcess::Create(TagService& service)
+IProcess::Ptr AddTagProcess::Create(TagService& service)
 {
     auto process = std::make_shared<AddTagProcess>(service);
     return std::static_pointer_cast<IProcess>(process);
@@ -32,7 +32,7 @@ void AddTagProcess::execute()
     LOG_TRC("[AddTagProcess] Execution [end] <<<");
 }
 
-service::IProcess::Ptr AddTagProcess::duplicate() const
+IProcess::Ptr AddTagProcess::duplicate() const
 {
     return Create(svc_);
 }

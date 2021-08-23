@@ -5,11 +5,11 @@
 #include <grpcpp/impl/codegen/completion_queue.h>
 #include <grpcpp/impl/codegen/async_unary_call.h>
 
-namespace memo::service {
+namespace memo {
     class MemoSvc;
 namespace process::memo {
 
-class UpdateProcess : public BaseProcess<service::MemoSvc, proto::Memo, proto::OperationStatus>
+class UpdateProcess : public BaseProcess<MemoSvc, proto::Memo, proto::OperationStatus>
 {
 public:
     static Ptr Create(MemoSvc& iSvc);
@@ -25,4 +25,4 @@ public:
 };
 
 } // namespace process::memo
-} // namespace memo::service
+} // namespace memo

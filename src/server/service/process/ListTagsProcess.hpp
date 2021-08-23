@@ -9,7 +9,7 @@
 namespace memo {
     class TagService;
 
-class ListTagsProcess : public service::process::BaseProcess<TagService, proto::ListTagsRq, proto::ListTagsRs>
+class ListTagsProcess : public process::BaseProcess<TagService, proto::ListTagsRq, proto::ListTagsRs>
 {
 public:
     static Ptr Create(TagService& service);

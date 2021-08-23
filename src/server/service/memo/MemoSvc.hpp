@@ -6,7 +6,7 @@
 
 namespace memo { class Resources; }
 
-namespace memo::service {
+namespace memo {
 
 class SearchProcess;
 class SearchByIdProcess;
@@ -15,7 +15,7 @@ class DeleteProcess;
 class UpdateProcess;
 
 class MemoSvc : public proto::MemoSvc::AsyncService,
-                public memo::service::BaseService
+                public memo::BaseService
 {
 public:
     MemoSvc(const std::shared_ptr<Resources>& ioResources, grpc::ServerCompletionQueue& ioCompletionQueue);
@@ -49,4 +49,4 @@ public:
     void registerProcesses() override;
 };
 
-} // namespace memo::service
+} // namespace memo

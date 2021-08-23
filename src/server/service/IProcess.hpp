@@ -2,7 +2,7 @@
 #include <grpcpp/completion_queue.h>
 #include <memory>
 
-namespace memo::service {
+namespace memo {
 
 class IProcess
 {
@@ -22,4 +22,4 @@ public:
     virtual Ptr duplicate() const = 0;
 };
 
-} // namespace memo::service
+} // namespace memo

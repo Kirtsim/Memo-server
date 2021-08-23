@@ -2,15 +2,15 @@
 #include "server/service/tag/TagSvc.hpp"
 #include "logger/logger.hpp"
 
-namespace memo::service::process::tag {
+namespace memo::process::tag {
 
-IProcess::Ptr CreateProcess::Create(service::TagSvc& iSvc)
+IProcess::Ptr CreateProcess::Create(TagSvc& iSvc)
 {
     auto process = std::make_shared<CreateProcess>(iSvc);
     return std::static_pointer_cast<IProcess>(process);
 }
 
-CreateProcess::CreateProcess(service::TagSvc& iSvc) : BaseProcess(iSvc)
+CreateProcess::CreateProcess(TagSvc& iSvc) : BaseProcess(iSvc)
 {}
 
 CreateProcess::~CreateProcess() = default;
@@ -35,4 +35,4 @@ IProcess::Ptr CreateProcess::duplicate() const
     return Create(svc_);
 }
 
-} // namespace memo::service::process::tag
+} // namespace memo::process::tag

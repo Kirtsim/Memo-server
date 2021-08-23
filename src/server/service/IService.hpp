@@ -3,7 +3,7 @@
 #include <memory>
 #include <vector>
 
-namespace memo::service {
+namespace memo {
 
 class IService
 {
@@ -21,4 +21,4 @@ public:
     virtual void disable() = 0;
 };
 
-} // namespace memo::service
+} // namespace memo

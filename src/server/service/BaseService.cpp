@@ -2,7 +2,7 @@
 #include "server/Resources.hpp"
 #include "logger/logger.hpp"
 
-namespace memo::service {
+namespace memo {
 
 BaseService::BaseService(const Resources::Ptr& ioResources, grpc::ServerCompletionQueue& ioCompletionQueue) :
     resources_(ioResources),
@@ -58,4 +58,4 @@ void BaseService::registerProcess(IProcess::Ptr iProcess)
     processes_.insert({ iProcess.get(), iProcess });
 }
 
-} // namespace memo::service
+} // namespace memo

@@ -6,7 +6,7 @@
 #include "server/Resources.hpp"
 #include "logger/logger.hpp"
 
-namespace memo::service {
+namespace memo {
 
 TagSvc::TagSvc(const Resources::Ptr& ioResources, grpc::ServerCompletionQueue& ioCompletionQueue) :
     BaseService(ioResources, ioCompletionQueue)
@@ -75,4 +75,4 @@ void TagSvc::registerProcesses()
     LOG_INF("[TagSvc] Registered " <<  processes_.size() << " processes.");
 }
 
-} // namespace memo::service
+} // namespace memo

@@ -5,16 +5,16 @@
 #include <grpcpp/impl/codegen/completion_queue.h>
 #include <grpcpp/impl/codegen/async_unary_call.h>
 
-namespace memo::service {
+namespace memo {
     class TagSvc;
 namespace process::tag {
 
-class SearchProcess : public BaseProcess<service::TagSvc, proto::TagSearchRq, proto::TagSearchRs>
+class SearchProcess : public BaseProcess<TagSvc, proto::TagSearchRq, proto::TagSearchRs>
 {
 public:
-    static Ptr Create(service::TagSvc& iSvc);
+    static Ptr Create(TagSvc& iSvc);
 
-    explicit SearchProcess(service::TagSvc& iSvc);
+    explicit SearchProcess(TagSvc& iSvc);
     ~SearchProcess() override;
 
     void init(grpc::ServerCompletionQueue& ioCompletionQueue) override;
@@ -25,4 +25,4 @@ public:
 };
 
 } // namespace process::tag
-} // namespace memo::service
+} // namespace memo

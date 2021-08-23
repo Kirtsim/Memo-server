@@ -7,10 +7,11 @@
 
 #include <unordered_map>
 
-namespace memo { class Resources; }
-namespace memo::service {
+namespace memo {
 
-class BaseService : public memo::service::IService
+class Resources;
+
+class BaseService : public memo::IService
 {
 public:
     BaseService(const std::shared_ptr<Resources>& ioResources, grpc::ServerCompletionQueue& ioCompletionQueue);
@@ -39,4 +40,4 @@ protected:
     std::unordered_map<IProcess*, IProcess::Ptr> processes_;
 };
 
-} // namespace memo::service
+} // namespace memo

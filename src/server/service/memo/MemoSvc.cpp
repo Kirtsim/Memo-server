@@ -9,7 +9,7 @@
 
 #include <ctime>
 #include <sstream>
-namespace memo::service {
+namespace memo {
 
 MemoSvc::MemoSvc(const Resources::Ptr& ioResources, grpc::ServerCompletionQueue& ioCompletionQueue) :
     BaseService(ioResources, ioCompletionQueue)
@@ -123,4 +123,4 @@ void MemoSvc::registerProcesses()
     LOG_INF("[MemoSvc] Registered " <<  processes_.size() << " processes.");
 }
 
-} // namespace memo::service
+} // namespace memo

@@ -8,7 +8,7 @@
 namespace memo {
     class MemoService;
 
-class AddMemoProcess : public service::process::BaseProcess<MemoService, proto::AddMemoRq, proto::AddMemoRs>
+class AddMemoProcess : public process::BaseProcess<MemoService, proto::AddMemoRq, proto::AddMemoRs>
 {
 public:
     static Ptr Create(MemoService& service);

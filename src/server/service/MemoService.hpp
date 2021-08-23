@@ -4,7 +4,7 @@
 
 namespace memo {
 class MemoService : public proto::MemoService::AsyncService,
-                    public service::BaseService
+                    public BaseService
 {
 public:
     MemoService(const std::shared_ptr<Resources>& ioResources, grpc::ServerCompletionQueue& ioCompletionQueue);

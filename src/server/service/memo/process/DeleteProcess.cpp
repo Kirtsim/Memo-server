@@ -2,7 +2,7 @@
 #include "server/service/memo/MemoSvc.hpp"
 #include "logger/logger.hpp"
 
-namespace memo::service::process::memo {
+namespace memo::process::memo {
 
 IProcess::Ptr DeleteProcess::Create(MemoSvc& iSvc)
 {
@@ -35,4 +35,4 @@ IProcess::Ptr DeleteProcess::duplicate() const
     return Create(svc_);
 }
 
-} // namespace memo::service::process::memo
+} // namespace memo::process::memo

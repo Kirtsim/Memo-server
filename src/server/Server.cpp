@@ -48,7 +48,7 @@ void Server::run()
     while (completionQueue_->Next(&tag, &isOk))
     {
         if (!tag) continue;
-        auto* process = static_cast<service::IProcess*>(tag);
+        auto* process = static_cast<IProcess*>(tag);
         executeProcess(process);
     }
 
@@ -63,9 +63,9 @@ void Server::initialize(const std::string& iServerAddress)
 
     completionQueue_ = builder.AddCompletionQueue();
 
-    auto memoService = std::make_shared<memo::service::MemoSvc>(resources_, *completionQueue_);
+    auto memoService = std::make_shared<memo::MemoSvc>(resources_, *completionQueue_);
     auto memoService2_0 = std::make_shared<memo::MemoService>(resources_, *completionQueue_);
-    auto tagService = std::make_shared<memo::service::TagSvc>(resources_, *completionQueue_);
+    auto tagService = std::make_shared<memo::TagSvc>(resources_, *completionQueue_);
     auto tagService2_0 = std::make_shared<memo::TagService>(resources_, *completionQueue_);
     services_.insert({ memoService->getId(), memoService });
     services_.insert({ memoService2_0->getId(), memoService2_0 });
@@ -85,7 +85,7 @@ void Server::initialize(const std::string& iServerAddress)
     LOG_TRC("[Server] Server listening on " << iServerAddress);
 }
 
-void Server::executeProcess(service::IProcess* ioProcess)
+void Server::executeProcess(IProcess* ioProcess)
 {
     auto it = services_.find(ioProcess->serviceId());
     if (it == end(services_))

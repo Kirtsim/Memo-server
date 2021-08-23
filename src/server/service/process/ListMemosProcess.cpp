@@ -4,7 +4,7 @@
 
 namespace memo {
 
-service::IProcess::Ptr ListMemosProcess::Create(MemoService& service)
+IProcess::Ptr ListMemosProcess::Create(MemoService& service)
 {
     auto process = std::make_shared<ListMemosProcess>(service);
     return std::static_pointer_cast<IProcess>(process);
@@ -31,7 +31,7 @@ void ListMemosProcess::execute()
     LOG_TRC("[ListMemosProcess] Execution [end] <<<");
 }
 
-service::IProcess::Ptr ListMemosProcess::duplicate() const
+IProcess::Ptr ListMemosProcess::duplicate() const
 {
     return Create(svc_);
 }
