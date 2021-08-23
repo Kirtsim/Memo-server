@@ -1,8 +1,6 @@
 #include "server/Server.hpp"
 #include "server/service/MemoService.hpp"
 #include "server/service/TagService.hpp"
-#include "server/service/memo/MemoSvc.hpp"
-#include "server/service/tag/TagSvc.hpp"
 #include "server/service/IProcess.hpp"
 
 #include "logger/logger.hpp"
@@ -63,24 +61,16 @@ void Server::initialize(const std::string& iServerAddress)
 
     completionQueue_ = builder.AddCompletionQueue();
 
-    auto memoService = std::make_shared<memo::MemoSvc>(resources_, *completionQueue_);
-    auto memoService2_0 = std::make_shared<memo::MemoService>(resources_, *completionQueue_);
-    auto tagService = std::make_shared<memo::TagSvc>(resources_, *completionQueue_);
-    auto tagService2_0 = std::make_shared<memo::TagService>(resources_, *completionQueue_);
+    auto memoService = std::make_shared<memo::MemoService>(resources_, *completionQueue_);
+    auto tagService = std::make_shared<memo::TagService>(resources_, *completionQueue_);
     services_.insert({ memoService->getId(), memoService });
-    services_.insert({ memoService2_0->getId(), memoService2_0 });
     services_.insert({ tagService->getId(), tagService });
-    services_.insert({ tagService2_0->getId(), tagService2_0 });
     builder.RegisterService(memoService.get());
-    builder.RegisterService(memoService2_0.get());
     builder.RegisterService(tagService.get());
-    builder.RegisterService(tagService2_0.get());
 
     server_ = builder.BuildAndStart();
     memoService->enable();
-    memoService2_0->enable();
     tagService->enable();
-    tagService2_0->enable();
 
     LOG_TRC("[Server] Server listening on " << iServerAddress);
 }
