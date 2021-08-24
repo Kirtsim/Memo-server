@@ -1,26 +1,27 @@
 #include "server/Resources.hpp"
 
 namespace memo {
-Resources::Ptr Resources::Create(const std::string& iAddress,
-                                 const std::string& iPortNumber)
+
+Resources::Ptr Resources::Create(const std::string& address,
+                                 const std::string& portNumber)
 {
-    return Ptr(new Resources(iAddress, iPortNumber));
+    return Ptr(new Resources(address, portNumber));
 }
 
-Resources::Resources(const std::string& iAddress,
-                     const std::string& iPortNumber) :
-    address(iAddress),
-    portNumber(iPortNumber)
+Resources::Resources(const std::string& address,
+                     const std::string& portNumber) :
+    serverAddress_(address),
+    portNumber_(portNumber)
 {}
 
-const std::string& Resources::getAddress() const
+const std::string& Resources::serverAddress() const
 {
-    return address;
+    return serverAddress_;
 }
 
-const std::string& Resources::getPortNumber() const
+const std::string& Resources::portNumber() const
 {
-    return portNumber;
+    return portNumber_;
 }
 
 } // namespace memo

@@ -6,16 +6,16 @@
 
 namespace memo {
 
-TagService::TagService(const std::shared_ptr<Resources>& ioResources,
-                       grpc::ServerCompletionQueue& ioCompletionQueue)
-        : BaseService(ioResources, ioCompletionQueue)
+TagService::TagService(const std::shared_ptr<Resources>& resources,
+                       grpc::ServerCompletionQueue& completionQueue)
+        : BaseService(resources, completionQueue)
 {
     LOG_TRC("[TagService] TagService created");
 }
 
 TagService::~TagService() = default;
 
-grpc::Status TagService::ListTags(grpc::ServerContext* context,
+grpc::Status TagService::ListTags(grpc::ServerContext*,
                                   const proto::ListTagsRq* request,
                                   proto::ListTagsRs* response)
 {
@@ -50,7 +50,7 @@ grpc::Status TagService::ListTags(grpc::ServerContext* context,
     return grpc::Status::OK;
 }
 
-grpc::Status TagService::AddTag(grpc::ServerContext* context,
+grpc::Status TagService::AddTag(grpc::ServerContext*,
                                 const proto::AddTagRq* request,
                                 proto::AddTagRs* response)
 {

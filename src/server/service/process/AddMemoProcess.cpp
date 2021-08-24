@@ -16,9 +16,9 @@ AddMemoProcess::AddMemoProcess(MemoService& service) : BaseProcess(service)
 
 AddMemoProcess::~AddMemoProcess() = default;
 
-void AddMemoProcess::init(grpc::ServerCompletionQueue& ioCompletionQueue)
+void AddMemoProcess::init(grpc::ServerCompletionQueue& completionQueue)
 {
-    svc_.RequestAddMemo(&context_, &request_, &writer_, &ioCompletionQueue, &ioCompletionQueue, this);
+    svc_.RequestAddMemo(&context_, &request_, &writer_, &completionQueue, &completionQueue, this);
     state_ = PROCESSING;
 }
 

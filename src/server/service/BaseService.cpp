@@ -4,9 +4,9 @@
 
 namespace memo {
 
-BaseService::BaseService(const Resources::Ptr& ioResources, grpc::ServerCompletionQueue& ioCompletionQueue) :
-    resources_(ioResources),
-    completionQueue_(ioCompletionQueue)
+BaseService::BaseService(const Resources::Ptr& resources, grpc::ServerCompletionQueue& completionQueue) :
+    resources_(resources),
+    completionQueue_(completionQueue)
 {}
 
 BaseService::~BaseService() = default;
@@ -47,15 +47,22 @@ void BaseService::disable()
 
 int BaseService::getId() const
 {
-    size_t pointerAddress = reinterpret_cast<size_t>(this);
+    auto pointerAddress = reinterpret_cast<size_t>(this);
     return pointerAddress;
 }
 
-void BaseService::registerProcess(IProcess::Ptr iProcess)
+void BaseService::registerProcess(const IProcess::Ptr& process)
 {
     LOG_TRC("[BaseService] Registering new process");
-    iProcess->init(completionQueue_);
-    processes_.insert({ iProcess.get(), iProcess });
+    if (process)
+    {
+        process->init(completionQueue_);
+        processes_.insert({ process.get(), process });
+    }
+    else
+    {
+        LOG_WRN("[BaseService] Failed to register: process is null.");
+    }
 }
 
 } // namespace memo

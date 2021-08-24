@@ -10,17 +10,17 @@
 namespace memo {
 
 namespace {
-Resources::Ptr ConstructResources(const std::string& iAddress,
-                                  const std::string& iPortNumber)
+Resources::Ptr ConstructResources(const std::string& address,
+                                  const std::string& portNumber)
 {
-    return Resources::Create(iAddress, iPortNumber);
+    return Resources::Create(address, portNumber);
 }
 
 } // namespace
 
-Server::Server(const std::string& iIpAddress, const std::string& iPort) :
-    ipAddress_(iIpAddress),
-    port_(iPort),
+Server::Server(const std::string& ipAddress, const std::string& port) :
+    ipAddress_(ipAddress),
+    port_(port),
     resources_(ConstructResources(ipAddress_, port_))
 {}
 
@@ -53,11 +53,11 @@ void Server::run()
     LOG_TRC("[Server] Run complete.");
 }
 
-void Server::initialize(const std::string& iServerAddress)
+void Server::initialize(const std::string& serverAddress)
 {
     grpc::ServerBuilder builder;
 
-    builder.AddListeningPort(iServerAddress, grpc::InsecureServerCredentials());
+    builder.AddListeningPort(serverAddress, grpc::InsecureServerCredentials());
 
     completionQueue_ = builder.AddCompletionQueue();
 
@@ -72,22 +72,22 @@ void Server::initialize(const std::string& iServerAddress)
     memoService->enable();
     tagService->enable();
 
-    LOG_TRC("[Server] Server listening on " << iServerAddress);
+    LOG_TRC("[Server] Server listening on " << serverAddress);
 }
 
-void Server::executeProcess(IProcess* ioProcess)
+void Server::executeProcess(IProcess* process)
 {
-    auto it = services_.find(ioProcess->serviceId());
+    auto it = services_.find(process->serviceId());
     if (it == end(services_))
     {
-        delete ioProcess;
+        delete process;
         return;
     }
 
-    bool processFound = it->second->executeProcess(ioProcess);
+    bool processFound = it->second->executeProcess(process);
     if (!processFound)
     {
-        delete ioProcess;
+        delete process;
     }
 }
 

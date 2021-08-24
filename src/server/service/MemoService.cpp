@@ -6,16 +6,16 @@
 
 namespace memo {
 
-MemoService::MemoService(const std::shared_ptr<Resources>& ioResources,
-                         grpc::ServerCompletionQueue& ioCompletionQueue)
-        : BaseService(ioResources, ioCompletionQueue)
+MemoService::MemoService(const std::shared_ptr<Resources>& resources,
+                         grpc::ServerCompletionQueue& completionQueue)
+        : BaseService(resources, completionQueue)
 {
     LOG_TRC("[MemoService] MemoService created");
 }
 
 MemoService::~MemoService() = default;
 
-grpc::Status MemoService::ListMemos(grpc::ServerContext* context, const proto::ListMemosRq* request,
+grpc::Status MemoService::ListMemos(grpc::ServerContext*, const proto::ListMemosRq* request,
                                     proto::ListMemosRs* response)
 {
     LOG_TRC("[MemoService] ++ List memos ++");
@@ -51,7 +51,7 @@ grpc::Status MemoService::ListMemos(grpc::ServerContext* context, const proto::L
     return grpc::Status::OK;
 }
 
-grpc::Status MemoService::AddMemo(grpc::ServerContext* context, const proto::AddMemoRq* request,
+grpc::Status MemoService::AddMemo(grpc::ServerContext*, const proto::AddMemoRq* request,
                                   proto::AddMemoRs* response)
 {
     LOG_TRC("[MemoService] Adding new Memo");

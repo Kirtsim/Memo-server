@@ -11,25 +11,25 @@ namespace memo {
 
 class IProcess;
 
-using CompletionQueuePtr_t = std::unique_ptr<grpc::ServerCompletionQueue>;
+using CompletionQueueUPtr = std::unique_ptr<grpc::ServerCompletionQueue>;
 
 class Server
 {
 public:
-    Server(const std::string& iIpAddress, const std::string& iPort);
+    Server(const std::string& ipAddress, const std::string& port);
     ~Server();
 
     void run();
 private:
-    void initialize(const std::string& iServerAddress);
-    void executeProcess(IProcess* ioProcess);
+    void initialize(const std::string& serverAddress);
+    void executeProcess(IProcess* process);
 
     std::string ipAddress_;
     std::string port_;
     memo::Resources::Ptr resources_;
 
     std::unique_ptr<grpc::Server> server_;
-    CompletionQueuePtr_t completionQueue_;
+    CompletionQueueUPtr completionQueue_;
     std::unordered_map<int, IService::Ptr> services_;
 };
 

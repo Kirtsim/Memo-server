@@ -6,6 +6,7 @@
 #include <grpcpp/impl/codegen/async_unary_call.h>
 
 #include <unordered_map>
+#include <memory>
 
 namespace memo {
 
@@ -14,7 +15,7 @@ class Resources;
 class BaseService : public memo::IService
 {
 public:
-    BaseService(const std::shared_ptr<Resources>& ioResources, grpc::ServerCompletionQueue& ioCompletionQueue);
+    BaseService(const std::shared_ptr<Resources>& resources, grpc::ServerCompletionQueue& completionQueue);
 
     ~BaseService() override;
 
@@ -33,7 +34,7 @@ public:
     int getId() const override;
 
 protected:
-    void registerProcess(IProcess::Ptr iProcess);
+    void registerProcess(const IProcess::Ptr& process);
 
     std::shared_ptr<Resources> resources_;
     grpc::ServerCompletionQueue& completionQueue_;

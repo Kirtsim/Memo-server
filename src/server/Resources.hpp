@@ -13,19 +13,20 @@ public:
     static Ptr Create(const std::string& iAddress,
                       const std::string& iPortNumber);
 
-    const std::string& getAddress() const;
-    const std::string& getPortNumber() const;
+    const std::string& serverAddress() const;
+
+    const std::string& portNumber() const;
 
     Resources(const Resources&) = delete;
     Resources& operator=(const Resources&) = delete;
 
 private:
-    Resources(const std::string& iAddress,
-              const std::string& iPortNumber);
+    Resources(const std::string& address,
+              const std::string& portNumber);
 
 private:
-    std::string address;
-    std::string portNumber;
+    std::string serverAddress_;
+    std::string portNumber_;
 };
 
 } // namespace memo

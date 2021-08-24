@@ -16,7 +16,7 @@ public:
     explicit AddMemoProcess(MemoService& service);
     ~AddMemoProcess() override;
 
-    void init(grpc::ServerCompletionQueue& ioCompletionQueue) override;
+    void init(grpc::ServerCompletionQueue& completionQueue) override;
 
     void execute() override;
 

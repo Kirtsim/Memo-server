@@ -14,7 +14,7 @@ class BaseProcess : public IProcess
     using ResponseWriter_t = grpc::ServerAsyncResponseWriter<ResponseType>;
 
 public:
-    explicit BaseProcess(ServiceType& iSvc);
+    explicit BaseProcess(ServiceType& service);
     ~BaseProcess() override;
 
     bool isFinished() const override;
@@ -33,9 +33,10 @@ protected:
 };
 
 template<class ServiceType, class RequestType, class ResponseType>
-BaseProcess<ServiceType, RequestType, ResponseType>::BaseProcess(ServiceType& iSvc) :
-    svc_(iSvc), writer_(&context_)
-{}
+        BaseProcess<ServiceType, RequestType, ResponseType>::BaseProcess(ServiceType& service) :
+        svc_(service), writer_(&context_)
+{
+}
 
 template<class ServiceType, class RequestType, class ResponseType>
 BaseProcess<ServiceType, RequestType, ResponseType>::~BaseProcess() = default;

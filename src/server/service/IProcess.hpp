@@ -11,7 +11,7 @@ public:
 
     virtual ~IProcess() = default;
 
-    virtual void init(grpc::ServerCompletionQueue& ioCompletionQueue) = 0;
+    virtual void init(grpc::ServerCompletionQueue& completionQueue) = 0;
 
     virtual void execute() = 0;
 

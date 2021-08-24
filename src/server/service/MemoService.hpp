@@ -1,13 +1,14 @@
 #pragma once
 #include "server/service/BaseService.hpp"
 #include "MemoSvc.grpc.pb.h"
+#include <memory>
 
 namespace memo {
 class MemoService : public proto::MemoService::AsyncService,
                     public BaseService
 {
 public:
-    MemoService(const std::shared_ptr<Resources>& ioResources, grpc::ServerCompletionQueue& ioCompletionQueue);
+    MemoService(const std::shared_ptr<Resources>& resources, grpc::ServerCompletionQueue& completionQueue);
 
     ~MemoService() override;
     MemoService& operator=(const MemoService&) = delete;

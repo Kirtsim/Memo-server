@@ -1,6 +1,7 @@
 #pragma once
 #include "server/service/BaseService.hpp"
 #include "TagSvc.grpc.pb.h"
+#include <memory>
 
 namespace memo {
 
@@ -8,7 +9,7 @@ class TagService : public proto::TagService::AsyncService,
                    public BaseService
 {
 public:
-    TagService(const std::shared_ptr<Resources>& ioResources, grpc::ServerCompletionQueue& ioCompletionQueue);
+    TagService(const std::shared_ptr<Resources>& resources, grpc::ServerCompletionQueue& completionQueue);
 
     ~TagService() override;
     TagService& operator=(const TagService&) = delete;
