@@ -17,7 +17,7 @@ public:
     explicit ListTagsProcess(TagService& service);
     ~ListTagsProcess() override;
 
-    void init(grpc::ServerCompletionQueue& ioCompletionQueue) override;
+    void init(grpc::ServerCompletionQueue& completionQueue) override;
 
     void execute() override;
 

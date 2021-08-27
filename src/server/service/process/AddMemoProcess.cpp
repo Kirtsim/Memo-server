@@ -35,4 +35,5 @@ IProcess::Ptr AddMemoProcess::duplicate() const
 {
     return Create(svc_);
 }
+
 } // namespace memo

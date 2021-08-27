@@ -17,9 +17,9 @@ AddTagProcess::AddTagProcess(TagService& service) : BaseProcess(service)
 
 AddTagProcess::~AddTagProcess() = default;
 
-void AddTagProcess::init(grpc::ServerCompletionQueue& ioCompletionQueue)
+void AddTagProcess::init(grpc::ServerCompletionQueue& completionQueue)
 {
-    svc_.RequestAddTag(&context_, &request_, &writer_, &ioCompletionQueue, &ioCompletionQueue, this);
+    svc_.RequestAddTag(&context_, &request_, &writer_, &completionQueue, &completionQueue, this);
     state_ = PROCESSING;
 }
 

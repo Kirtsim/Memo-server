@@ -16,7 +16,7 @@ public:
     explicit ListMemosProcess(MemoService& service);
     ~ListMemosProcess() override;
 
-    void init(grpc::ServerCompletionQueue& ioCompletionQueue) override;
+    void init( rpc::ServerCompletionQueue& completionQueue) override;
 
     void execute() override;
 

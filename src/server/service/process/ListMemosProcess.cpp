@@ -16,9 +16,9 @@ ListMemosProcess::ListMemosProcess(MemoService& service) : BaseProcess(service)
 
 ListMemosProcess::~ListMemosProcess() = default;
 
-void ListMemosProcess::init(grpc::ServerCompletionQueue& ioCompletionQueue)
+void ListMemosProcess::init(grpc::ServerCompletionQueue& completionQueue)
 {
-    svc_.RequestListMemos(&context_, &request_, &writer_, &ioCompletionQueue, &ioCompletionQueue, this);
+    svc_.RequestListMemos(&context_, &request_, &writer_, &completionQueue, &completionQueue, this);
     state_ = PROCESSING;
 }
 

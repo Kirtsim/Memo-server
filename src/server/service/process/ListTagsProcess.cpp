@@ -17,9 +17,9 @@ ListTagsProcess::ListTagsProcess(TagService& service) : BaseProcess(service)
 
 ListTagsProcess::~ListTagsProcess() = default;
 
-void ListTagsProcess::init(grpc::ServerCompletionQueue& ioCompletionQueue)
+void ListTagsProcess::init(grpc::ServerCompletionQueue& completionQueue)
 {
-    svc_.RequestListTags(&context_, &request_, &writer_, &ioCompletionQueue, &ioCompletionQueue, this);
+    svc_.RequestListTags(&context_, &request_, &writer_, &completionQueue, &completionQueue, this);
     state_ = PROCESSING;
 }
 
