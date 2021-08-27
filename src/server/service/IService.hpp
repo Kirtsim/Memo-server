@@ -1,5 +1,5 @@
 #pragma once
-#include "server/service/IProcess.hpp"
+#include "server/process/IProcess.hpp"
 #include <memory>
 #include <vector>
 

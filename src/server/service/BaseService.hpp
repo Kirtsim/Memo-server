@@ -1,6 +1,6 @@
 #pragma once
 #include "server/service/IService.hpp"
-#include "server/service/IProcess.hpp"
+#include "server/process/IProcess.hpp"
 
 #include <grpcpp/impl/codegen/completion_queue.h>
 #include <grpcpp/impl/codegen/async_unary_call.h>

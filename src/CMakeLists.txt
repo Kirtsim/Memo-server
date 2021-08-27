@@ -11,24 +11,24 @@ target_sources(${exe_lib}
         ${src_dir}/server/service/BaseService.cpp
         ${src_dir}/server/service/MemoService.cpp
         ${src_dir}/server/service/TagService.cpp
-        ${src_dir}/server/service/process/ListMemosProcess.cpp
-        ${src_dir}/server/service/process/AddMemoProcess.cpp
-        ${src_dir}/server/service/process/ListTagsProcess.cpp
-        ${src_dir}/server/service/process/AddTagProcess.cpp
+        ${src_dir}/server/process/ListMemosProcess.cpp
+        ${src_dir}/server/process/AddMemoProcess.cpp
+        ${src_dir}/server/process/ListTagsProcess.cpp
+        ${src_dir}/server/process/AddTagProcess.cpp
         ${src_dir}/server/Server.cpp
         ${src_dir}/server/Resources.cpp
     INTERFACE
         ${src_dir}/logger/logger.hpp
         ${src_dir}/server/service/IService.hpp
         ${src_dir}/server/service/BaseService.hpp
-        ${src_dir}/server/service/IProcess.hpp
         ${src_dir}/server/service/MemoService.hpp
         ${src_dir}/server/service/TagService.hpp
-        ${src_dir}/server/service/BaseProcess.hpp
-        ${src_dir}/server/service/process/ListMemosProcess.hpp
-        ${src_dir}/server/service/process/AddMemoProcess.hpp
-        ${src_dir}/server/service/process/ListTagsProcess.hpp
-        ${src_dir}/server/service/process/AddTagProcess.hpp
+        ${src_dir}/server/process/IProcess.hpp
+        ${src_dir}/server/process/BaseProcess.hpp
+        ${src_dir}/server/process/ListMemosProcess.hpp
+        ${src_dir}/server/process/AddMemoProcess.hpp
+        ${src_dir}/server/process/ListTagsProcess.hpp
+        ${src_dir}/server/process/AddTagProcess.hpp
         ${src_dir}/server/Server.hpp
         ${src_dir}/server/Resources.hpp)
 

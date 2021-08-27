@@ -1,6 +1,6 @@
 #include "server/service/MemoService.hpp"
-#include "server/service/process/ListMemosProcess.hpp"
-#include "server/service/process/AddMemoProcess.hpp"
+#include "server/process/ListMemosProcess.hpp"
+#include "server/process/AddMemoProcess.hpp"
 
 #include "logger/logger.hpp"
 

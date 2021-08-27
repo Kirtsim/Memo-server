@@ -1,5 +1,5 @@
 #pragma once
-#include "server/service/IProcess.hpp"
+#include "server/process/IProcess.hpp"
 
 #include <grpcpp/impl/codegen/completion_queue.h>
 #include <grpcpp/impl/codegen/server_context.h>

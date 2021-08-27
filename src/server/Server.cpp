@@ -1,7 +1,7 @@
 #include "server/Server.hpp"
 #include "server/service/MemoService.hpp"
 #include "server/service/TagService.hpp"
-#include "server/service/IProcess.hpp"
+#include "server/process/IProcess.hpp"
 
 #include "logger/logger.hpp"
 

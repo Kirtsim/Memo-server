@@ -1,6 +1,6 @@
 #include "server/service/TagService.hpp"
-#include "server/service/process/ListTagsProcess.hpp"
-#include "server/service/process/AddTagProcess.hpp"
+#include "server/process/ListTagsProcess.hpp"
+#include "server/process/AddTagProcess.hpp"
 
 #include "logger/logger.hpp"
 

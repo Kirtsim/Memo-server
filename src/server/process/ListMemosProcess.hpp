@@ -1,5 +1,5 @@
 #pragma once
-#include "server/service/BaseProcess.hpp"
+#include "server/process/BaseProcess.hpp"
 #include "MemoSvc.grpc.pb.h"
 
 #include <grpcpp/impl/codegen/completion_queue.h>
@@ -8,13 +8,13 @@
 namespace memo {
     class MemoService;
 
-class AddMemoProcess : public process::BaseProcess<MemoService, proto::AddMemoRq, proto::AddMemoRs>
+class ListMemosProcess : public process::BaseProcess<MemoService, proto::ListMemosRq, proto::ListMemosRs>
 {
 public:
     static Ptr Create(MemoService& service);
 
-    explicit AddMemoProcess(MemoService& service);
-    ~AddMemoProcess() override;
+    explicit ListMemosProcess(MemoService& service);
+    ~ListMemosProcess() override;
 
     void init(grpc::ServerCompletionQueue& completionQueue) override;
 

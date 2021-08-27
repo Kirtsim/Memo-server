@@ -1,5 +1,5 @@
 #pragma once
-#include "server/service/BaseProcess.hpp"
+#include "server/process/BaseProcess.hpp"
 #include "TagSvc.grpc.pb.h"
 
 #include <grpcpp/impl/codegen/completion_queue.h>

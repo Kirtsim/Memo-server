@@ -1,4 +1,4 @@
-#include "server/service/process/ListTagsProcess.hpp"
+#include "server/process/ListTagsProcess.hpp"
 #include "server/service/TagService.hpp"
 #include "logger/logger.hpp"
 

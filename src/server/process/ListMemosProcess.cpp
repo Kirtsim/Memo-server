@@ -1,4 +1,4 @@
-#include "server/service/process/ListMemosProcess.hpp"
+#include "server/process/ListMemosProcess.hpp"
 #include "server/service/MemoService.hpp"
 #include "logger/logger.hpp"
 
