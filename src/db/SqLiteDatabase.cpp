@@ -25,7 +25,7 @@ bool SQLiteDatabase::open()
 
 bool SQLiteDatabase::close()
 {
-    return false;
+    return sqlite3_close(handle_) == SQLITE_OK;
 }
 
 bool SQLiteDatabase::exec(const std::string& query, const SQLCallback& callback)
