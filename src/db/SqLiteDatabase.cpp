@@ -3,6 +3,11 @@
 
 namespace memo {
 
+SQLiteDatabase::SQLiteDatabase(const std::string& dbFilePath)
+    : dbFilePath_(dbFilePath)
+{
+}
+
 SQLiteDatabase::~SQLiteDatabase()
 {
     sqlite3_close(handle_);
