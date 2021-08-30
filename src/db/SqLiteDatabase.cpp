@@ -15,7 +15,12 @@ SQLiteDatabase::~SQLiteDatabase()
 
 bool SQLiteDatabase::open()
 {
-    return false;
+    int returnCode = SQLITE_OK;
+    if (!handle_)
+    {
+        returnCode = sqlite3_open(dbFilePath_.c_str(), &handle_);
+    }
+    return (returnCode == SQLITE_OK && handle_);
 }
 
 bool SQLiteDatabase::close()
