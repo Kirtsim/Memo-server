@@ -1,5 +1,6 @@
 #pragma once
 #include "db/IDatabase.hpp"
+#include <memory>
 
 class sqlite3;
 

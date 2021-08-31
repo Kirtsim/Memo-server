@@ -3,6 +3,19 @@
 
 namespace memo {
 
+namespace {
+    /// @brief This is a callback function passed to sqlite3_exec(...). It transforms C-like data
+    ///        filtered by the query into C++ equivalent and passes it onto a callback std::function.
+    ///        This function is called for every row that the query returns.
+    /// @param voidCallback parameter containing the callback function. Needs to be type-casted.
+    /// @param columnCount number of columns to be expected in the resulting row.
+    /// @param values row values
+    /// @param columns column names
+    /// @return 0 if the query should continue evaluating or non-0 if it should stop.
+    int onRowReturned(void* voidCallback, int columnCount, char** values, char** columns);
+} // namespace
+
+
 SQLiteDatabase::SQLiteDatabase(const std::string& dbFilePath)
     : dbFilePath_(dbFilePath)
 {
@@ -30,6 +43,32 @@ bool SQLiteDatabase::close()
 
 bool SQLiteDatabase::exec(const std::string& query, const SQLCallback& callback)
 {
+    callback_ = callback;
+    sqlite3_exec(handle_, query.c_str(), onRowReturned, &callback_, nullptr);
     return false;
 }
+
+namespace {
+
+    int onRowReturned(void* voidCallback, int columnCount, char** values, char** columns)
+    {
+        int returnValue = 0;
+        auto callback = voidCallback ? static_cast<SQLCallback*>(voidCallback) : nullptr;
+        if (callback)
+        {
+            std::vector<std::string> rowValues(static_cast<size_t>(columnCount));
+            std::vector<std::string> columnNames(static_cast<size_t>(columnCount));
+            for (size_t colIdx = 0; colIdx < static_cast<size_t>(columnCount); ++colIdx)
+            {
+                rowValues[colIdx] = std::string(values[colIdx]);
+                columnNames[colIdx] = std::string(columns[colIdx]);
+            }
+            bool continueQuery = callback->operator()(rowValues, columnNames);
+            returnValue = static_cast<int>(continueQuery);
+        }
+        return returnValue;
+    }
+
+} // namespace
+
 } // namespace memo
