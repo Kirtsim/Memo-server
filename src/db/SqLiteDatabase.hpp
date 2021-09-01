@@ -6,6 +6,7 @@ class sqlite3;
 
 namespace memo {
 
+/// @brief Implementation of the SQLite database.
 class SQLiteDatabase : public IDatabase
 {
 public:
