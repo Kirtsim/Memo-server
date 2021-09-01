@@ -7,11 +7,13 @@ add_compile_options(-std=c++17 -Wall -Wextra -Wsign-conversion)
 set(memo_proto_lib memo_proto_lib)
 set(exe memo_server)
 set(exe_lib memo_server_lib)
+set(tests_exe memo_server_tests)
 
 set(memo_proto_include_dir ${CMAKE_SOURCE_DIR}/Memo-proto/model)
 
 add_subdirectory(${CMAKE_SOURCE_DIR}/Memo-proto)
 add_subdirectory(${CMAKE_SOURCE_DIR}/src)
+add_subdirectory(${CMAKE_SOURCE_DIR}/tests)
 
 target_link_directories(memo_server PRIVATE /usr/lib/sqlite3)
 IF(UNIX AND NOT APPLE)
