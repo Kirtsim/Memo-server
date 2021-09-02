@@ -40,11 +40,17 @@ target_include_directories(${exe_lib}
         ${src_dir}
         ${memo_proto_include_dir})
 
+target_link_directories(${exe_lib} PUBLIC /usr/lib/sqlite3)
+IF(UNIX AND NOT APPLE)
+    target_link_directories(${exe_lib} PUBLIC /usr/include/)
+ENDIF()
+
 target_link_libraries(${exe_lib}
     PUBLIC
         ${memo_proto_lib}
         ${_REFLECTION}
         ${_GRPC_GRPCPP}
-        ${_PROTOBUF_LIBPROTOBUF})
+        ${_PROTOBUF_LIBPROTOBUF}
+        sqlite3)
 
 target_link_libraries(${exe} PRIVATE ${exe_lib})
