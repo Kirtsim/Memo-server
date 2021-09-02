@@ -27,6 +27,10 @@ public:
     /// @return true if the database was closed successfully, false otherwise.
     virtual bool close() = 0;
 
+    /// @brief Checks if the database is open, i.e. it can be queried.
+    /// @return true if the database is open, false otherwise.
+    virtual bool isOpen() const = 0;
+
     /// @brief Executes a give query and calls the callback function once a result is available.
     ///        In case of a search query, the callback function is called for each row in the
     ///        table returned by the query.

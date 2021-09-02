@@ -18,6 +18,8 @@ public:
 
     bool close() override;
 
+    bool isOpen() const override;
+
     bool exec(const std::string& query, const SQLCallback& callback) override;
 
 private:
@@ -25,7 +27,7 @@ private:
 
     SQLCallback callback_;
 
-    sqlite3* handle_;
+    sqlite3* handle_ = nullptr;
 };
 
 } // namespace memo
