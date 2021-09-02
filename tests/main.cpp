@@ -1,3 +1,4 @@
+#include "db/TestSQLiteDatabase.inl"
 #include <gtest/gtest.h>
 
 int main()
