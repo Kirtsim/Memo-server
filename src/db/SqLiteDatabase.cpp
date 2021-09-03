@@ -23,7 +23,7 @@ SQLiteDatabase::SQLiteDatabase(const std::string& dbFilePath)
 
 SQLiteDatabase::~SQLiteDatabase()
 {
-    sqlite3_close(handle_);
+    SQLiteDatabase::close();
 }
 
 bool SQLiteDatabase::open()
@@ -38,7 +38,13 @@ bool SQLiteDatabase::open()
 
 bool SQLiteDatabase::close()
 {
-    return sqlite3_close(handle_) == SQLITE_OK;
+    if (sqlite3_close(handle_) == SQLITE_OK)
+    {
+        sqlite3_free(handle_);
+        handle_ = nullptr;
+        return true;
+    }
+    return false;
 }
 
 bool SQLiteDatabase::isOpen() const
