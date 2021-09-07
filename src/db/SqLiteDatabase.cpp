@@ -40,7 +40,6 @@ bool SQLiteDatabase::close()
 {
     if (sqlite3_close(handle_) == SQLITE_OK)
     {
-        sqlite3_free(handle_);
         handle_ = nullptr;
         return true;
     }
