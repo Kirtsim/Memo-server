@@ -54,8 +54,8 @@ bool SQLiteDatabase::isOpen() const
 bool SQLiteDatabase::exec(const std::string& query, const SQLCallback& callback)
 {
     callback_ = callback;
-    sqlite3_exec(handle_, query.c_str(), onRowReturned, &callback_, nullptr);
-    return false;
+    auto returnCode = sqlite3_exec(handle_, query.c_str(), onRowReturned, &callback_, nullptr);
+    return returnCode == SQLITE_OK || returnCode == SQLITE_ABORT;
 }
 
 namespace {
