@@ -38,4 +38,51 @@ TEST(TestSQLiteDatabase, test_close_Database_file_should_not_be_deleted)
     std::remove(filePath.c_str());
 }
 
+TEST(TestSQLiteDatabase, test_exec_Perform_create_table_cmd_without_callback_Return_success)
+{
+    const auto filePath = std::filesystem::current_path().string() + "/test.db";
+    std::remove(filePath.c_str());
+    const std::string sqlCommand = "CREATE TABLE IF NOT EXISTS test_table (id INTEGER PRIMARY KEY);";
+
+    SQLiteDatabase database(filePath);
+    database.open();
+    const auto succeeded = database.exec(sqlCommand, nullptr);
+    EXPECT_TRUE(succeeded);
+    EXPECT_TRUE(database.close());
+    std::remove(filePath.c_str());
+}
+
+TEST(TestSQLiteDatabase, test_exec_Perform_create_table_cmd_Return_success)
+{
+    const auto filePath = std::filesystem::current_path().string() + "/test.db";
+    std::remove(filePath.c_str());
+
+    SQLiteDatabase database(filePath);
+    database.open();
+    const bool succeeded = database.exec("CREATE TABLE test (id INTEGER PRIMARY KEY);",  nullptr);
+    EXPECT_TRUE(succeeded);
+    EXPECT_TRUE(database.close());
+    std::remove(filePath.c_str());
+}
+
+TEST(TestSQLiteDatabase, test_exec_Perform_create_table_Check_callback_is_called_once)
+{
+    const auto filePath = std::filesystem::current_path().string() + "/test.db";
+    std::remove(filePath.c_str());
+
+    int callbackCallCount = 0;
+    auto callback = [&](const std::vector<std::string>&/*values*/, const std::vector<std::string>&/*colNames*/) {
+        ++callbackCallCount;
+        return true;
+    };
+
+    SQLiteDatabase database(filePath);
+    database.open();
+    const bool succeeded = database.exec("CREATE TABLE test (id INTEGER PRIMARY KEY);",  callback);
+    EXPECT_TRUE(succeeded);
+    EXPECT_EQ(callbackCallCount, 0);
+    EXPECT_TRUE(database.close());
+    std::remove(filePath.c_str());
+}
+
 } // namespace memo
