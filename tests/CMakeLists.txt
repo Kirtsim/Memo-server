@@ -14,3 +14,5 @@ target_include_directories(${tests_exe}
         ${CMAKE_SOURCE_DIR}/src)
 target_link_directories(${tests_exe} PRIVATE ${googletest_dir}/lib)
 target_link_libraries(${tests_exe} PRIVATE ${exe_lib} gtest)
+
+add_definitions(-DTESTS_DIR="${test_dir}")
