@@ -129,6 +129,24 @@ TEST(TestSQLiteDatabase, test_exec_Perform_INSERT_Callback_shouldnt_be_called_Ex
     std::remove(testDbFilePath().c_str());
 }
 
+TEST(TestSQLiteDatabase, test_exec_Perform_INSERT_with_duplicate_id_Expect_failure)
+{
+    auto database = DatabaseWithEmptyTable();
+    ASSERT_TRUE(InsertRow(database, {1, "Memo1", "MemoDesc1", 11}));
+
+    int callbackCallCount = 0;
+    auto callback = [&](const StringVector&/*values*/, const StringVector&/*colNames*/) {
+        ++callbackCallCount;
+        return false;
+    };
+
+    const bool succeeded = database->exec("INSERT INTO Memo VALUES(1, 'Memo2', 'MemoDesc2', 22345);",  callback);
+    EXPECT_FALSE(succeeded);
+    EXPECT_EQ(callbackCallCount, 0);
+    EXPECT_TRUE(database->close());
+    std::remove(testDbFilePath().c_str());
+}
+
 TEST(TestSQLiteDatabase, test_exec_Perform_SELECT_ALL_Callback_should_be_called_for_each_row_Expect_success)
 {
     auto database = DatabaseWithEmptyTable();
@@ -186,6 +204,27 @@ TEST(TestSQLiteDatabase, test_exec_Perform_DELETE_Callback_shouldnt_be_called_Ex
     std::remove(testDbFilePath().c_str());
 }
 
+TEST(TestSQLiteDatabase, test_exec_Perform_DELETE_on_non_existing_row_Expect_success)
+{
+    auto database = DatabaseWithEmptyTable();
+    int callbackCallCount = 0;
+    auto callback = [&](const StringVector&/*values*/, const StringVector&/*colNames*/) {
+        ++callbackCallCount;
+        return false;
+    };
+    ASSERT_TRUE(InsertRow(database, {1, "Memo1", "MemoDesc1", 11}));
+
+    const bool deleteSucceeded = database->exec("DELETE FROM Memo WHERE id = 10;",  callback);
+    EXPECT_TRUE(deleteSucceeded);
+    EXPECT_EQ(callbackCallCount, 0);
+
+    const bool selectSucceeded = database->exec("SELECT * FROM Memo;",  callback);
+    EXPECT_TRUE(selectSucceeded);
+    EXPECT_EQ(callbackCallCount, 1);
+    EXPECT_TRUE(database->close());
+    std::remove(testDbFilePath().c_str());
+}
+
 TEST(TestSQLiteDatabase, test_exec_Perform_UPDATE_Callback_shouldnt_be_called_Expect_success)
 {
     auto database = DatabaseWithEmptyTable();
@@ -202,11 +241,38 @@ TEST(TestSQLiteDatabase, test_exec_Perform_UPDATE_Callback_shouldnt_be_called_Ex
     EXPECT_TRUE(succeeded);
     EXPECT_EQ(callbackCallCount, 0);
 
+    callbackCallCount = 0;
     const bool selectSucceeded = database->exec("SELECT title FROM Memo WHERE id = 1;",  callback);
     EXPECT_TRUE(selectSucceeded);
     EXPECT_EQ(callbackCallCount, 1);
     ASSERT_EQ(fetchedValues.size(), 1ul);
     EXPECT_EQ(fetchedValues.front(), "NewMemo");
+    EXPECT_TRUE(database->close());
+    std::remove(testDbFilePath().c_str());
+}
+
+TEST(TestSQLiteDatabase, test_exec_Perform_UPDATE_on_data_with_non_existing_id_Expect_success)
+{
+    auto database = DatabaseWithEmptyTable();
+    int callbackCallCount = 0;
+    StringVector fetchedValues;
+    auto callback = [&](const StringVector& values, const StringVector&/*colNames*/) {
+        ++callbackCallCount;
+        fetchedValues = values;
+        return false;
+    };
+    ASSERT_TRUE(InsertRow(database, {1, "Memo1", "MemoDesc1", 11}));
+
+    const bool succeeded = database->exec("UPDATE Memo SET title='NewMemo' WHERE id=10;",  callback);
+    EXPECT_TRUE(succeeded);
+    EXPECT_EQ(callbackCallCount, 0);
+
+    callbackCallCount = 0;
+    const bool selectSucceeded = database->exec("SELECT title FROM Memo WHERE id=1;",  callback);
+    EXPECT_TRUE(selectSucceeded);
+    EXPECT_EQ(callbackCallCount, 1);
+    ASSERT_EQ(fetchedValues.size(), 1ul);
+    EXPECT_EQ(fetchedValues.front(), "Memo1");
     EXPECT_TRUE(database->close());
     std::remove(testDbFilePath().c_str());
 }
