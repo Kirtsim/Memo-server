@@ -1,5 +1,5 @@
 #pragma once
-#include "db/IDatabase.hpp"
+#include "db/ISqlite3Wrapper.hpp"
 #include <memory>
 
 class sqlite3;
@@ -7,12 +7,12 @@ class sqlite3;
 namespace memo {
 
 /// @brief Implementation of the SQLite database.
-class SQLiteDatabase : public IDatabase
+class Sqlite3Wrapper : public ISqlite3Wrapper
 {
 public:
-    explicit SQLiteDatabase(const std::string& dbFilePath);
+    explicit Sqlite3Wrapper(const std::string& dbFilePath);
 
-    ~SQLiteDatabase() override;
+    ~Sqlite3Wrapper() override;
 
     bool open() override;
 

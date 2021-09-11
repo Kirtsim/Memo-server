@@ -15,9 +15,9 @@ namespace {
 
     std::string testDbFilePath();
 
-    std::shared_ptr<SQLiteDatabase> DatabaseWithEmptyTable();
+    std::shared_ptr<Sqlite3Wrapper> DatabaseWithEmptyTable();
 
-    bool InsertRow(const std::shared_ptr<SQLiteDatabase>& database, const Values& values);
+    bool InsertRow(const std::shared_ptr<Sqlite3Wrapper>& database, const Values& values);
 
     StringVector ValuesToStringVector(const Values& values);
 
@@ -25,7 +25,7 @@ namespace {
 
 TEST(TestSQLiteDatabase, test_constructor_Check_database_does_not_automatically_open)
 {
-    SQLiteDatabase database(testDbFilePath());
+    Sqlite3Wrapper database(testDbFilePath());
     EXPECT_FALSE(database.isOpen());
 }
 
@@ -33,7 +33,7 @@ TEST(TestSQLiteDatabase, test_open_Create_new_db_file_when_it_does_not_exist)
 {
     std::remove(testDbFilePath().c_str());
 
-    SQLiteDatabase database(testDbFilePath());
+    Sqlite3Wrapper database(testDbFilePath());
     EXPECT_TRUE(database.open());
     EXPECT_TRUE(database.isOpen());
     EXPECT_TRUE(std::filesystem::exists(testDbFilePath()));
@@ -44,7 +44,7 @@ TEST(TestSQLiteDatabase, test_close_Database_file_should_not_be_deleted)
 {
     std::remove(testDbFilePath().c_str());
 
-    SQLiteDatabase database(testDbFilePath());
+    Sqlite3Wrapper database(testDbFilePath());
     EXPECT_TRUE(database.open());
     EXPECT_TRUE(database.isOpen());
     EXPECT_TRUE(database.close());
@@ -58,7 +58,7 @@ TEST(TestSQLiteDatabase, test_exec_Perform_create_table_cmd_without_callback_Ret
     std::remove(testDbFilePath().c_str());
     const std::string sqlCommand = "CREATE TABLE IF NOT EXISTS test_table (id INTEGER PRIMARY KEY);";
 
-    SQLiteDatabase database(testDbFilePath());
+    Sqlite3Wrapper database(testDbFilePath());
     database.open();
     const auto succeeded = database.exec(sqlCommand, nullptr);
     EXPECT_TRUE(succeeded);
@@ -70,7 +70,7 @@ TEST(TestSQLiteDatabase, test_exec_Perform_create_table_cmd_Return_success)
 {
     std::remove(testDbFilePath().c_str());
 
-    SQLiteDatabase database(testDbFilePath());
+    Sqlite3Wrapper database(testDbFilePath());
     database.open();
     const bool succeeded = database.exec("CREATE TABLE test (id INTEGER PRIMARY KEY);",  nullptr);
     EXPECT_TRUE(succeeded);
@@ -88,7 +88,7 @@ TEST(TestSQLiteDatabase, test_exec_Perform_create_table_Check_callback_is_called
         return false;
     };
 
-    SQLiteDatabase database(testDbFilePath());
+    Sqlite3Wrapper database(testDbFilePath());
     database.open();
     const bool succeeded = database.exec("CREATE TABLE test (id INTEGER PRIMARY KEY);",  callback);
     EXPECT_TRUE(succeeded);
@@ -284,7 +284,7 @@ std::string testDbFilePath()
     return std::filesystem::current_path().string() + "/test.db";
 }
 
-std::shared_ptr<SQLiteDatabase> DatabaseWithEmptyTable()
+std::shared_ptr<Sqlite3Wrapper> DatabaseWithEmptyTable()
 {
     const std::string createTableCmd =
             "CREATE TABLE IF NOT EXISTS Memo("
@@ -293,13 +293,13 @@ std::shared_ptr<SQLiteDatabase> DatabaseWithEmptyTable()
                 "description TEXT,"
                 "timestamp INTEGER NOT NULL);";
     std::remove(testDbFilePath().c_str());
-    auto database = std::make_shared<SQLiteDatabase>(testDbFilePath());
+    auto database = std::make_shared<Sqlite3Wrapper>(testDbFilePath());
     database->open();
     database->exec(createTableCmd, nullptr);
     return database;
 }
 
-bool InsertRow(const std::shared_ptr<SQLiteDatabase>& database, const Values& values)
+bool InsertRow(const std::shared_ptr<Sqlite3Wrapper>& database, const Values& values)
 {
     if (database)
     {

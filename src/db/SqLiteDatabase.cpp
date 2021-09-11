@@ -16,17 +16,17 @@ namespace {
 } // namespace
 
 
-SQLiteDatabase::SQLiteDatabase(const std::string& dbFilePath)
+Sqlite3Wrapper::Sqlite3Wrapper(const std::string& dbFilePath)
     : dbFilePath_(dbFilePath)
 {
 }
 
-SQLiteDatabase::~SQLiteDatabase()
+Sqlite3Wrapper::~Sqlite3Wrapper()
 {
-    SQLiteDatabase::close();
+    Sqlite3Wrapper::close();
 }
 
-bool SQLiteDatabase::open()
+bool Sqlite3Wrapper::open()
 {
     int returnCode = SQLITE_OK;
     if (!handle_)
@@ -38,7 +38,7 @@ bool SQLiteDatabase::open()
     return (returnCode == SQLITE_OK && handle_);
 }
 
-bool SQLiteDatabase::close()
+bool Sqlite3Wrapper::close()
 {
     if (sqlite3_close(handle_) == SQLITE_OK)
     {
@@ -48,12 +48,12 @@ bool SQLiteDatabase::close()
     return false;
 }
 
-bool SQLiteDatabase::isOpen() const
+bool Sqlite3Wrapper::isOpen() const
 {
     return handle_ != nullptr;
 }
 
-bool SQLiteDatabase::exec(const std::string& query, const SQLCallback& callback)
+bool Sqlite3Wrapper::exec(const std::string& query, const SQLCallback& callback)
 {
     callback_ = callback;
     auto returnCode = sqlite3_exec(handle_, query.c_str(), onRowReturned, &callback_, nullptr);

@@ -12,10 +12,10 @@ namespace memo {
 // return - true if the query evaluation should stop, false if it should continue evaluating.
 using SQLCallback = std::function<bool(const std::vector<std::string>&, const std::vector<std::string>&)>;
 
-class IDatabase
+class ISqlite3Wrapper
 {
 public:
-    virtual ~IDatabase() = default;
+    virtual ~ISqlite3Wrapper() = default;
 
     /// @brief Opens the database for writing, brings it to a state where its data can be queried and
     ///        modified.
