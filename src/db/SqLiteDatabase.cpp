@@ -32,6 +32,8 @@ bool SQLiteDatabase::open()
     if (!handle_)
     {
         returnCode = sqlite3_open(dbFilePath_.c_str(), &handle_);
+        if (returnCode != SQLITE_OK)
+            close();
     }
     return (returnCode == SQLITE_OK && handle_);
 }
