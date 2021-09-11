@@ -1,5 +1,5 @@
 #pragma once
-#include "db/SqLiteDatabase.hpp"
+#include "db/Sqlite3Wrapper.hpp"
 #include <memory>
 #include <sstream>
 #include <filesystem>

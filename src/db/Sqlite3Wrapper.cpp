@@ -1,4 +1,4 @@
-#include "db/SqLiteDatabase.hpp"
+#include "db/Sqlite3Wrapper.hpp"
 #include <sqlite3.h>
 
 namespace memo {
