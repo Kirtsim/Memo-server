@@ -17,7 +17,7 @@ target_sources(${exe_lib}
         ${src_dir}/server/process/AddTagProcess.cpp
         ${src_dir}/server/Server.cpp
         ${src_dir}/server/Resources.cpp
-        ${src_dir}/db/SQLiteDatabase.cpp
+        ${src_dir}/db/Sqlite3Wrapper.cpp
     INTERFACE
         ${src_dir}/logger/logger.hpp
         ${src_dir}/server/service/IService.hpp
@@ -33,7 +33,8 @@ target_sources(${exe_lib}
         ${src_dir}/server/Server.hpp
         ${src_dir}/server/Resources.hpp
         ${src_dir}/db/IDatabase.hpp
-        ${src_dir}/db/SQLiteDatabase.hpp)
+        ${src_dir}/db/ISqlite3Wrapper.hpp
+        ${src_dir}/db/Sqlite3Wrapper.hpp)
 
 target_include_directories(${exe_lib}
     PUBLIC
