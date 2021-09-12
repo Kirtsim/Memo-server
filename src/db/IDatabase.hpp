@@ -1,5 +1,6 @@
 #pragma once
 #include "model/ModelDefs.hpp"
+#include <string>
 #include <optional>
 #include <vector>
 
