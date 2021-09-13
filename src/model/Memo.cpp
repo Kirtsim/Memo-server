@@ -54,7 +54,7 @@ void Memo::setTagIds(const std::vector<unsigned long>& tagIds)
 
 void Memo::addTagId(unsigned long tagId)
 {
-    tagIds_.emplace_back(tag);
+    tagIds_.emplace_back(tagId);
 }
 
 } // namespace memo::model
