@@ -23,13 +23,13 @@ namespace {
 
 } // namespace
 
-TEST(TestSQLiteDatabase, test_constructor_Check_database_does_not_automatically_open)
+TEST(TestSqlite3Wrapper, test_constructor_Check_database_does_not_automatically_open)
 {
     Sqlite3Wrapper database(testDbFilePath());
     EXPECT_FALSE(database.isOpen());
 }
 
-TEST(TestSQLiteDatabase, test_open_Create_new_db_file_when_it_does_not_exist)
+TEST(TestSqlite3Wrapper, test_open_Create_new_db_file_when_it_does_not_exist)
 {
     std::remove(testDbFilePath().c_str());
 
@@ -40,7 +40,7 @@ TEST(TestSQLiteDatabase, test_open_Create_new_db_file_when_it_does_not_exist)
     std::remove(testDbFilePath().c_str());
 }
 
-TEST(TestSQLiteDatabase, test_close_Database_file_should_not_be_deleted)
+TEST(TestSqlite3Wrapper, test_close_Database_file_should_not_be_deleted)
 {
     std::remove(testDbFilePath().c_str());
 
@@ -53,7 +53,7 @@ TEST(TestSQLiteDatabase, test_close_Database_file_should_not_be_deleted)
     std::remove(testDbFilePath().c_str());
 }
 
-TEST(TestSQLiteDatabase, test_exec_Perform_create_table_cmd_without_callback_Return_success)
+TEST(TestSqlite3Wrapper, test_exec_Perform_create_table_cmd_without_callback_Return_success)
 {
     std::remove(testDbFilePath().c_str());
     const std::string sqlCommand = "CREATE TABLE IF NOT EXISTS test_table (id INTEGER PRIMARY KEY);";
@@ -66,7 +66,7 @@ TEST(TestSQLiteDatabase, test_exec_Perform_create_table_cmd_without_callback_Ret
     std::remove(testDbFilePath().c_str());
 }
 
-TEST(TestSQLiteDatabase, test_exec_Perform_create_table_cmd_Return_success)
+TEST(TestSqlite3Wrapper, test_exec_Perform_create_table_cmd_Return_success)
 {
     std::remove(testDbFilePath().c_str());
 
@@ -78,7 +78,7 @@ TEST(TestSQLiteDatabase, test_exec_Perform_create_table_cmd_Return_success)
     std::remove(testDbFilePath().c_str());
 }
 
-TEST(TestSQLiteDatabase, test_exec_Perform_create_table_Check_callback_is_called_once)
+TEST(TestSqlite3Wrapper, test_exec_Perform_create_table_Check_callback_is_called_once)
 {
     std::remove(testDbFilePath().c_str());
 
@@ -97,7 +97,7 @@ TEST(TestSQLiteDatabase, test_exec_Perform_create_table_Check_callback_is_called
     std::remove(testDbFilePath().c_str());
 }
 
-TEST(TestSQLiteDatabase, test_exec_Perform_SELECT_ALL_on_empty_table_Callback_shouldnt_be_called_Expect_success)
+TEST(TestSqlite3Wrapper, test_exec_Perform_SELECT_ALL_on_empty_table_Callback_shouldnt_be_called_Expect_success)
 {
     auto database = DatabaseWithEmptyTable();
     int callbackCallCount = 0;
@@ -113,7 +113,7 @@ TEST(TestSQLiteDatabase, test_exec_Perform_SELECT_ALL_on_empty_table_Callback_sh
     std::remove(testDbFilePath().c_str());
 }
 
-TEST(TestSQLiteDatabase, test_exec_Perform_INSERT_Callback_shouldnt_be_called_Expect_success)
+TEST(TestSqlite3Wrapper, test_exec_Perform_INSERT_Callback_shouldnt_be_called_Expect_success)
 {
     auto database = DatabaseWithEmptyTable();
     int callbackCallCount = 0;
@@ -129,7 +129,7 @@ TEST(TestSQLiteDatabase, test_exec_Perform_INSERT_Callback_shouldnt_be_called_Ex
     std::remove(testDbFilePath().c_str());
 }
 
-TEST(TestSQLiteDatabase, test_exec_Perform_INSERT_with_duplicate_id_Expect_failure)
+TEST(TestSqlite3Wrapper, test_exec_Perform_INSERT_with_duplicate_id_Expect_failure)
 {
     auto database = DatabaseWithEmptyTable();
     ASSERT_TRUE(InsertRow(database, {1, "Memo1", "MemoDesc1", 11}));
@@ -147,7 +147,7 @@ TEST(TestSQLiteDatabase, test_exec_Perform_INSERT_with_duplicate_id_Expect_failu
     std::remove(testDbFilePath().c_str());
 }
 
-TEST(TestSQLiteDatabase, test_exec_Perform_SELECT_ALL_Callback_should_be_called_for_each_row_Expect_success)
+TEST(TestSqlite3Wrapper, test_exec_Perform_SELECT_ALL_Callback_should_be_called_for_each_row_Expect_success)
 {
     auto database = DatabaseWithEmptyTable();
     Values row1 {1, "Memo1", "MemoDesc1", 11};
@@ -181,7 +181,7 @@ TEST(TestSQLiteDatabase, test_exec_Perform_SELECT_ALL_Callback_should_be_called_
     std::remove(testDbFilePath().c_str());
 }
 
-TEST(TestSQLiteDatabase, test_exec_Perform_DELETE_Callback_shouldnt_be_called_Expect_success)
+TEST(TestSqlite3Wrapper, test_exec_Perform_DELETE_Callback_shouldnt_be_called_Expect_success)
 {
     auto database = DatabaseWithEmptyTable();
     int callbackCallCount = 0;
@@ -204,7 +204,7 @@ TEST(TestSQLiteDatabase, test_exec_Perform_DELETE_Callback_shouldnt_be_called_Ex
     std::remove(testDbFilePath().c_str());
 }
 
-TEST(TestSQLiteDatabase, test_exec_Perform_DELETE_on_non_existing_row_Expect_success)
+TEST(TestSqlite3Wrapper, test_exec_Perform_DELETE_on_non_existing_row_Expect_success)
 {
     auto database = DatabaseWithEmptyTable();
     int callbackCallCount = 0;
@@ -225,7 +225,7 @@ TEST(TestSQLiteDatabase, test_exec_Perform_DELETE_on_non_existing_row_Expect_suc
     std::remove(testDbFilePath().c_str());
 }
 
-TEST(TestSQLiteDatabase, test_exec_Perform_UPDATE_Callback_shouldnt_be_called_Expect_success)
+TEST(TestSqlite3Wrapper, test_exec_Perform_UPDATE_Callback_shouldnt_be_called_Expect_success)
 {
     auto database = DatabaseWithEmptyTable();
     int callbackCallCount = 0;
@@ -251,7 +251,7 @@ TEST(TestSQLiteDatabase, test_exec_Perform_UPDATE_Callback_shouldnt_be_called_Ex
     std::remove(testDbFilePath().c_str());
 }
 
-TEST(TestSQLiteDatabase, test_exec_Perform_UPDATE_on_data_with_non_existing_id_Expect_success)
+TEST(TestSqlite3Wrapper, test_exec_Perform_UPDATE_on_data_with_non_existing_id_Expect_success)
 {
     auto database = DatabaseWithEmptyTable();
     int callbackCallCount = 0;

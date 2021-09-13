@@ -1,4 +1,4 @@
-#include "db/TestSQLiteDatabase.inl"
+#include "db/TestSqlite3Wrapper.inl"
 #include <gtest/gtest.h>
 
 int main()

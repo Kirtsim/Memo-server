@@ -4,7 +4,7 @@ set(test_dir ${CMAKE_CURRENT_LIST_DIR})
 target_sources(${tests_exe}
         PRIVATE
         ${test_dir}/main.cpp
-        ${test_dir}/db/TestSQLiteDatabase.inl
+        ${test_dir}/db/TestSqlite3Wrapper.inl
         )
 
 set(googletest_dir ${CMAKE_SOURCE_DIR}/3rdparty/googletest)
