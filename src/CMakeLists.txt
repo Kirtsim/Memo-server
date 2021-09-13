@@ -40,6 +40,7 @@ target_sources(${exe_lib}
         ${src_dir}/db/ISqlite3Wrapper.hpp
         ${src_dir}/db/Sqlite3Wrapper.hpp
         ${src_dir}/db/Sqlite3Database.hpp
+        ${src_dir}/db/Sqlite3Schema.hpp
         ${src_dir}/model/ModelDefs.hpp
         ${src_dir}/model/Memo.hpp
         ${src_dir}/model/Tag.hpp
