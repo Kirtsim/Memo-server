@@ -1,5 +1,6 @@
 #pragma once
 #include "db/Sqlite3Wrapper.hpp"
+#include "Utils.hpp"
 #include <memory>
 #include <sstream>
 #include <filesystem>
@@ -281,7 +282,7 @@ namespace {
 
 std::string testDbFilePath()
 {
-    return std::filesystem::current_path().string() + "/test.db";
+    return test::TestFilePath("temp.db");
 }
 
 std::shared_ptr<Sqlite3Wrapper> DatabaseWithEmptyTable()
