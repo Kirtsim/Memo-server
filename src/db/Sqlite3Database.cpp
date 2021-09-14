@@ -1,10 +1,8 @@
 #include "db/Sqlite3Database.hpp"
 #include "db/ISqlite3Wrapper.hpp"
 #include "db/Sqlite3Functions.hpp"
-#include "db/Sqlite3Schema.hpp"
 #include "model/Memo.hpp"
 #include "model/Tag.hpp"
-#include <sstream>
 #include <set>
 
 #include <logger/logger.hpp>
