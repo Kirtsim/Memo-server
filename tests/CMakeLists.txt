@@ -10,6 +10,7 @@ target_sources(${tests_exe}
 set(googletest_dir ${CMAKE_SOURCE_DIR}/3rdparty/googletest)
 target_include_directories(${tests_exe}
         PRIVATE
+        ${test_dir}
         ${googletest_dir}/include
         ${CMAKE_SOURCE_DIR}/src)
 target_link_directories(${tests_exe} PRIVATE ${googletest_dir}/lib)
