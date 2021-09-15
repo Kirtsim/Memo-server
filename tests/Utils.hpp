@@ -10,6 +10,11 @@ namespace memo::test {
 /// @return the absolute file path to the test file in the test-files directory.
 std::string TestFilePath(const std::string& relativeFilePath);
 
+/// @brief Removes the file specified by the file path.
+/// @param filePath path to the file to be removed.
+/// @return true if file was removed, false otherwise
+bool RemoveFile(const std::string& filePath);
+
 } // namespace memo::test
 
 

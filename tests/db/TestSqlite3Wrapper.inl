@@ -32,18 +32,18 @@ TEST(TestSqlite3Wrapper, test_constructor_Check_database_does_not_automatically_
 
 TEST(TestSqlite3Wrapper, test_open_Create_new_db_file_when_it_does_not_exist)
 {
-    std::remove(testDbFilePath().c_str());
+    test::RemoveFile(testDbFilePath());
 
     Sqlite3Wrapper database(testDbFilePath());
     EXPECT_TRUE(database.open());
     EXPECT_TRUE(database.isOpen());
     EXPECT_TRUE(std::filesystem::exists(testDbFilePath()));
-    std::remove(testDbFilePath().c_str());
+    test::RemoveFile(testDbFilePath());
 }
 
 TEST(TestSqlite3Wrapper, test_close_Database_file_should_not_be_deleted)
 {
-    std::remove(testDbFilePath().c_str());
+    test::RemoveFile(testDbFilePath());
 
     Sqlite3Wrapper database(testDbFilePath());
     EXPECT_TRUE(database.open());
@@ -51,12 +51,12 @@ TEST(TestSqlite3Wrapper, test_close_Database_file_should_not_be_deleted)
     EXPECT_TRUE(database.close());
     EXPECT_FALSE(database.isOpen());
     EXPECT_TRUE(std::filesystem::exists(testDbFilePath()));
-    std::remove(testDbFilePath().c_str());
+    test::RemoveFile(testDbFilePath());
 }
 
 TEST(TestSqlite3Wrapper, test_exec_Perform_create_table_cmd_without_callback_Return_success)
 {
-    std::remove(testDbFilePath().c_str());
+    test::RemoveFile(testDbFilePath());
     const std::string sqlCommand = "CREATE TABLE IF NOT EXISTS test_table (id INTEGER PRIMARY KEY);";
 
     Sqlite3Wrapper database(testDbFilePath());
@@ -64,24 +64,24 @@ TEST(TestSqlite3Wrapper, test_exec_Perform_create_table_cmd_without_callback_Ret
     const auto succeeded = database.exec(sqlCommand, nullptr);
     EXPECT_TRUE(succeeded);
     EXPECT_TRUE(database.close());
-    std::remove(testDbFilePath().c_str());
+    test::RemoveFile(testDbFilePath());
 }
 
 TEST(TestSqlite3Wrapper, test_exec_Perform_create_table_cmd_Return_success)
 {
-    std::remove(testDbFilePath().c_str());
+    test::RemoveFile(testDbFilePath());
 
     Sqlite3Wrapper database(testDbFilePath());
     database.open();
     const bool succeeded = database.exec("CREATE TABLE test (id INTEGER PRIMARY KEY);",  nullptr);
     EXPECT_TRUE(succeeded);
     EXPECT_TRUE(database.close());
-    std::remove(testDbFilePath().c_str());
+    test::RemoveFile(testDbFilePath());
 }
 
 TEST(TestSqlite3Wrapper, test_exec_Perform_create_table_Check_callback_is_called_once)
 {
-    std::remove(testDbFilePath().c_str());
+    test::RemoveFile(testDbFilePath());
 
     int callbackCallCount = 0;
     auto callback = [&](const StringVector&/*values*/, const StringVector&/*colNames*/) {
@@ -95,7 +95,7 @@ TEST(TestSqlite3Wrapper, test_exec_Perform_create_table_Check_callback_is_called
     EXPECT_TRUE(succeeded);
     EXPECT_EQ(callbackCallCount, 0);
     EXPECT_TRUE(database.close());
-    std::remove(testDbFilePath().c_str());
+    test::RemoveFile(testDbFilePath());
 }
 
 TEST(TestSqlite3Wrapper, test_exec_Perform_SELECT_ALL_on_empty_table_Callback_shouldnt_be_called_Expect_success)
@@ -111,7 +111,7 @@ TEST(TestSqlite3Wrapper, test_exec_Perform_SELECT_ALL_on_empty_table_Callback_sh
     EXPECT_TRUE(succeeded);
     EXPECT_EQ(callbackCallCount, 0);
     EXPECT_TRUE(database->close());
-    std::remove(testDbFilePath().c_str());
+    test::RemoveFile(testDbFilePath());
 }
 
 TEST(TestSqlite3Wrapper, test_exec_Perform_INSERT_Callback_shouldnt_be_called_Expect_success)
@@ -127,7 +127,7 @@ TEST(TestSqlite3Wrapper, test_exec_Perform_INSERT_Callback_shouldnt_be_called_Ex
     EXPECT_TRUE(succeeded);
     EXPECT_EQ(callbackCallCount, 0);
     EXPECT_TRUE(database->close());
-    std::remove(testDbFilePath().c_str());
+    test::RemoveFile(testDbFilePath());
 }
 
 TEST(TestSqlite3Wrapper, test_exec_Perform_INSERT_with_duplicate_id_Expect_failure)
@@ -145,7 +145,7 @@ TEST(TestSqlite3Wrapper, test_exec_Perform_INSERT_with_duplicate_id_Expect_failu
     EXPECT_FALSE(succeeded);
     EXPECT_EQ(callbackCallCount, 0);
     EXPECT_TRUE(database->close());
-    std::remove(testDbFilePath().c_str());
+    test::RemoveFile(testDbFilePath());
 }
 
 TEST(TestSqlite3Wrapper, test_exec_Perform_SELECT_ALL_Callback_should_be_called_for_each_row_Expect_success)
@@ -179,7 +179,7 @@ TEST(TestSqlite3Wrapper, test_exec_Perform_SELECT_ALL_Callback_should_be_called_
         EXPECT_EQ(actualValues, expectedValues);
     }
     EXPECT_TRUE(database->close());
-    std::remove(testDbFilePath().c_str());
+    test::RemoveFile(testDbFilePath());
 }
 
 TEST(TestSqlite3Wrapper, test_exec_Perform_DELETE_Callback_shouldnt_be_called_Expect_success)
@@ -202,7 +202,7 @@ TEST(TestSqlite3Wrapper, test_exec_Perform_DELETE_Callback_shouldnt_be_called_Ex
     EXPECT_TRUE(selectSucceeded);
     EXPECT_EQ(callbackCallCount, 0);
     EXPECT_TRUE(database->close());
-    std::remove(testDbFilePath().c_str());
+    test::RemoveFile(testDbFilePath());
 }
 
 TEST(TestSqlite3Wrapper, test_exec_Perform_DELETE_on_non_existing_row_Expect_success)
@@ -223,7 +223,7 @@ TEST(TestSqlite3Wrapper, test_exec_Perform_DELETE_on_non_existing_row_Expect_suc
     EXPECT_TRUE(selectSucceeded);
     EXPECT_EQ(callbackCallCount, 1);
     EXPECT_TRUE(database->close());
-    std::remove(testDbFilePath().c_str());
+    test::RemoveFile(testDbFilePath());
 }
 
 TEST(TestSqlite3Wrapper, test_exec_Perform_UPDATE_Callback_shouldnt_be_called_Expect_success)
@@ -249,7 +249,7 @@ TEST(TestSqlite3Wrapper, test_exec_Perform_UPDATE_Callback_shouldnt_be_called_Ex
     ASSERT_EQ(fetchedValues.size(), 1ul);
     EXPECT_EQ(fetchedValues.front(), "NewMemo");
     EXPECT_TRUE(database->close());
-    std::remove(testDbFilePath().c_str());
+    test::RemoveFile(testDbFilePath());
 }
 
 TEST(TestSqlite3Wrapper, test_exec_Perform_UPDATE_on_data_with_non_existing_id_Expect_success)
@@ -275,7 +275,7 @@ TEST(TestSqlite3Wrapper, test_exec_Perform_UPDATE_on_data_with_non_existing_id_E
     ASSERT_EQ(fetchedValues.size(), 1ul);
     EXPECT_EQ(fetchedValues.front(), "Memo1");
     EXPECT_TRUE(database->close());
-    std::remove(testDbFilePath().c_str());
+    test::RemoveFile(testDbFilePath());
 }
 
 namespace {
@@ -293,7 +293,7 @@ std::shared_ptr<Sqlite3Wrapper> DatabaseWithEmptyTable()
                 "title TEXT NOT NULL,"
                 "description TEXT,"
                 "timestamp INTEGER NOT NULL);";
-    std::remove(testDbFilePath().c_str());
+    test::RemoveFile(testDbFilePath());
     auto database = std::make_shared<Sqlite3Wrapper>(testDbFilePath());
     database->open();
     database->exec(createTableCmd, nullptr);
