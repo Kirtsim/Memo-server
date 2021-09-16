@@ -10,6 +10,8 @@ struct Color
     int green = 0;
     int blue = 0;
 
+    Color() = default;
+
     Color(int red, int green, int blue);
 
     bool operator==(const Color& other) const;
