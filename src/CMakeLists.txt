@@ -20,6 +20,7 @@ target_sources(${exe_lib}
         ${src_dir}/db/Sqlite3Wrapper.cpp
         ${src_dir}/db/Sqlite3Database.cpp
         ${src_dir}/db/Sqlite3Functions.cpp
+        ${src_dir}/db/Tools.cpp
         ${src_dir}/model/Memo.cpp
         ${src_dir}/model/Tag.cpp
         ${src_dir}/model/Color.cpp
@@ -43,6 +44,7 @@ target_sources(${exe_lib}
         ${src_dir}/db/Sqlite3Database.hpp
         ${src_dir}/db/Sqlite3Functions.hpp
         ${src_dir}/db/Sqlite3Schema.hpp
+        ${src_dir}/db/Tools.hpp
         ${src_dir}/model/ModelDefs.hpp
         ${src_dir}/model/Memo.hpp
         ${src_dir}/model/Tag.hpp
