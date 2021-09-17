@@ -21,4 +21,10 @@ bool Color::operator!=(const Color& other) const
     return !(*this == other);
 }
 
+std::ostream& operator<<(std::ostream& stream, const Color& color)
+{
+    stream << "Color {" << color.red << ", " << color.green << ", " << color.blue << "}";
+    return stream;
+}
+
 } // namespace memo::model

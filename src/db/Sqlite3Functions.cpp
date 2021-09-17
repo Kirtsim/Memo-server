@@ -1,18 +1,11 @@
 #include "db/Sqlite3Functions.hpp"
 #include "db/ISqlite3Wrapper.hpp"
 #include "db/Sqlite3Schema.hpp"
+#include "db/Tools.hpp"
 #include "model/Memo.hpp"
 #include <sstream>
 
 namespace memo {
-
-namespace {
-
-int ColorToInt(const model::Color& color);
-
-model::Color IntToColor(int numericColor);
-
-} // namespace
 
 bool UpdateMemoTable(const model::Memo& memo, ISqlite3Wrapper& sqlite3)
 {
@@ -34,7 +27,7 @@ bool UpdateTagTable(const model::Tag& tag, ISqlite3Wrapper& sqlite3)
     std::stringstream updateCmd;
     updateCmd << "UPDATE " << TagTable::kName
               << " SET " << att::kName << "=" << tag.name() << ", "
-                         << att::kColor << "=" << ColorToInt(tag.color()) << ", "
+                         << att::kColor << "=" << tools::ColorToInt(tag.color()) << ", "
                          << att::kTimestamp << "=" << tag.timestamp()
               << " WHERE " << att::kId << "=" << tag.id() << ";";
 
@@ -47,7 +40,7 @@ bool SelectMemoTagIds(const model::Memo& memo, std::vector<unsigned long>& tagId
     namespace att = TaggedTable::att;
     std::stringstream selectCmd;
     selectCmd << "SELECT " << att::kTagId << " FROM " << TaggedTable::kName
-    << " WHERE " << att::kMemoId << "=" << memo.id() << ";";
+              << " WHERE " << att::kMemoId << "=" << memo.id() << ";";
     auto selectTagIdsCallback = [&tagIds](const std::vector<std::string>& id, const std::vector<std::string>&)
     {
         tagIds.emplace_back(std::stoul(id.front()));
@@ -87,19 +80,4 @@ bool DeleteMemoTagIds(const model::Memo& memo, const std::vector<unsigned long>&
     return sqlite3.exec(deleteCmd.str(), nullptr);
 }
 
-namespace {
-
-int ColorToInt(const model::Color& color)
-{
-    // TODO:  implement
-    return 0;
-}
-
-model::Color IntToColor(int numericColor)
-{
-    // TODO: implement
-    return { 0, 0, 0 };
-}
-
-} // namespace
 } // namespace memo

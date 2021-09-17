@@ -1,4 +1,5 @@
 #pragma once
+#include <sstream>
 
 namespace memo::model {
 
@@ -19,5 +20,6 @@ struct Color
     bool operator!=(const Color& other) const;
 };
 
+std::ostream& operator<<(std::ostream& stream, const Color& color);
 
 } // namespace memo::model
