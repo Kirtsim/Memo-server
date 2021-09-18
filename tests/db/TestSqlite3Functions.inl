@@ -6,7 +6,7 @@
 #include "db/Sqlite3TestHelperFunctions.hpp"
 #include "model/Memo.hpp"
 #include "model/Tag.hpp"
-#include "Utils.hpp"
+#include "TestingUtils.hpp"
 #include <gtest/gtest.h>
 #include <sstream>
 

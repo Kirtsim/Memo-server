@@ -4,7 +4,7 @@ set(test_dir ${CMAKE_CURRENT_LIST_DIR})
 target_sources(${tests_exe}
         PRIVATE
         ${test_dir}/main.cpp
-        ${test_dir}/Utils.cpp
+        ${test_dir}/TestingUtils.cpp
         ${test_dir}/db/Sqlite3TestHelperFunctions.cpp
         ${test_dir}/db/TestSqlite3Wrapper.inl
         ${test_dir}/db/TestSqlite3Functions.inl

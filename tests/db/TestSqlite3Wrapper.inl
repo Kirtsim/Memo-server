@@ -1,7 +1,7 @@
 #pragma once
 #include "db/Sqlite3Wrapper.hpp"
 #include "db/Sqlite3TestHelperFunctions.hpp"
-#include "Utils.hpp"
+#include "TestingUtils.hpp"
 #include <memory>
 #include <sstream>
 #include <filesystem>
