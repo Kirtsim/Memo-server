@@ -6,6 +6,7 @@ target_sources(${tests_exe}
         ${test_dir}/main.cpp
         ${test_dir}/Utils.cpp
         ${test_dir}/db/TestSqlite3Wrapper.inl
+        ${test_dir}/db/TestSqlite3Functions.inl
         ${test_dir}/db/TestTools.inl
         )
 

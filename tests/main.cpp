@@ -1,4 +1,6 @@
 #include "db/TestSqlite3Wrapper.inl"
+#include "db/TestSqlite3Functions.inl"
+#include "db/TestTools.inl"
 #include <gtest/gtest.h>
 
 int main()

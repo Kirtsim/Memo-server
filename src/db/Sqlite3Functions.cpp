@@ -12,11 +12,10 @@ bool UpdateMemoTable(const model::Memo& memo, ISqlite3Wrapper& sqlite3)
     namespace att = MemoTable::att;
     std::stringstream memoCmd;
     memoCmd << "UPDATE " << MemoTable::kName
-    << " SET " << att::kTitle << "=" << memo.title() << ", "
-               << att::kDescription << "=" << memo.description() << ", "
+    << " SET " << att::kTitle << "='" << memo.title() << "', "
+               << att::kDescription << "='" << memo.description() << "', "
                << att::kTimestamp   << "=" << memo.timestamp()
     << " WHERE " << att::kId << "=" << memo.id() << ";";
-
     return sqlite3.exec(memoCmd.str(), nullptr);
 }
 
@@ -26,7 +25,7 @@ bool UpdateTagTable(const model::Tag& tag, ISqlite3Wrapper& sqlite3)
 
     std::stringstream updateCmd;
     updateCmd << "UPDATE " << TagTable::kName
-              << " SET " << att::kName << "=" << tag.name() << ", "
+              << " SET " << att::kName << "='" << tag.name() << "', "
                          << att::kColor << "=" << tools::ColorToInt(tag.color()) << ", "
                          << att::kTimestamp << "=" << tag.timestamp()
               << " WHERE " << att::kId << "=" << tag.id() << ";";
@@ -72,7 +71,7 @@ bool DeleteMemoTagIds(const model::Memo& memo, const std::vector<unsigned long>&
 
     std::stringstream deleteCmd;
     deleteCmd << "DELETE FROM " << TaggedTable::kName
-              << "WHERE " << att::kMemoId << "=" << memo.id() << " AND " << att::kTagId << " IN (" << tagIds.front();
+              << " WHERE " << att::kMemoId << "=" << memo.id() << " AND " << att::kTagId << " IN (" << tagIds.front();
     for (auto i = 1ul; i < tagIds.size(); ++i)
         deleteCmd << "," << tagIds[i];
     deleteCmd << ");";
