@@ -1,5 +1,6 @@
 #pragma once
 #include "db/Sqlite3Wrapper.hpp"
+#include "db/Sqlite3TestHelperFunctions.hpp"
 #include "Utils.hpp"
 #include <memory>
 #include <sstream>
@@ -12,15 +13,11 @@ namespace memo {
 using StringVector = std::vector<std::string>;
 
 namespace {
-    struct Values { int id; std::string title; std::string description; long timestamp; };
-
     std::string testDbFilePath();
 
     std::shared_ptr<Sqlite3Wrapper> DatabaseWithEmptyTable();
 
-    bool InsertRow(const std::shared_ptr<Sqlite3Wrapper>& database, const Values& values);
-
-    StringVector ValuesToStringVector(const Values& values);
+    StringVector ValuesToStringVector(const test::MemoValues& values);
 
 } // namespace
 
@@ -133,7 +130,7 @@ TEST(TestSqlite3Wrapper, test_exec_Perform_INSERT_Callback_shouldnt_be_called_Ex
 TEST(TestSqlite3Wrapper, test_exec_Perform_INSERT_with_duplicate_id_Expect_failure)
 {
     auto database = DatabaseWithEmptyTable();
-    ASSERT_TRUE(InsertRow(database, {1, "Memo1", "MemoDesc1", 11}));
+    ASSERT_TRUE(test::InsertMemoRow(*database, {1, "Memo1", "MemoDesc1", 11}));
 
     int callbackCallCount = 0;
     auto callback = [&](const StringVector&/*values*/, const StringVector&/*colNames*/) {
@@ -151,12 +148,12 @@ TEST(TestSqlite3Wrapper, test_exec_Perform_INSERT_with_duplicate_id_Expect_failu
 TEST(TestSqlite3Wrapper, test_exec_Perform_SELECT_ALL_Callback_should_be_called_for_each_row_Expect_success)
 {
     auto database = DatabaseWithEmptyTable();
-    Values row1 {1, "Memo1", "MemoDesc1", 11};
-    Values row2 {2, "Memo2", "MemoDesc2", 22};
-    Values row3 {3, "Memo3", "MemoDesc3", 33};
-    ASSERT_TRUE(InsertRow(database, row1));
-    ASSERT_TRUE(InsertRow(database, row2));
-    ASSERT_TRUE(InsertRow(database, row3));
+    test::MemoValues row1 {1, "Memo1", "MemoDesc1", 11};
+    test::MemoValues row2 {2, "Memo2", "MemoDesc2", 22};
+    test::MemoValues row3 {3, "Memo3", "MemoDesc3", 33};
+    ASSERT_TRUE(test::InsertMemoRow(*database, row1));
+    ASSERT_TRUE(test::InsertMemoRow(*database, row2));
+    ASSERT_TRUE(test::InsertMemoRow(*database, row3));
 
     std::vector<StringVector> expectedValueVectors {
         ValuesToStringVector(row1),
@@ -190,9 +187,9 @@ TEST(TestSqlite3Wrapper, test_exec_Perform_DELETE_Callback_shouldnt_be_called_Ex
         ++callbackCallCount;
         return false;
     };
-    ASSERT_TRUE(InsertRow(database, {1, "Memo1", "MemoDesc1", 11}));
-    ASSERT_TRUE(InsertRow(database, {2, "Memo2", "MemoDesc2", 22}));
-    ASSERT_TRUE(InsertRow(database, {3, "Memo3", "MemoDesc3", 33}));
+    ASSERT_TRUE(test::InsertMemoRow(*database, {1, "Memo1", "MemoDesc1", 11}));
+    ASSERT_TRUE(test::InsertMemoRow(*database, {2, "Memo2", "MemoDesc2", 22}));
+    ASSERT_TRUE(test::InsertMemoRow(*database, {3, "Memo3", "MemoDesc3", 33}));
 
     const bool deleteSucceeded = database->exec("DELETE FROM Memo WHERE id IN (1, 2, 3);",  callback);
     EXPECT_TRUE(deleteSucceeded);
@@ -213,7 +210,7 @@ TEST(TestSqlite3Wrapper, test_exec_Perform_DELETE_on_non_existing_row_Expect_suc
         ++callbackCallCount;
         return false;
     };
-    ASSERT_TRUE(InsertRow(database, {1, "Memo1", "MemoDesc1", 11}));
+    ASSERT_TRUE(test::InsertMemoRow(*database, {1, "Memo1", "MemoDesc1", 11}));
 
     const bool deleteSucceeded = database->exec("DELETE FROM Memo WHERE id = 10;",  callback);
     EXPECT_TRUE(deleteSucceeded);
@@ -236,7 +233,7 @@ TEST(TestSqlite3Wrapper, test_exec_Perform_UPDATE_Callback_shouldnt_be_called_Ex
         fetchedValues = values;
         return false;
     };
-    ASSERT_TRUE(InsertRow(database, {1, "Memo1", "MemoDesc1", 11}));
+    ASSERT_TRUE(test::InsertMemoRow(*database, {1, "Memo1", "MemoDesc1", 11}));
 
     const bool succeeded = database->exec("UPDATE Memo SET title='NewMemo' WHERE id = 1;",  callback);
     EXPECT_TRUE(succeeded);
@@ -262,7 +259,7 @@ TEST(TestSqlite3Wrapper, test_exec_Perform_UPDATE_on_data_with_non_existing_id_E
         fetchedValues = values;
         return false;
     };
-    ASSERT_TRUE(InsertRow(database, {1, "Memo1", "MemoDesc1", 11}));
+    ASSERT_TRUE(test::InsertMemoRow(*database, {1, "Memo1", "MemoDesc1", 11}));
 
     const bool succeeded = database->exec("UPDATE Memo SET title='NewMemo' WHERE id=10;",  callback);
     EXPECT_TRUE(succeeded);
@@ -300,20 +297,8 @@ std::shared_ptr<Sqlite3Wrapper> DatabaseWithEmptyTable()
     return database;
 }
 
-bool InsertRow(const std::shared_ptr<Sqlite3Wrapper>& database, const Values& values)
-{
-    if (database)
-    {
-        std::stringstream stream;
-        stream << "INSERT INTO Memo (id, title, description, timestamp) "
-               << "VALUES (" << values.id << ", '" << values.title << "', '"
-               << values.description << "', " << values.timestamp << ");";
-        return database->exec(stream.str(), nullptr);
-    }
-    return false;
-}
 
-StringVector ValuesToStringVector(const Values& values)
+StringVector ValuesToStringVector(const test::MemoValues& values)
 {
     return {
         std::to_string(values.id),
