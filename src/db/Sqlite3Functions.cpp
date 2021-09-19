@@ -34,12 +34,12 @@ bool UpdateTagTable(const model::Tag& tag, ISqlite3Wrapper& sqlite3)
 
 }
 
-bool SelectMemoTagIds(const model::Memo& memo, std::vector<unsigned long>& tagIds, ISqlite3Wrapper& sqlite3)
+bool SelectMemoTagIds(const unsigned long memoId, std::vector<unsigned long>& tagIds, ISqlite3Wrapper& sqlite3)
 {
     namespace att = TaggedTable::att;
     std::stringstream selectCmd;
     selectCmd << "SELECT " << att::kTagId << " FROM " << TaggedTable::kName
-              << " WHERE " << att::kMemoId << "=" << memo.id() << ";";
+              << " WHERE " << att::kMemoId << "=" << memoId << ";";
     auto selectTagIdsCallback = [&tagIds](const std::vector<std::string>& id, const std::vector<std::string>&)
     {
         tagIds.emplace_back(std::stoul(id.front()));
@@ -48,7 +48,7 @@ bool SelectMemoTagIds(const model::Memo& memo, std::vector<unsigned long>& tagId
     return sqlite3.exec(selectCmd.str(), selectTagIdsCallback);
 }
 
-bool InsertMemoTagIds(const model::Memo& memo, const std::vector<unsigned long>& tagIds, ISqlite3Wrapper& sqlite3)
+bool InsertMemoTagIds(const unsigned long memoId, const std::vector<unsigned long>& tagIds, ISqlite3Wrapper& sqlite3)
 {
     namespace att = TaggedTable::att;
     if (tagIds.empty())
@@ -56,14 +56,14 @@ bool InsertMemoTagIds(const model::Memo& memo, const std::vector<unsigned long>&
 
     std::stringstream insertCmd;
     insertCmd << "INSERT INTO " << TaggedTable::kName << "(" << att::kMemoId << ", " << att::kTagId << ") "
-              << "VALUES (" << memo.id() << "," << tagIds.front() << ")";
+              << "VALUES (" << memoId << "," << tagIds.front() << ")";
     for (auto i = 1ul; i < tagIds.size(); ++i)
-        insertCmd << ", (" << memo.id() << "," << tagIds[i] << ")";
+        insertCmd << ", (" << memoId << "," << tagIds[i] << ")";
     insertCmd << ";";
     return sqlite3.exec(insertCmd.str(), nullptr);
 }
 
-bool DeleteMemoTagIds(const model::Memo& memo, const std::vector<unsigned long>& tagIds, ISqlite3Wrapper& sqlite3)
+bool DeleteMemoTagIds(const unsigned long memoId, const std::vector<unsigned long>& tagIds, ISqlite3Wrapper& sqlite3)
 {
     namespace att = TaggedTable::att;
     if (tagIds.empty())
@@ -71,7 +71,7 @@ bool DeleteMemoTagIds(const model::Memo& memo, const std::vector<unsigned long>&
 
     std::stringstream deleteCmd;
     deleteCmd << "DELETE FROM " << TaggedTable::kName
-              << " WHERE " << att::kMemoId << "=" << memo.id() << " AND " << att::kTagId << " IN (" << tagIds.front();
+              << " WHERE " << att::kMemoId << "=" << memoId << " AND " << att::kTagId << " IN (" << tagIds.front();
     for (auto i = 1ul; i < tagIds.size(); ++i)
         deleteCmd << "," << tagIds[i];
     deleteCmd << ");";

@@ -95,7 +95,7 @@ TEST(TestSqlite3Wrapper, test_SelectMemoTagIds)
 
     std::vector<unsigned long> expectedTagIds { 1, 3 };
     std::vector<unsigned long> selectedTagIds;
-    EXPECT_TRUE(SelectMemoTagIds(memo, selectedTagIds, sqlite3));
+    EXPECT_TRUE(SelectMemoTagIds(memo.id(), selectedTagIds, sqlite3));
     EXPECT_EQ(selectedTagIds, expectedTagIds);
 }
 
@@ -118,7 +118,7 @@ TEST(TestSqlite3Wrapper, test_InsertMemoTagIds)
     ASSERT_TRUE(test::InsertMemoRow(sqlite3, {(int)memo.id(), memo.title(), memo.description(), (int)memo.timestamp()}));
 
     const std::vector<unsigned long> expectedTagIds { 1, 3 };
-    EXPECT_TRUE(InsertMemoTagIds(memo, expectedTagIds, sqlite3));
+    EXPECT_TRUE(InsertMemoTagIds(memo.id(), expectedTagIds, sqlite3));
 
     std::vector<unsigned long> returnedTagIds;
     auto callback = [&](const std::vector<std::string>& values, const std::vector<std::string>&)
@@ -154,7 +154,7 @@ TEST(TestSqlite3Wrapper, test_DeleteMemoTagIds)
     ASSERT_TRUE(test::InsertTaggedRow(sqlite3, {1, 3}));
 
     const std::vector<unsigned long> expectedTagIds { 2, };
-    EXPECT_TRUE(DeleteMemoTagIds(memo, {1, 3}, sqlite3));
+    EXPECT_TRUE(DeleteMemoTagIds(memo.id(), {1, 3}, sqlite3));
 
     std::vector<unsigned long> returnedTagIds;
     auto callback = [&](const std::vector<std::string>& values, const std::vector<std::string>&)

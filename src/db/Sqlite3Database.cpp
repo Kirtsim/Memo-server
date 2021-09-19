@@ -41,7 +41,7 @@ bool Sqlite3Database::updateMemo(const model::MemoPtr& memo)
 
     beginTransaction();
     std::vector<unsigned long> queriedTagIds;
-    if (!SelectMemoTagIds(*memo, queriedTagIds, *sqlite3_))
+    if (!SelectMemoTagIds(memo->id(), queriedTagIds, *sqlite3_))
     {
         LOG_WRN(kLogTag << "Update memo FAILURE.")
         rollback();
@@ -55,8 +55,8 @@ bool Sqlite3Database::updateMemo(const model::MemoPtr& memo)
     std::copy_if(memo->tagIds().begin(), memo->tagIds().end(), std::back_inserter(tagIdsToAdd), checkIdNotPresent);
 
     std::vector<unsigned long> tagIdsToDelete(oldTagIds.begin(), oldTagIds.end());
-    bool failed = !DeleteMemoTagIds(*memo, tagIdsToDelete, *sqlite3_)
-               || !InsertMemoTagIds(*memo, tagIdsToAdd, *sqlite3_)
+    bool failed = !DeleteMemoTagIds(memo->id(), tagIdsToDelete, *sqlite3_)
+               || !InsertMemoTagIds(memo->id(), tagIdsToAdd, *sqlite3_)
                || !UpdateMemoTable(*memo, *sqlite3_);
 
     if (failed)
