@@ -8,6 +8,7 @@ target_sources(${tests_exe}
         ${test_dir}/db/Sqlite3TestHelperFunctions.cpp
         ${test_dir}/db/TestSqlite3Wrapper.inl
         ${test_dir}/db/TestSqlite3Functions.inl
+        ${test_dir}/db/TestSqlite3Database.inl
         ${test_dir}/db/TestTools.inl
         )
 
