@@ -72,7 +72,6 @@ TEST(TestSqlite3Wrapper, test_UpdateTagTable)
     EXPECT_EQ(returnedValues[0][3], std::to_string(tag.timestamp()));
 }
 
-
 TEST(TestSqlite3Wrapper, test_SelectMemoTagIds)
 {
     model::Memo memo;
@@ -97,6 +96,21 @@ TEST(TestSqlite3Wrapper, test_SelectMemoTagIds)
     std::vector<unsigned long> selectedTagIds;
     EXPECT_TRUE(SelectMemoTagIds(memo.id(), selectedTagIds, sqlite3));
     EXPECT_EQ(selectedTagIds, expectedTagIds);
+}
+
+TEST(TestSqlite3Wrapper, test_SelectMemoTagIds_No_tags_found_Return_success)
+{
+    const auto tempDbFile = test::TestFilePath("temp__.db");
+    Sqlite3Wrapper sqlite3(tempDbFile);
+    sqlite3.open();
+
+    ASSERT_TRUE(test::RecreateTables(sqlite3));
+    ASSERT_TRUE(test::InsertTagRow(sqlite3, {1, "Tag 1", 11111, 1111111}));
+    ASSERT_TRUE(test::InsertMemoRow(sqlite3, {1, "Title", "Desc", 131313}));
+
+    std::vector<unsigned long> selectedTagIds;
+    EXPECT_TRUE(SelectMemoTagIds(1, selectedTagIds, sqlite3));
+    EXPECT_EQ(std::vector<unsigned long>{}, selectedTagIds);
 }
 
 TEST(TestSqlite3Wrapper, test_InsertMemoTagIds)
