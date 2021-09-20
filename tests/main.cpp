@@ -1,7 +1,12 @@
 #include "db/TestSqlite3Wrapper.inl"
 #include "db/TestSqlite3Functions.inl"
+#include "db/TestSqlite3Database.inl"
 #include "db/TestTools.inl"
 #include <gtest/gtest.h>
+#include "logger/logger.hpp"
+
+INITIALIZE_EASYLOGGINGPP
+
 
 int main()
 {
