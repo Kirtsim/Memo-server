@@ -12,7 +12,7 @@
 
 namespace memo {
 
-TEST(TestSqlite3Wrapper, test_UpdateMemoTable)
+TEST(TestSqlite3Functions, test_UpdateMemoTable)
 {
     model::Memo memo;
     memo.setId(1);
@@ -42,7 +42,7 @@ TEST(TestSqlite3Wrapper, test_UpdateMemoTable)
     EXPECT_EQ(returnedValues[0][3], std::to_string(memo.timestamp()));
 }
 
-TEST(TestSqlite3Wrapper, test_UpdateTagTable)
+TEST(TestSqlite3Functions, test_UpdateTagTable)
 {
     model::Tag tag;
     tag.setId(1);
@@ -72,7 +72,7 @@ TEST(TestSqlite3Wrapper, test_UpdateTagTable)
     EXPECT_EQ(returnedValues[0][3], std::to_string(tag.timestamp()));
 }
 
-TEST(TestSqlite3Wrapper, test_SelectMemoTagIds)
+TEST(TestSqlite3Functions, test_SelectMemoTagIds)
 {
     model::Memo memo;
     memo.setId(1);
@@ -98,7 +98,7 @@ TEST(TestSqlite3Wrapper, test_SelectMemoTagIds)
     EXPECT_EQ(selectedTagIds, expectedTagIds);
 }
 
-TEST(TestSqlite3Wrapper, test_SelectMemoTagIds_No_tags_found_Return_success)
+TEST(TestSqlite3Functions, test_SelectMemoTagIds_No_tags_found_Return_success)
 {
     const auto tempDbFile = test::TestFilePath("temp__.db");
     Sqlite3Wrapper sqlite3(tempDbFile);
@@ -113,7 +113,7 @@ TEST(TestSqlite3Wrapper, test_SelectMemoTagIds_No_tags_found_Return_success)
     EXPECT_EQ(std::vector<unsigned long>{}, selectedTagIds);
 }
 
-TEST(TestSqlite3Wrapper, test_InsertMemoTagIds)
+TEST(TestSqlite3Functions, test_InsertMemoTagIds)
 {
     model::Memo memo;
     memo.setId(1);
@@ -146,7 +146,7 @@ TEST(TestSqlite3Wrapper, test_InsertMemoTagIds)
 }
 
 
-TEST(TestSqlite3Wrapper, test_DeleteMemoTagIds)
+TEST(TestSqlite3Functions, test_DeleteMemoTagIds)
 {
     model::Memo memo;
     memo.setId(1);
