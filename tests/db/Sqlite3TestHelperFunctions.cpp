@@ -56,7 +56,7 @@ std::string CreateMemoTableCommand()
     std::stringstream command;
     command << "CREATE TABLE IF NOT EXISTS " << MemoTable::kName << " (\n"
             << MemoTable::att::kId << " INTEGER PRIMARY KEY,\n"
-            << MemoTable::att::kTitle << " TEXT NOT NULL,\n"
+            << MemoTable::att::kTitle << " TEXT NOT NULL UNIQUE,\n"
             << MemoTable::att::kDescription << " TEXT,\n"
             << MemoTable::att::kTimestamp << " INTEGER NOT NULL);\n";
     return command.str();
@@ -67,7 +67,7 @@ std::string CreateTagTableCommand()
     std::stringstream command;
     command << "CREATE TABLE IF NOT EXISTS " << TagTable::kName << "(\n"
             << TagTable::att::kId << " INTEGER PRIMARY KEY,\n"
-            << TagTable::att::kName << " TEXT NOT NULL,\n"
+            << TagTable::att::kName << " TEXT NOT NULL UNIQUE,\n"
             << TagTable::att::kColor << " INTEGER,\n"
             << TagTable::att::kTimestamp << " INTEGER NOT NULL);\n";
     return command.str();
