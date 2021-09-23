@@ -1,9 +1,11 @@
 #pragma once
+#include <string>
 #include <vector>
 
 namespace memo {
 
 class ISqlite3Wrapper;
+struct TagSearchFilter;
 
 namespace model { class Memo; }
 namespace model { class Tag; }
@@ -18,5 +20,7 @@ bool SelectMemoTagIds(unsigned long memoId, std::vector<unsigned long>& tagIds, 
 bool InsertMemoTagIds(unsigned long memoId, const std::vector<unsigned long>& tagIds, ISqlite3Wrapper& sqlite3);
 
 bool DeleteMemoTagIds(unsigned long memoId, const std::vector<unsigned long>& tagIds, ISqlite3Wrapper& sqlite3);
+
+std::string BuildTagQuery(const TagSearchFilter& filter);
 
 } // namespace memo

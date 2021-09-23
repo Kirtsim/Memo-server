@@ -1,4 +1,5 @@
 #pragma once
+#include "db/IDatabase.hpp"
 #include "db/Sqlite3Functions.hpp"
 #include "db/Sqlite3Wrapper.hpp"
 #include "db/Sqlite3Schema.hpp"
@@ -181,4 +182,22 @@ TEST(TestSqlite3Functions, test_DeleteMemoTagIds)
     EXPECT_EQ(returnedTagIds, expectedTagIds);
 }
 
+TEST(TestSqlite3Functions, test_BuildTagQuery)
+{
+    TagSearchFilter searchFilter;
+    searchFilter.namePrefix = "name_prefix";
+    searchFilter.nameContains = "name_contains";
+    searchFilter.colors = {111, 222, 333};
+    searchFilter.memoIds = {1, 2, 3};
+    searchFilter.filterFromDate = 100001;
+    searchFilter.filterUntilDate = 200002;
+
+    std::string expectedQuery = "SELECT id, name, color, timestamp FROM Tag "
+                                "INNER JOIN Tagged ON Tag.id = Tagged.tagId "
+                                "WHERE name LIKE 'name_prefix%' AND name LIKE '%name_contains%' "
+                                "AND color IN (111,222,333) AND timestamp >= 100001 AND timestamp <= 200002 "
+                                "AND memoId IN (1,2,3) GROUP BY id;";
+    const auto actualQuery = BuildTagQuery(searchFilter);
+    EXPECT_EQ(expectedQuery, actualQuery);
+}
 } // namespace memo
