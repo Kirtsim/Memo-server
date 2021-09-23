@@ -1,13 +1,10 @@
 #pragma once
+#include "ModelTestHelperFunctions.hpp"
 #include <string>
 
 namespace memo { class Sqlite3Wrapper; }
 
 namespace memo::test {
-
-struct MemoValues { int id; std::string title; std::string description; long timestamp; };
-struct TagValues { int id; std::string name; int color; long timestamp; };
-struct TaggedValues { int memoId; int tagId; };
 
 bool RecreateTables(Sqlite3Wrapper& sqlite3);
 
@@ -19,6 +16,7 @@ bool InsertTagRow(Sqlite3Wrapper& sqlite3, const TagValues& values);
 
 bool InsertTaggedRow(Sqlite3Wrapper& sqlite3, const TaggedValues& values);
 
+std::vector<std::vector<std::string>> ExecCommand(Sqlite3Wrapper& sqlite3, const std::string& command);
 
 } // namespace memo::test
 

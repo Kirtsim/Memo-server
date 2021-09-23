@@ -50,6 +50,18 @@ bool InsertTaggedRow(memo::Sqlite3Wrapper& sqlite3, const TaggedValues& values)
     return sqlite3.exec(stream.str(), nullptr);
 }
 
+std::vector<std::vector<std::string>> ExecCommand(Sqlite3Wrapper& sqlite3, const std::string& command)
+{
+    std::vector<std::vector<std::string>> returnedValues;
+    auto callback = [&](const std::vector<std::string>& values, const std::vector<std::string>&)
+            {
+        returnedValues.emplace_back(values);
+        return false;
+            };
+    sqlite3.exec(command, callback);
+    return returnedValues;
+}
+
 namespace {
 std::string CreateMemoTableCommand()
 {
