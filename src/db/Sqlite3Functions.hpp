@@ -1,4 +1,5 @@
 #pragma once
+#include "model/ModelDefs.hpp"
 #include <string>
 #include <vector>
 
@@ -7,9 +8,7 @@ namespace memo {
 class ISqlite3Wrapper;
 struct TagSearchFilter;
 
-namespace model { class Memo; }
-namespace model { class Tag; }
-
+std::vector<model::TagPtr> SelectTags(const std::string& query, ISqlite3Wrapper& sqlite3);
 
 bool UpdateMemoTable(const model::Memo& memo, ISqlite3Wrapper& sqlite3);
 

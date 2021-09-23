@@ -4,9 +4,34 @@
 #include "db/IDatabase.hpp"
 #include "db/Tools.hpp"
 #include "model/Memo.hpp"
+#include "model/Tag.hpp"
+#include "logger/logger.hpp"
 #include <sstream>
 
 namespace memo {
+
+std::vector<model::TagPtr> SelectTags(const std::string& query, ISqlite3Wrapper& sqlite3)
+{
+    std::vector<model::TagPtr> selection;
+    auto callback = [&selection](const std::vector<std::string>& values, const std::vector<std::string>&)
+    {
+        if (values.size() != 4ul)
+            return false;
+
+        auto tag = std::make_shared<model::Tag>();
+        tag->setId(std::stoul(values[0]));
+        tag->setName(values[1]);
+        int colorValue = std::stoi(values[2]);
+        tag->setColor(tools::IntToColor(colorValue));
+        tag->setTimestamp(std::stoul(values[3]));
+        selection.emplace_back(tag);
+        return false;
+    };
+    const bool success = sqlite3.exec(query, callback);
+    if (!success)
+        LOG_DBG("Failed to execute query:\n" << query);
+    return selection;
+}
 
 bool UpdateMemoTable(const model::Memo& memo, ISqlite3Wrapper& sqlite3)
 {

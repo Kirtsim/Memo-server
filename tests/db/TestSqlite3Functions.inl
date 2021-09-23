@@ -5,6 +5,7 @@
 #include "db/Sqlite3Schema.hpp"
 #include "db/Tools.hpp"
 #include "db/Sqlite3TestHelperFunctions.hpp"
+#include "ModelTestHelperFunctions.hpp"
 #include "model/Memo.hpp"
 #include "model/Tag.hpp"
 #include "TestingUtils.hpp"
@@ -12,6 +13,34 @@
 #include <sstream>
 
 namespace memo {
+
+TEST(TestSqlite3Functions, test_SelectTags)
+{
+    const auto tempDbFile = test::TestFilePath("temp__.db");
+    Sqlite3Wrapper sqlite3(tempDbFile);
+    ASSERT_TRUE(sqlite3.open());
+    ASSERT_TRUE(test::RecreateTables(sqlite3));
+    auto tag1 = test::CreateTag({1, "T1", 11, 1001});
+    auto tag2 = test::CreateTag({2, "T2", 22, 2002});
+    auto tag3 = test::CreateTag({3, "T3", 33, 3003});
+
+
+    ASSERT_TRUE(test::InsertTagRow(sqlite3, test::TagToValues(*tag1)));
+    ASSERT_TRUE(test::InsertTagRow(sqlite3, test::TagToValues(*tag2)));
+    ASSERT_TRUE(test::InsertTagRow(sqlite3, test::TagToValues(*tag3)));
+
+    const std::vector<model::TagPtr> expectedTags { tag1, tag2, tag3 };
+    const auto actualTags = SelectTags("SELECT * FROM Tag;", sqlite3);
+    ASSERT_EQ(expectedTags.size(), actualTags.size());
+    for (auto i = 0ul; i < actualTags.size(); ++i)
+    {
+        auto actualTag = actualTags[i];
+        EXPECT_NE(nullptr, actualTag) << "Index " << i;
+        if (actualTag)
+            EXPECT_EQ(*expectedTags[i], *actualTag) << "Index " << i;
+    }
+
+}
 
 TEST(TestSqlite3Functions, test_UpdateMemoTable)
 {
@@ -89,7 +118,7 @@ TEST(TestSqlite3Functions, test_SelectMemoTagIds)
     ASSERT_TRUE(test::InsertTagRow(sqlite3, {1, "Tag 1", 11111, 1111111}));
     ASSERT_TRUE(test::InsertTagRow(sqlite3, {2, "Tag 2", 22222, 2222222}));
     ASSERT_TRUE(test::InsertTagRow(sqlite3, {3, "Tag 3", 33333, 3333333}));
-    ASSERT_TRUE(test::InsertMemoRow(sqlite3, {(int)memo.id(), memo.title(), memo.description(), (int)memo.timestamp()}));
+    ASSERT_TRUE(test::InsertMemoRow(sqlite3, {memo.id(), memo.title(), memo.description(), memo.timestamp()}));
     ASSERT_TRUE(test::InsertTaggedRow(sqlite3, {1, 1}));
     ASSERT_TRUE(test::InsertTaggedRow(sqlite3, {1, 3}));
 
@@ -130,7 +159,7 @@ TEST(TestSqlite3Functions, test_InsertMemoTagIds)
     ASSERT_TRUE(test::InsertTagRow(sqlite3, {1, "Tag 1", 11111, 1111111}));
     ASSERT_TRUE(test::InsertTagRow(sqlite3, {2, "Tag 2", 22222, 2222222}));
     ASSERT_TRUE(test::InsertTagRow(sqlite3, {3, "Tag 3", 33333, 3333333}));
-    ASSERT_TRUE(test::InsertMemoRow(sqlite3, {(int)memo.id(), memo.title(), memo.description(), (int)memo.timestamp()}));
+    ASSERT_TRUE(test::InsertMemoRow(sqlite3, {memo.id(), memo.title(), memo.description(), memo.timestamp()}));
 
     const std::vector<unsigned long> expectedTagIds { 1, 3 };
     EXPECT_TRUE(InsertMemoTagIds(memo.id(), expectedTagIds, sqlite3));
@@ -163,7 +192,7 @@ TEST(TestSqlite3Functions, test_DeleteMemoTagIds)
     ASSERT_TRUE(test::InsertTagRow(sqlite3, {1, "Tag 1", 11111, 1111111}));
     ASSERT_TRUE(test::InsertTagRow(sqlite3, {2, "Tag 2", 22222, 2222222}));
     ASSERT_TRUE(test::InsertTagRow(sqlite3, {3, "Tag 3", 33333, 3333333}));
-    ASSERT_TRUE(test::InsertMemoRow(sqlite3, {(int)memo.id(), memo.title(), memo.description(), (int)memo.timestamp()}));
+    ASSERT_TRUE(test::InsertMemoRow(sqlite3, {memo.id(), memo.title(), memo.description(), memo.timestamp()}));
     ASSERT_TRUE(test::InsertTaggedRow(sqlite3, {1, 1}));
     ASSERT_TRUE(test::InsertTaggedRow(sqlite3, {1, 2}));
     ASSERT_TRUE(test::InsertTaggedRow(sqlite3, {1, 3}));
