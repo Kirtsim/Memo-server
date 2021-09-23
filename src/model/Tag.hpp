@@ -30,4 +30,7 @@ private:
     unsigned long timestamp_ = 0;
 };
 
+bool operator==(const Tag& first, const Tag& second);
+
+bool operator!=(const Tag& first, const Tag& second);
 } // namespace memo::model

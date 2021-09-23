@@ -38,4 +38,8 @@ private:
     unsigned long timestamp_ = 0;
 };
 
+bool operator==(const Memo& first, const Memo& second);
+
+bool operator!=(const Memo& first, const Memo& second);
+
 } // namespace memo::model

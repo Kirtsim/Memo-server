@@ -42,4 +42,19 @@ void Tag::setTimestamp(unsigned long timestamp)
     timestamp_ = timestamp;
 }
 
+bool operator==(const Tag& first, const Tag& second)
+{
+    return &first == &second || (
+           first.id() == second.id() &&
+           first.name() == second.name() &&
+           first.color() == second.color() &&
+           first.timestamp() == second.timestamp() );
+}
+
+
+bool operator!=(const Tag& first, const Tag& second)
+{
+    return !(first == second);
+}
+
 } // namespace memo::model

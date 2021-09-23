@@ -57,4 +57,18 @@ void Memo::addTagId(unsigned long tagId)
     tagIds_.emplace_back(tagId);
 }
 
+bool operator==(const Memo& first, const Memo& second)
+{
+    return &first == &second || (
+            first.id() == second.id() &&
+            first.title() == second.title() &&
+            first.description() == second.description() &&
+            first.timestamp() == second.timestamp() );
+}
+
+bool operator!=(const Memo& first, const Memo& second)
+{
+    return !(first == second);
+}
+
 } // namespace memo::model
