@@ -14,18 +14,27 @@ std::vector<model::TagPtr> SelectTags(const std::string& query, ISqlite3Wrapper&
 {
     std::vector<model::TagPtr> selection;
     auto callback = [&selection](const std::vector<std::string>& values, const std::vector<std::string>&)
-    {
+            {
         if (values.size() != 4ul)
             return true;
 
-        auto tag = std::make_shared<model::Tag>();
-        tag->setId(std::stoul(values[0]));
-        tag->setName(values[1]);
-        int colorValue = std::stoi(values[2]);
-        tag->setColor(tools::IntToColor(colorValue));
-        tag->setTimestamp(std::stoul(values[3]));
-        selection.emplace_back(tag);
-        return false;
+        // TODO: Here a mapping should be applied and made sure the correct attributes are being returned.
+        try
+        {
+            auto tag = std::make_shared<model::Tag>();
+            tag->setId(std::stoul(values[0]));
+            tag->setName(values[1]);
+            int colorValue = std::stoi(values[2]);
+            tag->setColor(tools::IntToColor(colorValue));
+            tag->setTimestamp(std::stoul(values[3]));
+            selection.emplace_back(tag);
+            return false;
+        }
+        catch(const std::invalid_argument& ex)
+        {
+            LOG_WRN("Failed create Tag from SELECT query.");
+            return true;
+        }
     };
     const bool success = sqlite3.exec(query, callback);
     if (!success)
