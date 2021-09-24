@@ -16,7 +16,7 @@ std::vector<model::TagPtr> SelectTags(const std::string& query, ISqlite3Wrapper&
     auto callback = [&selection](const std::vector<std::string>& values, const std::vector<std::string>&)
     {
         if (values.size() != 4ul)
-            return false;
+            return true;
 
         auto tag = std::make_shared<model::Tag>();
         tag->setId(std::stoul(values[0]));
