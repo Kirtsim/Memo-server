@@ -14,7 +14,7 @@
 
 namespace memo {
 
-TEST(TestSqlite3Functions, test_SelectTags)
+TEST(TestSqlite3Functions, test_SelectRows_Tags_only)
 {
     const auto tempDbFile = test::TestFilePath("temp__.db");
     Sqlite3Wrapper sqlite3(tempDbFile);
@@ -24,24 +24,17 @@ TEST(TestSqlite3Functions, test_SelectTags)
     auto tag2 = test::CreateTag({2, "T2", 22, 2002});
     auto tag3 = test::CreateTag({3, "T3", 33, 3003});
 
-
     ASSERT_TRUE(test::InsertTagRow(sqlite3, test::TagToValues(*tag1)));
     ASSERT_TRUE(test::InsertTagRow(sqlite3, test::TagToValues(*tag2)));
     ASSERT_TRUE(test::InsertTagRow(sqlite3, test::TagToValues(*tag3)));
 
-    const std::vector<model::TagPtr> expectedTags { tag1, tag2, tag3 };
-    const auto actualTags = SelectTags("SELECT * FROM Tag;", sqlite3);
-    ASSERT_EQ(expectedTags.size(), actualTags.size());
-    for (auto i = 0ul; i < actualTags.size(); ++i)
-    {
-        auto actualTag = actualTags[i];
-        EXPECT_NE(nullptr, actualTag) << "Index " << i;
-        if (actualTag)
-            EXPECT_EQ(*expectedTags[i], *actualTag) << "Index " << i;
-    }
+    const test::Sqlite3Rows expectedTags { test::ToStringVector(*tag1), test::ToStringVector(*tag2),
+                                           test::ToStringVector(*tag3) };
+    const auto actualTags = SelectRows("SELECT * FROM Tag;", sqlite3);
+    EXPECT_EQ(expectedTags, actualTags);
 }
 
-TEST(TestSqlite3Functions, test_SelectTags_Returns_empty_list_if_not_all_tag_attributes_are_queried)
+TEST(TestSqlite3Functions, test_SelectRows_Select_tag_rows_with_only_a_subset_of_attributes)
 {
     const auto tempDbFile = test::TestFilePath("temp__.db");
     Sqlite3Wrapper sqlite3(tempDbFile);
@@ -52,35 +45,9 @@ TEST(TestSqlite3Functions, test_SelectTags_Returns_empty_list_if_not_all_tag_att
     ASSERT_TRUE(test::InsertTagRow(sqlite3, {2, "T2", 22, 2002}));
     ASSERT_TRUE(test::InsertTagRow(sqlite3, {3, "T3", 33, 3003}));
 
-    const std::vector<model::TagPtr> expectedTags = {};
-    const auto actualTags = SelectTags("SELECT id, name, color FROM Tag;", sqlite3); // Missing timestamp
-    EXPECT_EQ(0ul, actualTags.size());
-    for (const auto& tag : actualTags)
-    {
-        if (tag) std::cout << "Tag with id " << tag->id();
-    }
-}
-
-TEST(TestSqlite3Functions, DISABLED_test_SelectTags_handles_attributes_being_returned_in_different_order)
-{
-    const auto tempDbFile = test::TestFilePath("temp__.db");
-    Sqlite3Wrapper sqlite3(tempDbFile);
-    ASSERT_TRUE(sqlite3.open());
-    ASSERT_TRUE(test::RecreateTables(sqlite3));
-
-    auto tag1 = test::CreateTag({1, "T1", 11, 1001});
-    ASSERT_TRUE(test::InsertTagRow(sqlite3, test::TagToValues(*tag1)));
-
-    const std::vector<model::TagPtr> expectedTags = { tag1 };
-    const auto actualTags = SelectTags("SELECT id, timestamp, name, color FROM Tag;", sqlite3);
-    ASSERT_EQ(expectedTags.size(), actualTags.size());
-    for (auto i = 0ul; i < actualTags.size(); ++i)
-    {
-        auto actualTag = actualTags[i];
-        EXPECT_NE(nullptr, actualTag) << "Index " << i;
-        if (actualTag)
-            EXPECT_EQ(*expectedTags[i], *actualTag) << "Index " << i;
-    }
+    const test::Sqlite3Rows expectedRows = { {"1", "T1"}, {"2", "T2"}, {"3", "T3"} };
+    const auto actualRows = SelectRows("SELECT id, name FROM Tag;", sqlite3);
+    EXPECT_EQ(expectedRows, actualRows);
 }
 
 TEST(TestSqlite3Functions, test_UpdateMemoTable)

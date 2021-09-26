@@ -8,13 +8,12 @@ namespace memo {
 class ISqlite3Wrapper;
 struct TagSearchFilter;
 
-/// @brief Executes a given query using the provided sqlite3 db wrapper and converts returned values to model::Tags.
-///        This function assumes the values returned by the query are solely the attributes of the Tag table, that all
-///        the attributes are present and that they're in the correct order: id, name, color, timestamp.
-/// @param query SELECT query that returns Tag rows with all Tag's attributes.
+/// @brief Executes a given query using the provided sqlite3 db wrapper and collects returned rows into a vector. A row
+///        is represented by a vector of string values (all values are returned in a string format).
+/// @param query SELECT query to be executed.
 /// @param sqlite3 Wrapper object for the sqlite3 db.
-/// @return A vector of model::Tag's built from the values returned by the query.
-std::vector<model::TagPtr> SelectTags(const std::string& query, ISqlite3Wrapper& sqlite3);
+/// @return A vector of string vectors (rows) returned by the query.
+std::vector<std::vector<std::string>> SelectRows(const std::string& query, ISqlite3Wrapper& sqlite3);
 
 /// @brief Updates a single row in the 'Memo' table. The function uses the ID of the provided Memo to identify the row
 ///        that needs to be updated and attempts to override all its attributes with the data in the given Memo.
