@@ -219,7 +219,7 @@ TEST(TestSqlite3Functions, test_DeleteMemoTagIds)
     EXPECT_EQ(returnedTagIds, expectedTagIds);
 }
 
-TEST(TestSqlite3Functions, test_BuildTagQuery)
+TEST(TestSqlite3Functions, test_BuildTagQuery_Use_all_options_in_the_filter)
 {
     TagSearchFilter searchFilter;
     searchFilter.namePrefix = "name_prefix";
@@ -237,4 +237,74 @@ TEST(TestSqlite3Functions, test_BuildTagQuery)
     const auto actualQuery = BuildTagQuery(searchFilter);
     EXPECT_EQ(expectedQuery, actualQuery);
 }
+
+TEST(TestSqlite3Functions, test_BuildTagQuery_returns_a_simple_select_query_if_filter_is_empty)
+{
+    const std::string expectedQuery = "SELECT * FROM Tag GROUP BY id;";
+    const auto actualQuery = BuildTagQuery({});
+    EXPECT_EQ(expectedQuery, actualQuery);
+}
+
+TEST(TestSqlite3Functions, test_BuildTagQuery_Filter_by_name_prefix_only)
+{
+    TagSearchFilter searchFilter;
+    searchFilter.namePrefix = "name_prefix";
+    const auto actualQuery = BuildTagQuery(searchFilter);
+
+    const std::string expectedQuery = "SELECT * FROM Tag WHERE name LIKE 'name_prefix%' GROUP BY id;";
+    EXPECT_EQ(expectedQuery, actualQuery);
+}
+
+TEST(TestSqlite3Functions, test_BuildTagQuery_Filter_by_name_keyword_only)
+{
+    TagSearchFilter searchFilter;
+    searchFilter.nameContains = "name_contains";
+    const auto actualQuery = BuildTagQuery(searchFilter);
+
+    const std::string expectedQuery = "SELECT * FROM Tag WHERE name LIKE '%name_contains%' GROUP BY id;";
+    EXPECT_EQ(expectedQuery, actualQuery);
+}
+
+TEST(TestSqlite3Functions, test_BuildTagQuery_Filter_by_colors_only)
+{
+    TagSearchFilter searchFilter;
+    searchFilter.colors = {111, 222, 333};
+    const auto actualQuery = BuildTagQuery(searchFilter);
+
+    const std::string expectedQuery = "SELECT * FROM Tag WHERE color IN (111,222,333) GROUP BY id;";
+    EXPECT_EQ(expectedQuery, actualQuery);
+}
+
+TEST(TestSqlite3Functions, test_BuildTagQuery_creates_a_JOIN_query_if_the_filter_contains_memo_ids)
+{
+    TagSearchFilter searchFilter;
+    searchFilter.memoIds = {1, 2, 3};
+    const auto actualQuery = BuildTagQuery(searchFilter);
+
+    const std::string expectedQuery = "SELECT id, name, color, timestamp FROM Tag "
+                                      "INNER JOIN Tagged ON Tag.id = Tagged.tagId "
+                                      "WHERE memoId IN (1,2,3) GROUP BY id;";
+    EXPECT_EQ(expectedQuery, actualQuery);
+}
+
+TEST(TestSqlite3Functions, test_BuildTagQuery_Filter_only_contains_start_date)
+{
+    TagSearchFilter searchFilter;
+    searchFilter.filterFromDate = 100001;
+    const auto actualQuery = BuildTagQuery(searchFilter);
+
+    const std::string expectedQuery = "SELECT * FROM Tag WHERE timestamp >= 100001 GROUP BY id;";
+    EXPECT_EQ(expectedQuery, actualQuery);
+}
+
+TEST(TestSqlite3Functions, test_BuildTagQuery_Filter_only_contains_end_date)
+{
+    TagSearchFilter searchFilter;
+    searchFilter.filterUntilDate = 200002;
+    const auto actualQuery = BuildTagQuery(searchFilter);
+
+    const std::string expectedQuery = "SELECT * FROM Tag WHERE timestamp <= 200002 GROUP BY id;";
+    EXPECT_EQ(expectedQuery, actualQuery);
+}
+
 } // namespace memo
