@@ -50,6 +50,8 @@ TEST(TestSqlite3Functions, test_SelectRows_Select_tag_rows_with_only_a_subset_of
     EXPECT_EQ(expectedRows, actualRows);
 }
 
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 TEST(TestSqlite3Functions, test_UpdateMemoTable)
 {
     model::Memo memo;
@@ -110,6 +112,8 @@ TEST(TestSqlite3Functions, test_UpdateTagTable)
     EXPECT_EQ(returnedValues[0][3], std::to_string(tag.timestamp()));
 }
 
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 TEST(TestSqlite3Functions, test_SelectMemoTagIds)
 {
     model::Memo memo;
@@ -151,6 +155,8 @@ TEST(TestSqlite3Functions, test_SelectMemoTagIds_No_tags_found_Return_success)
     EXPECT_EQ(std::vector<unsigned long>{}, selectedTagIds);
 }
 
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 TEST(TestSqlite3Functions, test_InsertMemoTagIds)
 {
     model::Memo memo;
@@ -183,6 +189,7 @@ TEST(TestSqlite3Functions, test_InsertMemoTagIds)
     EXPECT_EQ(returnedTagIds, expectedTagIds);
 }
 
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 TEST(TestSqlite3Functions, test_DeleteMemoTagIds)
 {
@@ -218,6 +225,8 @@ TEST(TestSqlite3Functions, test_DeleteMemoTagIds)
     sqlite3.exec("SELECT tagId FROM Tagged WHERE memoId=1 ORDER BY tagId;", callback);
     EXPECT_EQ(returnedTagIds, expectedTagIds);
 }
+
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 TEST(TestSqlite3Functions, test_BuildTagQuery_Use_all_options_in_the_filter)
 {
@@ -305,6 +314,138 @@ TEST(TestSqlite3Functions, test_BuildTagQuery_Filter_only_contains_end_date)
 
     const std::string expectedQuery = "SELECT * FROM Tag WHERE timestamp <= 200002 GROUP BY id;";
     EXPECT_EQ(expectedQuery, actualQuery);
+}
+
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+TEST(TestSqlite3Functions, test_BuildMemoQuery_Use_all_filter_options)
+{
+    MemoSearchFilter filter;
+    filter.titlePrefix = "title_prefix";
+    filter.titleKeywords = {"key1", "key2", "key3"};
+    filter.memoKeywords = {"mKey1", "mKey2", "mKey3"};
+    filter.tagIds = {1, 2, 3};
+    filter.filterFromDate = 10001;
+    filter.filterUntilDate = 20003;
+
+    const auto query = BuildMemoQuery(filter);
+    const std::string expectedQuery =
+            "SELECT id, title, description, timestamp FROM Memo "
+            "INNER JOIN Tagged ON Memo.id = Tagged.memoId "
+            "WHERE title LIKE 'title_prefix%' "
+            "AND (title LIKE '%key1%' OR title LIKE '%key2%' OR title LIKE '%key3%') "
+            "AND (description LIKE '%mKey1%' OR description LIKE '%mKey2%' OR description LIKE '%mKey3%') "
+            "AND timestamp >= 10001 AND timestamp <= 20003 "
+            "AND tagId IN (1,2,3) GROUP BY id;";
+
+    EXPECT_EQ(expectedQuery, query);
+}
+
+TEST(TestSqlite3Functions, test_BuildMemoQuery_returns_simple_SELECT_query_if_no_filter_is_applied)
+{
+    const auto query = BuildMemoQuery({});
+    const std::string expectedQuery = "SELECT id, title, description, timestamp FROM Memo GROUP BY id;";
+
+    EXPECT_EQ(expectedQuery, query);
+}
+
+TEST(TestSqlite3Functions, test_BuildMemoQuery_Use_title_prefix_filter_only)
+{
+    MemoSearchFilter filter;
+    filter.titlePrefix = "title_prefix";
+
+    const auto query = BuildMemoQuery(filter);
+    const std::string expectedQuery = "SELECT id, title, description, timestamp FROM Memo "
+                                      "WHERE title LIKE 'title_prefix%' GROUP BY id;";
+
+    EXPECT_EQ(expectedQuery, query);
+}
+
+TEST(TestSqlite3Functions, test_BuildMemoQuery_Use_only_title_keywords_filter)
+{
+    MemoSearchFilter filter;
+    filter.titleKeywords = {"key1", "key2", "key3"};
+
+    const auto query = BuildMemoQuery(filter);
+    const std::string expectedQuery = "SELECT id, title, description, timestamp FROM Memo "
+                                      "WHERE (title LIKE '%key1%' OR title LIKE '%key2%' OR title LIKE '%key3%') "
+                                      "GROUP BY id;";
+    EXPECT_EQ(expectedQuery, query);
+}
+
+TEST(TestSqlite3Functions, test_BuildMemoQuery_ignores_keyword_duplicates_for_title)
+{
+    MemoSearchFilter filter;
+    filter.titleKeywords = {"key1", "key2", "key3", "key2", "key1"};
+
+    const auto query = BuildMemoQuery(filter);
+    const std::string expectedQuery = "SELECT id, title, description, timestamp FROM Memo "
+                                      "WHERE (title LIKE '%key1%' OR title LIKE '%key2%' OR title LIKE '%key3%') "
+                                      "GROUP BY id;";
+    EXPECT_EQ(expectedQuery, query);
+}
+
+TEST(TestSqlite3Functions, test_BuildMemoQuery_Use_only_description_keywords_filter)
+{
+    MemoSearchFilter filter;
+    filter.memoKeywords = {"mKey1", "mKey2", "mKey3"};
+
+    const auto query = BuildMemoQuery(filter);
+    const std::string expectedQuery =
+            "SELECT id, title, description, timestamp FROM Memo "
+            "WHERE (description LIKE '%mKey1%' OR description LIKE '%mKey2%' OR description LIKE '%mKey3%') "
+            "GROUP BY id;";
+    EXPECT_EQ(expectedQuery, query);
+}
+
+TEST(TestSqlite3Functions, test_BuildMemoQuery_ignores_duplicate_keywords_for_description)
+{
+    MemoSearchFilter filter;
+    filter.memoKeywords = {"mKey1", "mKey2", "mKey3", "mKey2", "mKey1"};
+
+    const auto query = BuildMemoQuery(filter);
+    const std::string expectedQuery =
+            "SELECT id, title, description, timestamp FROM Memo "
+            "WHERE (description LIKE '%mKey1%' OR description LIKE '%mKey2%' OR description LIKE '%mKey3%') "
+            "GROUP BY id;";
+    EXPECT_EQ(expectedQuery, query);
+}
+
+TEST(TestSqlite3Functions, test_BuildMemoQuery_creates_JOIN_query_if_filter_contains_tag_ids)
+{
+    MemoSearchFilter filter;
+    filter.tagIds = {1, 2, 3};
+
+    const auto query = BuildMemoQuery(filter);
+    const std::string expectedQuery = "SELECT id, title, description, timestamp FROM Memo "
+                                      "INNER JOIN Tagged ON Memo.id = Tagged.memoId "
+                                      "WHERE tagId IN (1,2,3) GROUP BY id;";
+
+    EXPECT_EQ(expectedQuery, query);
+}
+
+TEST(TestSqlite3Functions, test_BuildMemoQuery_Filter_by_start_date_only)
+{
+    MemoSearchFilter filter;
+    filter.filterFromDate = 10001;
+
+    const auto query = BuildMemoQuery(filter);
+    const std::string expectedQuery = "SELECT id, title, description, timestamp FROM Memo "
+                                      "WHERE timestamp >= 10001 GROUP BY id;";
+
+    EXPECT_EQ(expectedQuery, query);
+}
+
+TEST(TestSqlite3Functions, test_BuildMemoQuery_Filter_by_end_date_only)
+{
+    MemoSearchFilter filter;
+    filter.filterUntilDate = 20002;
+
+            const auto query = BuildMemoQuery(filter);
+    const std::string expectedQuery = "SELECT id, title, description, timestamp FROM Memo "
+                                      "WHERE timestamp <= 20002 GROUP BY id;";
+
+    EXPECT_EQ(expectedQuery, query);
 }
 
 } // namespace memo

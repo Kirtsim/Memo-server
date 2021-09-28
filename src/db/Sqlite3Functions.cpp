@@ -6,6 +6,7 @@
 #include "model/Memo.hpp"
 #include "model/Tag.hpp"
 #include "logger/logger.hpp"
+#include <set>
 #include <sstream>
 
 namespace memo {
@@ -96,6 +97,67 @@ bool DeleteMemoTagIds(const unsigned long memoId, const std::vector<unsigned lon
     return sqlite3.exec(deleteCmd.str(), nullptr);
 }
 
+namespace {
+    std::string ConstructContainsKeysCondition(const std::string& attribute, const std::vector<std::string>& keywords);
+}
+
+std::string BuildMemoQuery(const MemoSearchFilter filter)
+{
+    namespace att = MemoTable::att;
+    std::stringstream query;
+    std::vector<std::string> conditions;
+
+    if (!filter.titlePrefix.empty())
+    {
+        conditions.emplace_back(att::kTitle + " LIKE '" + filter.titlePrefix + "%'");
+    }
+
+    if (!filter.titleKeywords.empty())
+    {
+        const auto condition = ConstructContainsKeysCondition(att::kTitle, filter.titleKeywords);
+        if (!condition.empty())
+            conditions.emplace_back(condition);
+    }
+
+    if (!filter.memoKeywords.empty())
+    {
+        const auto condition = ConstructContainsKeysCondition(att::kDescription, filter.memoKeywords);
+        if (!condition.empty())
+            conditions.emplace_back(condition);
+    }
+
+    if (filter.filterFromDate)
+        conditions.emplace_back(att::kTimestamp + " >= " + std::to_string(filter.filterFromDate.value()));
+    if (filter.filterUntilDate)
+        conditions.emplace_back(att::kTimestamp + " <= " + std::to_string(filter.filterUntilDate.value()));
+
+    query << "SELECT " << att::kId << ", " << att::kTitle << ", " << att::kDescription << ", " << att::kTimestamp
+          << " FROM " << MemoTable::kName;
+
+    const bool hasTagIds = !filter.tagIds.empty();
+    if (hasTagIds)
+    {
+        std::stringstream condition;
+        condition << TaggedTable::att::kTagId << " IN (" << filter.tagIds.front();
+        for (size_t i = 1; i < filter.tagIds.size(); ++i)
+            condition << "," << filter.tagIds[i];
+        condition << ")";
+        conditions.emplace_back(condition.str());
+
+        query << " INNER JOIN " << TaggedTable::kName << " ON "
+              << MemoTable::kName << "." << att::kId << " = "  << TaggedTable::kName << "." << TaggedTable::att::kMemoId;
+    }
+
+    if (!conditions.empty())
+    {
+        query << " WHERE " << conditions.front();
+        for (auto i = 1ul; i < conditions.size(); ++i)
+            query << " AND " << conditions[i];
+    }
+    query << " GROUP BY id;";
+    return query.str();
+}
+
 std::string BuildTagQuery(const TagSearchFilter& filter)
 {
     namespace att = TagTable::att;
@@ -157,4 +219,23 @@ std::string BuildTagQuery(const TagSearchFilter& filter)
     return query.str();
 }
 
+namespace {
+    std::string ConstructContainsKeysCondition(const std::string& attribute, const std::vector<std::string>& keywords)
+    {
+        std::set<std::string> uniqueKeywords(keywords.begin(), keywords.end());
+        uniqueKeywords.erase("");
+        if (uniqueKeywords.empty() || attribute.empty())
+            return "";
+
+        std::stringstream condition;
+        condition << "(" << attribute << " LIKE '%" << *uniqueKeywords.begin() << "%'";
+        uniqueKeywords.erase(uniqueKeywords.begin());
+
+        for (const auto& keyword : uniqueKeywords)
+            condition << " OR " << attribute << " LIKE '%" << keyword << "%'";
+
+        condition << ")";
+        return condition.str();
+    }
+}
 } // namespace memo

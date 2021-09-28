@@ -6,6 +6,7 @@
 namespace memo {
 
 class ISqlite3Wrapper;
+struct MemoSearchFilter;
 struct TagSearchFilter;
 
 /// @brief Executes a given query using the provided sqlite3 db wrapper and collects returned rows into a vector. A row
@@ -53,10 +54,16 @@ bool InsertMemoTagIds(unsigned long memoId, const std::vector<unsigned long>& ta
 /// @return true if the deletion succeeded (even if nothing was deleted), false if the operation failed.
 bool DeleteMemoTagIds(unsigned long memoId, const std::vector<unsigned long>& tagIds, ISqlite3Wrapper& sqlite3);
 
-/// @brief Based on the information in the provided filter, builds a query that returns Tag rows with all of Tag's
+/// @brief Based on information in the provided filter, builds a query that returns Memo rows with all of Memo's
+///        attributes.
+/// @param filter A struct containing criteria based on which memos should be selected.
+/// @return A string representing a SELECT query.
+std::string BuildMemoQuery(const MemoSearchFilter filter);
+
+/// @brief Based on information in the provided filter, builds a query that returns Tag rows with all of Tag's
 ///        attributes.
 /// @param filter A struct containing criteria based on which tags should be selected.
-/// @return A string representing the built SELECT query.
+/// @return A string representing a SELECT query.
 std::string BuildTagQuery(const TagSearchFilter& filter);
 
 } // namespace memo
