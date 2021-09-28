@@ -7,6 +7,8 @@
 namespace memo { class Sqlite3Wrapper; }
 namespace memo::test {
 
+using Sqlite3Rows = std::vector<std::vector<std::string>>;
+
 struct MemoValues { unsigned long id; std::string title; std::string description; unsigned long timestamp; };
 struct TagValues { unsigned long id; std::string name; int color; unsigned long timestamp; };
 struct TaggedValues { unsigned long memoId; unsigned long tagId; };
@@ -22,6 +24,8 @@ test::TagValues TagToValues(const model::Tag& tag);
 std::vector<std::string> ToStringVector(const model::Memo& memo);
 
 std::vector<std::string> ToStringVector(const model::Tag& tag);
+
+Sqlite3Rows ToStringVectors(const std::vector<model::TagPtr>& tags);
 
 std::vector<std::vector<std::string>> ExecCommand(Sqlite3Wrapper& sqlite3, const std::string& command);
 

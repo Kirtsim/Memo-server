@@ -3,6 +3,7 @@
 #include "db/Sqlite3Functions.hpp"
 #include "model/Memo.hpp"
 #include "model/Tag.hpp"
+#include "db/Tools.hpp"
 #include <set>
 
 #include <logger/logger.hpp>
@@ -30,7 +31,34 @@ std::vector<model::MemoPtr> Sqlite3Database::listMemos(const MemoSearchFilter& f
 
 std::vector<model::TagPtr> Sqlite3Database::listTags(const TagSearchFilter& filter)
 {
-    return {};
+    const auto query = BuildTagQuery(filter);
+    const auto selectedRows = SelectRows(query, *sqlite3_);
+    const auto expectedValueCount = 4ul;
+
+    std::vector<model::TagPtr> selectedTags;
+    for (const auto& row : selectedRows) {
+        if (row.size() != expectedValueCount)
+        {
+            LOG_WRN("SELECT query returned an invalid number of values per row: " << row.size() <<
+                    ". Expected number of values: " << expectedValueCount)
+            break;
+        }
+        try
+        {
+            auto tag = std::make_shared<model::Tag>();
+            tag->setId(std::stoul(row[0]));
+            tag->setName(row[1]);
+            tag->setColor(tools::IntToColor(std::stoi(row[2])));
+            tag->setTimestamp(std::stoul(row[3]));
+            selectedTags.emplace_back(tag);
+        }
+        catch (const std::invalid_argument&)
+        {
+            LOG_WRN("Error encountered while converting tag rows returned by a SELECT query to model::Tag.");
+            break;
+        }
+    }
+    return selectedTags;
 }
 
 bool Sqlite3Database::updateMemo(const model::MemoPtr& memo)

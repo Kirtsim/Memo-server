@@ -14,6 +14,27 @@ namespace {
      std::string TestFilePath();
 }
 
+TEST(TestSqlite3Database, test_listTags_without_filter)
+{
+    auto db = Sqlite3Database(std::make_unique<Sqlite3Wrapper>(TestFilePath()));
+    Sqlite3Wrapper sqlite3(TestFilePath());
+    sqlite3.open();
+
+    auto tag1 = test::CreateTag({1, "T1", 111, 11111});
+    auto tag2 = test::CreateTag({2, "T2", 222, 22222});
+    auto tag3 = test::CreateTag({3, "T3", 333, 33333});
+
+    ASSERT_TRUE(test::RecreateTables(sqlite3));
+    ASSERT_TRUE(test::InsertTagRow(sqlite3, test::TagToValues(*tag1)));
+    ASSERT_TRUE(test::InsertTagRow(sqlite3, test::TagToValues(*tag2)));
+    ASSERT_TRUE(test::InsertTagRow(sqlite3, test::TagToValues(*tag3)));
+
+    auto selectedTags = db.listTags({});
+    const auto expectedRows = test::ToStringVectors({ tag1, tag2, tag3 });
+    const auto actualRows = test::ToStringVectors(selectedTags);
+    EXPECT_EQ(expectedRows, actualRows);
+}
+
 TEST(TestSqlite3Database, test_updateMemo_Update_primitive_fields)
 {
     auto db = Sqlite3Database(std::make_unique<Sqlite3Wrapper>(TestFilePath()));
