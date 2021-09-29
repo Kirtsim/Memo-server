@@ -66,6 +66,17 @@ std::vector<std::string> ToStringVector(const model::Tag& tag)
     };
 }
 
+Sqlite3Rows ToStringVectors(const std::vector<model::MemoPtr>& memos)
+{
+    Sqlite3Rows rows;
+    for (const auto& memo : memos)
+    {
+        if (memo)
+            rows.emplace_back(ToStringVector(*memo));
+    }
+    return rows;
+}
+
 Sqlite3Rows ToStringVectors(const std::vector<model::TagPtr>& tags)
 {
     Sqlite3Rows vectors;

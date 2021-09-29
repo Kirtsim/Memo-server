@@ -25,6 +25,8 @@ std::vector<std::string> ToStringVector(const model::Memo& memo);
 
 std::vector<std::string> ToStringVector(const model::Tag& tag);
 
+Sqlite3Rows ToStringVectors(const std::vector<model::MemoPtr>& memos);
+
 Sqlite3Rows ToStringVectors(const std::vector<model::TagPtr>& tags);
 
 std::vector<std::vector<std::string>> ExecCommand(Sqlite3Wrapper& sqlite3, const std::string& command);
