@@ -19,6 +19,7 @@ TEST(TestSqlite3Database, test_listMemos_without_filter_and_tag_ids)
     auto db = Sqlite3Database(std::make_unique<Sqlite3Wrapper>(TestFilePath()));
     Sqlite3Wrapper sqlite3(TestFilePath());
     ASSERT_TRUE(sqlite3.open());
+    ASSERT_TRUE(test::RecreateTables(sqlite3));
 
     auto memo1 = test::CreateMemo({1, "T1", "D1", 1111});
     auto memo2 = test::CreateMemo({2, "T2", "D2", 2222});
@@ -39,19 +40,20 @@ TEST(TestSqlite3Database, test_listMemos_Check_memos_contain_expected_tag_ids)
     auto db = Sqlite3Database(std::make_unique<Sqlite3Wrapper>(TestFilePath()));
     Sqlite3Wrapper sqlite3(TestFilePath());
     ASSERT_TRUE(sqlite3.open());
+    ASSERT_TRUE(test::RecreateTables(sqlite3));
 
     auto memo1 = test::CreateMemo({1, "T1", "D1", 1111});
     auto memo2 = test::CreateMemo({2, "T2", "D2", 2222});
     auto memo3 = test::CreateMemo({3, "T3", "D3", 3333});
     auto memo4 = test::CreateMemo({4, "T4", "D4", 4444});
     std::vector<model::MemoPtr> memos { memo1, memo2, memo3, memo4 };
-    const std::vector<unsigned long> memo1TagIds = { 1, 2, 3 };
-    const std::vector<unsigned long> memo2TagIds = { 2 };
-    const std::vector<unsigned long> memo3TagIds = { 1, 3 };
+    memo1->setTagIds({ 1, 2, 3 });
+    memo2->setTagIds({ 2 });
+    memo3->setTagIds({ 1, 3 });
 
-    ASSERT_TRUE(test::InsertMemoRow(sqlite3, test::MemoToValues(*memo1)));
-    ASSERT_TRUE(test::InsertMemoRow(sqlite3, test::MemoToValues(*memo2)));
-    ASSERT_TRUE(test::InsertMemoRow(sqlite3, test::MemoToValues(*memo3)));
+    for (const auto& memo : memos)
+        ASSERT_TRUE(test::InsertMemoRow(sqlite3, test::MemoToValues(*memo))) << "Id: " << memo->id();
+
     ASSERT_TRUE(test::InsertTagRow(sqlite3, {1, "N1", 11, 1111 }));
     ASSERT_TRUE(test::InsertTagRow(sqlite3, {2, "N2", 11, 1111 }));
     ASSERT_TRUE(test::InsertTagRow(sqlite3, {3, "N3", 11, 1111 }));
@@ -70,6 +72,7 @@ TEST(TestSqlite3Database, test_listMemos_Check_memos_contain_expected_tag_ids)
     for (auto i = 0ul; i < selectedMemos.size(); ++i)
     {
         ASSERT_NE(nullptr, selectedMemos[i]) << " i = " << i;
+        EXPECT_EQ(memos[i]->id(), selectedMemos[i]->id()) << " i = " << i;
         EXPECT_EQ(memos[i]->tagIds(), selectedMemos[i]->tagIds()) << " i = " << i;
     }
 }

@@ -51,7 +51,6 @@ std::vector<model::MemoPtr> Sqlite3Database::listMemos(const MemoSearchFilter& f
             if (alreadyAdded)
                 continue;
 
-            memos.emplace_back(memo);
             std::vector<unsigned long> tagIds;
             SelectMemoTagIds(memo->id(), tagIds, *sqlite3_);
             memo->setTagIds(tagIds);
