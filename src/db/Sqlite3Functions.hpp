@@ -4,6 +4,7 @@
 #include <vector>
 
 namespace memo {
+using TableRows = std::vector<std::vector<std::string>>;
 
 class ISqlite3Wrapper;
 struct MemoSearchFilter;
@@ -14,7 +15,7 @@ struct TagSearchFilter;
 /// @param query SELECT query to be executed.
 /// @param sqlite3 Wrapper object for the sqlite3 db.
 /// @return A vector of string vectors (rows) returned by the query.
-std::vector<std::vector<std::string>> SelectRows(const std::string& query, ISqlite3Wrapper& sqlite3);
+TableRows SelectRows(const std::string& query, ISqlite3Wrapper& sqlite3);
 
 /// @brief Updates a single row in the 'Memo' table. The function uses the ID of the provided Memo to identify the row
 ///        that needs to be updated and attempts to override all its attributes with the data in the given Memo.

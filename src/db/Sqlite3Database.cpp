@@ -26,7 +26,44 @@ Sqlite3Database::Sqlite3Database(std::unique_ptr<ISqlite3Wrapper> wrapper)
 
 std::vector<model::MemoPtr> Sqlite3Database::listMemos(const MemoSearchFilter& filter)
 {
-    return {};
+    const auto query = BuildMemoQuery(filter);
+    const auto selectedRows = SelectRows(query, *sqlite3_);
+    const auto expectedMemoValueCount = 4ul;
+    std::vector<model::MemoPtr> memos;
+    std::set<unsigned long> memoIds;
+    for (const auto& row : selectedRows)
+    {
+        if (row.size() != expectedMemoValueCount)
+        {
+            LOG_WRN("SELECT query returned an invalid number of values per row: " << row.size() <<
+            ". Expected number of values: " << expectedMemoValueCount)
+            break;
+        }
+        try
+        {
+            auto memo = std::make_shared<model::Memo>();
+            memo->setId(std::stoul(row[0]));
+            memo->setTitle(row[1]);
+            memo->setDescription(row[2]);
+            memo->setTimestamp(std::stoul(row[3]));
+
+            const bool alreadyAdded = !memoIds.insert(memo->id()).second;
+            if (alreadyAdded)
+                continue;
+
+            memos.emplace_back(memo);
+            std::vector<unsigned long> tagIds;
+            SelectMemoTagIds(memo->id(), tagIds, *sqlite3_);
+            memo->setTagIds(tagIds);
+            memos.emplace_back(memo);
+        }
+        catch (const std::invalid_argument&)
+        {
+            LOG_WRN("Error encountered while converting memo rows to model::Memos returned by a SELECT query.");
+            break;
+        }
+    }
+    return memos;
 }
 
 std::vector<model::TagPtr> Sqlite3Database::listTags(const TagSearchFilter& filter)
@@ -54,7 +91,7 @@ std::vector<model::TagPtr> Sqlite3Database::listTags(const TagSearchFilter& filt
         }
         catch (const std::invalid_argument&)
         {
-            LOG_WRN("Error encountered while converting tag rows returned by a SELECT query to model::Tag.");
+            LOG_WRN("Error encountered while converting tag rows to model::Tags returned by a SELECT query.");
             break;
         }
     }
