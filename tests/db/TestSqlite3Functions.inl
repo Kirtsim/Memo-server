@@ -157,6 +157,47 @@ TEST(TestSqlite3Functions, test_SelectMemoTagIds_No_tags_found_Return_success)
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+TEST(TestSqlite3Functions, test_InsertMemo_automatically_increments_and_assigns_id)
+{
+    const auto tempDbFile = test::TestFilePath("temp__.db");
+    Sqlite3Wrapper sqlite3(tempDbFile);
+    ASSERT_TRUE(sqlite3.open());
+    ASSERT_TRUE(test::RecreateTables(sqlite3));
+
+    const auto existingMemo = test::CreateMemo({3, "T", "D", 10000});
+    ASSERT_TRUE(test::InsertMemoRow(sqlite3, test::MemoToValues(*existingMemo)));
+
+    auto memo = test::CreateMemo({0, "Title", "Description", 11111});
+    const bool success = InsertMemo(*memo, sqlite3);
+
+    EXPECT_TRUE(success);
+    memo->setId(4);
+    const auto rows = test::ExecCommand(sqlite3, "SELECT * FROM Memo;");
+    const auto expectedRows = test::ToStringVectors({existingMemo, memo});
+    EXPECT_EQ(expectedRows, rows);
+}
+
+TEST(TestSqlite3Functions, test_InsertMemo_fails_if_memo_with_the_same_title_exists_in_the_db)
+{
+    const auto tempDbFile = test::TestFilePath("temp__.db");
+    Sqlite3Wrapper sqlite3(tempDbFile);
+    ASSERT_TRUE(sqlite3.open());
+    ASSERT_TRUE(test::RecreateTables(sqlite3));
+
+    const auto existingMemo = test::CreateMemo({3, "Title", "D", 10000});
+    ASSERT_TRUE(test::InsertMemoRow(sqlite3, test::MemoToValues(*existingMemo)));
+
+    auto memo = test::CreateMemo({0, "Title", "Description", 11111});
+    const bool success = InsertMemo(*memo, sqlite3);
+
+    EXPECT_FALSE(success);
+    const auto rows = test::ExecCommand(sqlite3, "SELECT * FROM Memo;");
+    const auto expectedRows = test::ToStringVectors({existingMemo});
+    EXPECT_EQ(expectedRows, rows);
+}
+
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 TEST(TestSqlite3Functions, test_InsertMemoTagIds)
 {
     model::Memo memo;

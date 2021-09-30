@@ -66,6 +66,18 @@ bool SelectMemoTagIds(const unsigned long memoId, std::vector<unsigned long>& ta
     return sqlite3.exec(selectCmd.str(), selectTagIdsCallback);
 }
 
+bool InsertMemo(const model::Memo& memo, ISqlite3Wrapper& sqlite3)
+{
+    namespace att = MemoTable::att;
+
+    std::stringstream insertCmd;
+    insertCmd << "INSERT INTO " << MemoTable::kName << "(" << att::kTitle << ", " << att::kDescription << ", "
+              << att::kTimestamp << ") "
+              << "VALUES ('" << memo.title() << "', '" << memo.description() << "', " << memo.timestamp() << ");";
+
+    return sqlite3.exec(insertCmd.str(), nullptr);
+}
+
 bool InsertMemoTagIds(const unsigned long memoId, const std::vector<unsigned long>& tagIds, ISqlite3Wrapper& sqlite3)
 {
     namespace att = TaggedTable::att;

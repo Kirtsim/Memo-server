@@ -39,6 +39,13 @@ bool UpdateTagTable(const model::Tag& tag, ISqlite3Wrapper& sqlite3);
 /// @return true if selection succeeded (even if no ids were selected), false if the operation failed.
 bool SelectMemoTagIds(unsigned long memoId, std::vector<unsigned long>& tagIds, ISqlite3Wrapper& sqlite3);
 
+/// @brief Inserts a new row in the Memo table. If a memo with the same title already exists, nothing gets inserted.
+///        This function is not responsible for inserting associated tag ids into the Tagged table.
+/// @param memo Memo to be inserted.
+/// @param sqlite3 Wrapper object for sqlite3 db.
+/// @return true if selection succeeded (even if no ids were selected), false if the operation failed.
+bool InsertMemo(const model::Memo& memo, ISqlite3Wrapper& sqlite3);
+
 /// @brief Inserts rows into the 'Tagged' table where inserted row is a combination of the given memo ID and tag IDs.
 ///        In simple terms, this represents a Memo being tagged with new Tags.
 /// @param memoId ID of Memo.
