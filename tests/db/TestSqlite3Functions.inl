@@ -54,89 +54,57 @@ TEST(TestSqlite3Functions, test_SelectRows_Select_tag_rows_with_only_a_subset_of
 
 TEST(TestSqlite3Functions, test_UpdateMemoTable)
 {
-    model::Memo memo;
-    memo.setId(1);
-    memo.setTitle("New title");
-    memo.setDescription("New desc");
-    memo.setTimestamp(12345);
-
     const auto tempDbFile = test::TestFilePath("temp__.db");
     Sqlite3Wrapper sqlite3(tempDbFile);
-    sqlite3.open();
+    ASSERT_TRUE(sqlite3.open());
     ASSERT_TRUE(test::RecreateTables(sqlite3));
     ASSERT_TRUE(test::InsertMemoRow(sqlite3, {1, "Old title", "Old desc", 11111}));
 
-    EXPECT_TRUE(UpdateMemoTable(memo, sqlite3));
-    std::vector<std::vector<std::string>> returnedValues;
-    auto callback = [&](const std::vector<std::string>& values, const std::vector<std::string>&)
-    {
-        returnedValues.emplace_back(values);
-        return false;
-    };
+    const auto memo = test::CreateMemo({1, "New title", "New desc", 12345});
 
-    sqlite3.exec("SELECT * FROM Memo WHERE id=1;", callback);
-    ASSERT_EQ(returnedValues.size(), 1ul);
-    ASSERT_EQ(returnedValues[0].size(), 4ul);
-    EXPECT_EQ(returnedValues[0][1], memo.title());
-    EXPECT_EQ(returnedValues[0][2], memo.description());
-    EXPECT_EQ(returnedValues[0][3], std::to_string(memo.timestamp()));
+    EXPECT_TRUE(UpdateMemoTable(*memo, sqlite3));
+    const auto expectedRows = test::ToStringVectors({memo});
+
+    const auto rows = test::ExecCommand(sqlite3, "SELECT * FROM Memo;");
+    EXPECT_EQ(expectedRows, rows);
 }
 
 TEST(TestSqlite3Functions, test_UpdateTagTable)
 {
-    model::Tag tag;
-    tag.setId(1);
-    tag.setName("New name");
-    tag.setColor({10, 10, 10});
-    tag.setTimestamp(22222);
-
     const auto tempDbFile = test::TestFilePath("temp__.db");
     Sqlite3Wrapper sqlite3(tempDbFile);
-    sqlite3.open();
+    ASSERT_TRUE(sqlite3.open());
     ASSERT_TRUE(test::RecreateTables(sqlite3));
     ASSERT_TRUE(test::InsertTagRow(sqlite3, {1, "Old name", 12345, 11111}));
 
-    EXPECT_TRUE(UpdateTagTable(tag, sqlite3));
-    std::vector<std::vector<std::string>> returnedValues;
-    auto callback = [&](const std::vector<std::string>& values, const std::vector<std::string>&)
-    {
-        returnedValues.emplace_back(values);
-        return false;
-    };
+    const auto tag = test::CreateTag({1, "New name", tools::ColorToInt({10, 10, 10}), 22222});
+    EXPECT_TRUE(UpdateTagTable(*tag, sqlite3));
 
-    sqlite3.exec("SELECT * FROM Tag WHERE id=1;", callback);
-    ASSERT_EQ(returnedValues.size(), 1ul);
-    ASSERT_EQ(returnedValues[0].size(), 4ul);
-    EXPECT_EQ(returnedValues[0][1], tag.name());
-    EXPECT_EQ(returnedValues[0][2], std::to_string(tools::ColorToInt(tag.color())));
-    EXPECT_EQ(returnedValues[0][3], std::to_string(tag.timestamp()));
+    const auto expectedRows = test::ToStringVectors({tag});
+
+    const auto rows = test::ExecCommand(sqlite3, "SELECT * FROM Tag;");
+    EXPECT_EQ(expectedRows, rows);
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 TEST(TestSqlite3Functions, test_SelectMemoTagIds)
 {
-    model::Memo memo;
-    memo.setId(1);
-    memo.setTitle("New title");
-    memo.setDescription("New desc");
-    memo.setTimestamp(12345);
-
+    const auto memo = test::CreateMemo({1, "New title", "New desc", 12345});
     const auto tempDbFile = test::TestFilePath("temp__.db");
     Sqlite3Wrapper sqlite3(tempDbFile);
-    sqlite3.open();
-
+    ASSERT_TRUE(sqlite3.open());
     ASSERT_TRUE(test::RecreateTables(sqlite3));
     ASSERT_TRUE(test::InsertTagRow(sqlite3, {1, "Tag 1", 11111, 1111111}));
     ASSERT_TRUE(test::InsertTagRow(sqlite3, {2, "Tag 2", 22222, 2222222}));
     ASSERT_TRUE(test::InsertTagRow(sqlite3, {3, "Tag 3", 33333, 3333333}));
-    ASSERT_TRUE(test::InsertMemoRow(sqlite3, {memo.id(), memo.title(), memo.description(), memo.timestamp()}));
+    ASSERT_TRUE(test::InsertMemoRow(sqlite3, test::MemoToValues(*memo)));
     ASSERT_TRUE(test::InsertTaggedRow(sqlite3, {1, 1}));
     ASSERT_TRUE(test::InsertTaggedRow(sqlite3, {1, 3}));
 
     std::vector<unsigned long> expectedTagIds { 1, 3 };
     std::vector<unsigned long> selectedTagIds;
-    EXPECT_TRUE(SelectMemoTagIds(memo.id(), selectedTagIds, sqlite3));
+    EXPECT_TRUE(SelectMemoTagIds(memo->id(), selectedTagIds, sqlite3));
     EXPECT_EQ(selectedTagIds, expectedTagIds);
 }
 
@@ -144,8 +112,8 @@ TEST(TestSqlite3Functions, test_SelectMemoTagIds_No_tags_found_Return_success)
 {
     const auto tempDbFile = test::TestFilePath("temp__.db");
     Sqlite3Wrapper sqlite3(tempDbFile);
-    sqlite3.open();
 
+    ASSERT_TRUE(sqlite3.open());
     ASSERT_TRUE(test::RecreateTables(sqlite3));
     ASSERT_TRUE(test::InsertTagRow(sqlite3, {1, "Tag 1", 11111, 1111111}));
     ASSERT_TRUE(test::InsertMemoRow(sqlite3, {1, "Title", "Desc", 131313}));
@@ -200,71 +168,48 @@ TEST(TestSqlite3Functions, test_InsertMemo_fails_if_memo_with_the_same_title_exi
 
 TEST(TestSqlite3Functions, test_InsertMemoTagIds)
 {
-    model::Memo memo;
-    memo.setId(1);
-    memo.setTitle("New title");
-    memo.setDescription("New desc");
-    memo.setTimestamp(12345);
-
     const auto tempDbFile = test::TestFilePath("temp__.db");
     Sqlite3Wrapper sqlite3(tempDbFile);
-    sqlite3.open();
 
+    const auto memo = test::CreateMemo({1, "New title", "New desc", 12345});
+    ASSERT_TRUE(sqlite3.open());
     ASSERT_TRUE(test::RecreateTables(sqlite3));
     ASSERT_TRUE(test::InsertTagRow(sqlite3, {1, "Tag 1", 11111, 1111111}));
     ASSERT_TRUE(test::InsertTagRow(sqlite3, {2, "Tag 2", 22222, 2222222}));
     ASSERT_TRUE(test::InsertTagRow(sqlite3, {3, "Tag 3", 33333, 3333333}));
-    ASSERT_TRUE(test::InsertMemoRow(sqlite3, {memo.id(), memo.title(), memo.description(), memo.timestamp()}));
+    ASSERT_TRUE(test::InsertMemoRow(sqlite3, test::MemoToValues(*memo)));
 
     const std::vector<unsigned long> expectedTagIds { 1, 3 };
-    EXPECT_TRUE(InsertMemoTagIds(memo.id(), expectedTagIds, sqlite3));
+    EXPECT_TRUE(InsertMemoTagIds(memo->id(), expectedTagIds, sqlite3));
 
-    std::vector<unsigned long> returnedTagIds;
-    auto callback = [&](const std::vector<std::string>& values, const std::vector<std::string>&)
-    {
-        if (!values.empty())
-            returnedTagIds.emplace_back(std::stoul(values.front()));
-        return false;
-    };
-    sqlite3.exec("SELECT tagId FROM Tagged WHERE memoId=1 ORDER BY tagId;", callback);
-    EXPECT_EQ(returnedTagIds, expectedTagIds);
+    const TableRows expectedRows = {{"1"}, {"3"}};
+    const auto rows = test::ExecCommand(sqlite3, "SELECT tagId FROM Tagged WHERE memoId=1 ORDER BY tagId;");
+    EXPECT_EQ(expectedRows, rows);
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 TEST(TestSqlite3Functions, test_DeleteMemoTagIds)
 {
-    model::Memo memo;
-    memo.setId(1);
-    memo.setTitle("New title");
-    memo.setDescription("New desc");
-    memo.setTimestamp(12345);
-
     const auto tempDbFile = test::TestFilePath("temp__.db");
     Sqlite3Wrapper sqlite3(tempDbFile);
-    sqlite3.open();
 
+    const auto memo = test::CreateMemo({1, "New title", "New desc", 12345});
+    ASSERT_TRUE(sqlite3.open());
     ASSERT_TRUE(test::RecreateTables(sqlite3));
     ASSERT_TRUE(test::InsertTagRow(sqlite3, {1, "Tag 1", 11111, 1111111}));
     ASSERT_TRUE(test::InsertTagRow(sqlite3, {2, "Tag 2", 22222, 2222222}));
     ASSERT_TRUE(test::InsertTagRow(sqlite3, {3, "Tag 3", 33333, 3333333}));
-    ASSERT_TRUE(test::InsertMemoRow(sqlite3, {memo.id(), memo.title(), memo.description(), memo.timestamp()}));
+    ASSERT_TRUE(test::InsertMemoRow(sqlite3, test::MemoToValues(*memo)));
     ASSERT_TRUE(test::InsertTaggedRow(sqlite3, {1, 1}));
     ASSERT_TRUE(test::InsertTaggedRow(sqlite3, {1, 2}));
     ASSERT_TRUE(test::InsertTaggedRow(sqlite3, {1, 3}));
 
-    const std::vector<unsigned long> expectedTagIds { 2, };
-    EXPECT_TRUE(DeleteMemoTagIds(memo.id(), {1, 3}, sqlite3));
+    EXPECT_TRUE(DeleteMemoTagIds(memo->id(), {1, 3}, sqlite3));
 
-    std::vector<unsigned long> returnedTagIds;
-    auto callback = [&](const std::vector<std::string>& values, const std::vector<std::string>&)
-    {
-        if (!values.empty())
-            returnedTagIds.emplace_back(std::stoul(values.front()));
-        return false;
-    };
-    sqlite3.exec("SELECT tagId FROM Tagged WHERE memoId=1 ORDER BY tagId;", callback);
-    EXPECT_EQ(returnedTagIds, expectedTagIds);
+    TableRows expectedRows = {{"2"}};
+    const auto rows = test::ExecCommand(sqlite3, "SELECT tagId FROM Tagged WHERE memoId=1 ORDER BY tagId;");
+    EXPECT_EQ(expectedRows, rows);
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
