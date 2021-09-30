@@ -316,6 +316,27 @@ TEST(TestSqlite3Functions, test_BuildTagQuery_Filter_only_contains_end_date)
     EXPECT_EQ(expectedQuery, actualQuery);
 }
 
+TEST(TestSqlite3Functions, test_BuildTagQuery_Filter_contains_only_one_color)
+{
+    TagSearchFilter searchFilter;
+    searchFilter.colors = {111};
+    const auto actualQuery = BuildTagQuery(searchFilter);
+
+    const std::string expectedQuery = "SELECT * FROM Tag WHERE color IN (111) GROUP BY id;";
+    EXPECT_EQ(expectedQuery, actualQuery);
+}
+
+TEST(TestSqlite3Functions, test_BuildTagQuery_Filter_contains_only_one_memo_id)
+{
+    TagSearchFilter searchFilter;
+    searchFilter.memoIds = {1};
+    const auto actualQuery = BuildTagQuery(searchFilter);
+
+    const std::string expectedQuery = "SELECT id, name, color, timestamp FROM Tag "
+                                      "INNER JOIN Tagged ON Tag.id = Tagged.tagId "
+                                      "WHERE memoId IN (1) GROUP BY id;";
+    EXPECT_EQ(expectedQuery, actualQuery);
+}
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 TEST(TestSqlite3Functions, test_BuildMemoQuery_Use_all_filter_options)
@@ -448,4 +469,39 @@ TEST(TestSqlite3Functions, test_BuildMemoQuery_Filter_by_end_date_only)
     EXPECT_EQ(expectedQuery, query);
 }
 
+TEST(TestSqlite3Functions, test_BuildMemoQuery_Specify_only_one_tag_id_in_filter)
+{
+    MemoSearchFilter filter;
+    filter.tagIds = {1};
+
+    const auto query = BuildMemoQuery(filter);
+    const std::string expectedQuery = "SELECT id, title, description, timestamp FROM Memo "
+                                      "INNER JOIN Tagged ON Memo.id = Tagged.memoId "
+                                      "WHERE tagId IN (1) GROUP BY id;";
+
+    EXPECT_EQ(expectedQuery, query);
+}
+
+TEST(TestSqlite3Functions, test_BuildMemoQuery_Specify_only_one_title_keyword_in_filter)
+{
+    MemoSearchFilter filter;
+    filter.titleKeywords = {"key1"};
+
+    const auto query = BuildMemoQuery(filter);
+    const std::string expectedQuery = "SELECT id, title, description, timestamp FROM Memo "
+                                      "WHERE (title LIKE '%key1%') GROUP BY id;";
+    EXPECT_EQ(expectedQuery, query);
+}
+
+TEST(TestSqlite3Functions, test_BuildMemoQuery_Specify_only_one_description_keyword_in_filter)
+{
+    MemoSearchFilter filter;
+    filter.memoKeywords = {"mKey1"};
+
+    const auto query = BuildMemoQuery(filter);
+    const std::string expectedQuery =
+            "SELECT id, title, description, timestamp FROM Memo "
+            "WHERE (description LIKE '%mKey1%') GROUP BY id;";
+    EXPECT_EQ(expectedQuery, query);
+}
 } // namespace memo
