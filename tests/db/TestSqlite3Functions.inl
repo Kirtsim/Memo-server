@@ -166,6 +166,47 @@ TEST(TestSqlite3Functions, test_InsertMemo_fails_if_memo_with_the_same_title_exi
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+TEST(TestSqlite3Functions, test_InsertTag_automatically_increments_and_assigns_tag_id)
+{
+    const auto tempDbFile = test::TestFilePath("temp__.db");
+    Sqlite3Wrapper sqlite3(tempDbFile);
+    ASSERT_TRUE(sqlite3.open());
+    ASSERT_TRUE(test::RecreateTables(sqlite3));
+
+    const auto existingTag = test::CreateTag({2, "Tag1", 111, 11111});
+    ASSERT_TRUE(test::InsertTagRow(sqlite3, test::TagToValues(*existingTag)));
+
+    auto tag = test::CreateTag({0, "Tag2", 222, 22222});
+    const bool success = InsertTag(*tag, sqlite3);
+    EXPECT_TRUE(success);
+
+    tag->setId(3);
+    const auto expectedRows = test::ToStringVectors({existingTag, tag});
+    const auto actualRows = test::ExecCommand(sqlite3, "SELECT * FROM Tag ORDER BY id;");
+    EXPECT_EQ(expectedRows, actualRows);
+}
+
+TEST(TestSqlite3Functions, test_InsertTag_fails_if_tag_with_the_same_name_exists_in_the_db)
+{
+    const auto tempDbFile = test::TestFilePath("temp__.db");
+    Sqlite3Wrapper sqlite3(tempDbFile);
+    ASSERT_TRUE(sqlite3.open());
+    ASSERT_TRUE(test::RecreateTables(sqlite3));
+
+    const auto existingTag = test::CreateTag({2, "Tag1", 1111, 10000});
+    ASSERT_TRUE(test::InsertTagRow(sqlite3, test::TagToValues(*existingTag)));
+
+    auto tag = test::CreateTag({0, "Tag1", 2929, 33333});
+    const bool success = InsertTag(*tag, sqlite3);
+
+    EXPECT_FALSE(success);
+    const auto rows = test::ExecCommand(sqlite3, "SELECT * FROM Tag;");
+    const auto expectedRows = test::ToStringVectors({existingTag});
+    EXPECT_EQ(expectedRows, rows);
+}
+
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 TEST(TestSqlite3Functions, test_InsertMemoTagIds)
 {
     const auto tempDbFile = test::TestFilePath("temp__.db");

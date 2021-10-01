@@ -71,10 +71,22 @@ bool InsertMemo(const model::Memo& memo, ISqlite3Wrapper& sqlite3)
     namespace att = MemoTable::att;
 
     std::stringstream insertCmd;
-    insertCmd << "INSERT INTO " << MemoTable::kName << "(" << att::kTitle << ", " << att::kDescription << ", "
+    insertCmd << "INSERT INTO " << MemoTable::kName << " (" << att::kTitle << ", " << att::kDescription << ", "
               << att::kTimestamp << ") "
               << "VALUES ('" << memo.title() << "', '" << memo.description() << "', " << memo.timestamp() << ");";
 
+    return sqlite3.exec(insertCmd.str(), nullptr);
+}
+
+bool InsertTag(const model::Tag& tag, ISqlite3Wrapper& sqlite3)
+{
+    namespace att = TagTable::att;
+
+    std::stringstream insertCmd;
+    const int colorValue = tools::ColorToInt(tag.color());
+    insertCmd << "INSERT INTO " << TagTable::kName << " (" << att::kName << ", " << att::kTimestamp << ", "
+              << att::kColor << ") "
+              << "VALUES ('" << tag.name() << "', " << tag.timestamp() << ", " << colorValue << ");";
     return sqlite3.exec(insertCmd.str(), nullptr);
 }
 
