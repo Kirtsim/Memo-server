@@ -25,6 +25,24 @@ std::vector<std::vector<std::string>> SelectRows(const std::string& query, ISqli
     return selection;
 }
 
+unsigned long SelectMemoId(const std::string& title, ISqlite3Wrapper& sqlite3)
+{
+    const std::string query = "SELECT " + MemoTable::att::kId + " FROM " + MemoTable::kName + " WHERE " +
+                              MemoTable::att::kTitle + " LIKE '" + title + "';";
+    const auto selection = SelectRows(query, sqlite3);
+    if (selection.empty() || selection.front().empty())
+        return -1ul;
+    try
+    {
+        return std::stoul(selection.front().front());
+    }
+    catch (const std::invalid_argument&)
+    {
+        LOG_DBG("(SelectMemoId) Conversion to unsigned long failed for value " << selection.front().front());
+    }
+    return -1ul;
+}
+
 bool UpdateMemoTable(const model::Memo& memo, ISqlite3Wrapper& sqlite3)
 {
     namespace att = MemoTable::att;
@@ -242,6 +260,7 @@ std::string BuildTagQuery(const TagSearchFilter& filter)
     query << " GROUP BY " << att::kId << ";";
     return query.str();
 }
+
 
 namespace {
     std::string ConstructContainsKeysCondition(const std::string& attribute, const std::vector<std::string>& keywords)

@@ -161,12 +161,23 @@ bool Sqlite3Database::updateTag(const model::TagPtr& tag)
 
 bool Sqlite3Database::insertMemo(const model::MemoPtr& memo)
 {
-    return false;
+    if (!memo)
+    {
+        LOG_DBG("Memo is null.")
+        return false;
+    }
+
+    return InsertMemo(*memo, *sqlite3_);
 }
 
 bool Sqlite3Database::insertTag(const model::TagPtr& tag)
 {
-    return false;
+    if (!tag)
+    {
+        LOG_DBG("Tag is null.");
+        return false;
+    }
+    return InsertTag(*tag, *sqlite3_);
 }
 
 bool Sqlite3Database::deleteMemo(const model::MemoPtr& memo)

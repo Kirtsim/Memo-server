@@ -17,6 +17,13 @@ struct TagSearchFilter;
 /// @return A vector of string vectors (rows) returned by the query.
 TableRows SelectRows(const std::string& query, ISqlite3Wrapper& sqlite3);
 
+/// @brief Queries the database for a memo row the title of which exactly matches the given title and returns its id.
+/// If no such memo exists, this function returns -1.
+/// @param title Memo title the id of which should be returned.
+/// @param sqlite3 Wrapper object for sqlite3 db.
+/// @return Memo id or -1 if memo with the given title does not exist in the database.
+unsigned long SelectMemoId(const std::string& title, ISqlite3Wrapper& sqlite3);
+
 /// @brief Updates a single row in the 'Memo' table. The function uses the ID of the provided Memo to identify the row
 ///        that needs to be updated and attempts to override all its attributes with the data in the given Memo.
 /// @param memo Memo to be updated.
