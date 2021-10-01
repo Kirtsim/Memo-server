@@ -161,23 +161,50 @@ bool Sqlite3Database::updateTag(const model::TagPtr& tag)
 
 bool Sqlite3Database::insertMemo(const model::MemoPtr& memo)
 {
+    LOG_DBG("Inserting Memo with title '" << memo->title() << "' ...")
     if (!memo)
     {
         LOG_DBG("Memo is null.")
         return false;
     }
+    beginTransaction();
+    auto insertSuccess = InsertMemo(*memo, *sqlite3_);
+    auto newId = SelectMemoId(memo->title(), *sqlite3_);
+    if (!insertSuccess || newId == -1ul)
+    {
+        if (newId != -1ul)
+            LOG_INF("Failed to insert Memo. Given title is already in use by another Memo.")
+        else
+            LOG_WRN("Failed to insert Memo.")
+        rollback();
+        return false;
+    }
 
-    return InsertMemo(*memo, *sqlite3_);
+    if (!InsertMemoTagIds(memo->id(), memo->tagIds(), *sqlite3_))
+    {
+        LOG_WRN("Failed to insert Memo. Tag ids could not be assigned.")
+        return false;
+    }
+    LOG_DBG("Memo inserted.")
+    return true;
 }
 
 bool Sqlite3Database::insertTag(const model::TagPtr& tag)
 {
+    LOG_DBG("Inserting Tag with name '" << tag->name() << "' ...")
     if (!tag)
     {
-        LOG_DBG("Tag is null.");
+        LOG_DBG("Tag is null.")
         return false;
     }
-    return InsertTag(*tag, *sqlite3_);
+
+    if (InsertTag(*tag, *sqlite3_))
+    {
+        LOG_DBG("Tag inserted.")
+        return true;
+    }
+    LOG_WRN("Failed to insert Tag.")
+    return false;
 }
 
 bool Sqlite3Database::deleteMemo(const model::MemoPtr& memo)
