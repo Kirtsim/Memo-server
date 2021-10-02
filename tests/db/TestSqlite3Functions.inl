@@ -14,12 +14,41 @@
 
 namespace memo {
 
-TEST(TestSqlite3Functions, test_SelectRows_Tags_only)
+class TestSqlite3Functions_WithSqlite3 : public testing::Test
 {
-    const auto tempDbFile = test::TestFilePath("temp__.db");
-    Sqlite3Wrapper sqlite3(tempDbFile);
+    static const std::string dbFileName;
+protected:
+    TestSqlite3Functions_WithSqlite3();
+
+    void SetUp() override;
+
+    void TearDown() override;
+
+protected:
+    Sqlite3Wrapper sqlite3;
+};
+
+const std::string TestSqlite3Functions_WithSqlite3::dbFileName = "temp__.db";
+
+TestSqlite3Functions_WithSqlite3::TestSqlite3Functions_WithSqlite3()
+    : testing::Test()
+    , sqlite3(test::TestFilePath(dbFileName))
+{
+}
+
+void TestSqlite3Functions_WithSqlite3::SetUp()
+{
     ASSERT_TRUE(sqlite3.open());
     ASSERT_TRUE(test::RecreateTables(sqlite3));
+}
+
+void TestSqlite3Functions_WithSqlite3::TearDown()
+{
+    test::RemoveFile(test::TestFilePath(dbFileName));
+}
+
+TEST_F(TestSqlite3Functions_WithSqlite3, test_SelectRows_Tags_only)
+{
     auto tag1 = test::CreateTag({1, "T1", 11, 1001});
     auto tag2 = test::CreateTag({2, "T2", 22, 2002});
     auto tag3 = test::CreateTag({3, "T3", 33, 3003});
@@ -34,13 +63,8 @@ TEST(TestSqlite3Functions, test_SelectRows_Tags_only)
     EXPECT_EQ(expectedTags, actualTags);
 }
 
-TEST(TestSqlite3Functions, test_SelectRows_Select_tag_rows_with_only_a_subset_of_attributes)
+TEST_F(TestSqlite3Functions_WithSqlite3, test_SelectRows_Select_tag_rows_with_only_a_subset_of_attributes)
 {
-    const auto tempDbFile = test::TestFilePath("temp__.db");
-    Sqlite3Wrapper sqlite3(tempDbFile);
-    ASSERT_TRUE(sqlite3.open());
-    ASSERT_TRUE(test::RecreateTables(sqlite3));
-
     ASSERT_TRUE(test::InsertTagRow(sqlite3, {1, "T1", 11, 1001}));
     ASSERT_TRUE(test::InsertTagRow(sqlite3, {2, "T2", 22, 2002}));
     ASSERT_TRUE(test::InsertTagRow(sqlite3, {3, "T3", 33, 3003}));
@@ -52,12 +76,8 @@ TEST(TestSqlite3Functions, test_SelectRows_Select_tag_rows_with_only_a_subset_of
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-TEST(TestSqlite3Functions, test_UpdateMemoTable)
+TEST_F(TestSqlite3Functions_WithSqlite3, test_UpdateMemoTable)
 {
-    const auto tempDbFile = test::TestFilePath("temp__.db");
-    Sqlite3Wrapper sqlite3(tempDbFile);
-    ASSERT_TRUE(sqlite3.open());
-    ASSERT_TRUE(test::RecreateTables(sqlite3));
     ASSERT_TRUE(test::InsertMemoRow(sqlite3, {1, "Old title", "Old desc", 11111}));
 
     const auto memo = test::CreateMemo({1, "New title", "New desc", 12345});
@@ -69,12 +89,8 @@ TEST(TestSqlite3Functions, test_UpdateMemoTable)
     EXPECT_EQ(expectedRows, rows);
 }
 
-TEST(TestSqlite3Functions, test_UpdateTagTable)
+TEST_F(TestSqlite3Functions_WithSqlite3, test_UpdateTagTable)
 {
-    const auto tempDbFile = test::TestFilePath("temp__.db");
-    Sqlite3Wrapper sqlite3(tempDbFile);
-    ASSERT_TRUE(sqlite3.open());
-    ASSERT_TRUE(test::RecreateTables(sqlite3));
     ASSERT_TRUE(test::InsertTagRow(sqlite3, {1, "Old name", 12345, 11111}));
 
     const auto tag = test::CreateTag({1, "New name", tools::ColorToInt({10, 10, 10}), 22222});
@@ -88,13 +104,9 @@ TEST(TestSqlite3Functions, test_UpdateTagTable)
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-TEST(TestSqlite3Functions, test_SelectMemoTagIds)
+TEST_F(TestSqlite3Functions_WithSqlite3, test_SelectMemoTagIds)
 {
     const auto memo = test::CreateMemo({1, "New title", "New desc", 12345});
-    const auto tempDbFile = test::TestFilePath("temp__.db");
-    Sqlite3Wrapper sqlite3(tempDbFile);
-    ASSERT_TRUE(sqlite3.open());
-    ASSERT_TRUE(test::RecreateTables(sqlite3));
     ASSERT_TRUE(test::InsertTagRow(sqlite3, {1, "Tag 1", 11111, 1111111}));
     ASSERT_TRUE(test::InsertTagRow(sqlite3, {2, "Tag 2", 22222, 2222222}));
     ASSERT_TRUE(test::InsertTagRow(sqlite3, {3, "Tag 3", 33333, 3333333}));
@@ -108,13 +120,8 @@ TEST(TestSqlite3Functions, test_SelectMemoTagIds)
     EXPECT_EQ(selectedTagIds, expectedTagIds);
 }
 
-TEST(TestSqlite3Functions, test_SelectMemoTagIds_No_tags_found_Return_success)
+TEST_F(TestSqlite3Functions_WithSqlite3, test_SelectMemoTagIds_No_tags_found_Return_success)
 {
-    const auto tempDbFile = test::TestFilePath("temp__.db");
-    Sqlite3Wrapper sqlite3(tempDbFile);
-
-    ASSERT_TRUE(sqlite3.open());
-    ASSERT_TRUE(test::RecreateTables(sqlite3));
     ASSERT_TRUE(test::InsertTagRow(sqlite3, {1, "Tag 1", 11111, 1111111}));
     ASSERT_TRUE(test::InsertMemoRow(sqlite3, {1, "Title", "Desc", 131313}));
 
@@ -125,13 +132,8 @@ TEST(TestSqlite3Functions, test_SelectMemoTagIds_No_tags_found_Return_success)
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-TEST(TestSqlite3Functions, test_InsertMemo_automatically_increments_and_assigns_id)
+TEST_F(TestSqlite3Functions_WithSqlite3, test_InsertMemo_automatically_increments_and_assigns_id)
 {
-    const auto tempDbFile = test::TestFilePath("temp__.db");
-    Sqlite3Wrapper sqlite3(tempDbFile);
-    ASSERT_TRUE(sqlite3.open());
-    ASSERT_TRUE(test::RecreateTables(sqlite3));
-
     const auto existingMemo = test::CreateMemo({3, "T", "D", 10000});
     ASSERT_TRUE(test::InsertMemoRow(sqlite3, test::MemoToValues(*existingMemo)));
 
@@ -145,13 +147,8 @@ TEST(TestSqlite3Functions, test_InsertMemo_automatically_increments_and_assigns_
     EXPECT_EQ(expectedRows, rows);
 }
 
-TEST(TestSqlite3Functions, test_InsertMemo_fails_if_memo_with_the_same_title_exists_in_the_db)
+TEST_F(TestSqlite3Functions_WithSqlite3, test_InsertMemo_fails_if_memo_with_the_same_title_exists_in_the_db)
 {
-    const auto tempDbFile = test::TestFilePath("temp__.db");
-    Sqlite3Wrapper sqlite3(tempDbFile);
-    ASSERT_TRUE(sqlite3.open());
-    ASSERT_TRUE(test::RecreateTables(sqlite3));
-
     const auto existingMemo = test::CreateMemo({3, "Title", "D", 10000});
     ASSERT_TRUE(test::InsertMemoRow(sqlite3, test::MemoToValues(*existingMemo)));
 
@@ -166,13 +163,8 @@ TEST(TestSqlite3Functions, test_InsertMemo_fails_if_memo_with_the_same_title_exi
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-TEST(TestSqlite3Functions, test_InsertTag_automatically_increments_and_assigns_tag_id)
+TEST_F(TestSqlite3Functions_WithSqlite3, test_InsertTag_automatically_increments_and_assigns_tag_id)
 {
-    const auto tempDbFile = test::TestFilePath("temp__.db");
-    Sqlite3Wrapper sqlite3(tempDbFile);
-    ASSERT_TRUE(sqlite3.open());
-    ASSERT_TRUE(test::RecreateTables(sqlite3));
-
     const auto existingTag = test::CreateTag({2, "Tag1", 111, 11111});
     ASSERT_TRUE(test::InsertTagRow(sqlite3, test::TagToValues(*existingTag)));
 
@@ -186,13 +178,8 @@ TEST(TestSqlite3Functions, test_InsertTag_automatically_increments_and_assigns_t
     EXPECT_EQ(expectedRows, actualRows);
 }
 
-TEST(TestSqlite3Functions, test_InsertTag_fails_if_tag_with_the_same_name_exists_in_the_db)
+TEST_F(TestSqlite3Functions_WithSqlite3, test_InsertTag_fails_if_tag_with_the_same_name_exists_in_the_db)
 {
-    const auto tempDbFile = test::TestFilePath("temp__.db");
-    Sqlite3Wrapper sqlite3(tempDbFile);
-    ASSERT_TRUE(sqlite3.open());
-    ASSERT_TRUE(test::RecreateTables(sqlite3));
-
     const auto existingTag = test::CreateTag({2, "Tag1", 1111, 10000});
     ASSERT_TRUE(test::InsertTagRow(sqlite3, test::TagToValues(*existingTag)));
 
@@ -207,14 +194,9 @@ TEST(TestSqlite3Functions, test_InsertTag_fails_if_tag_with_the_same_name_exists
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-TEST(TestSqlite3Functions, test_InsertMemoTagIds)
+TEST_F(TestSqlite3Functions_WithSqlite3, test_InsertMemoTagIds)
 {
-    const auto tempDbFile = test::TestFilePath("temp__.db");
-    Sqlite3Wrapper sqlite3(tempDbFile);
-
     const auto memo = test::CreateMemo({1, "New title", "New desc", 12345});
-    ASSERT_TRUE(sqlite3.open());
-    ASSERT_TRUE(test::RecreateTables(sqlite3));
     ASSERT_TRUE(test::InsertTagRow(sqlite3, {1, "Tag 1", 11111, 1111111}));
     ASSERT_TRUE(test::InsertTagRow(sqlite3, {2, "Tag 2", 22222, 2222222}));
     ASSERT_TRUE(test::InsertTagRow(sqlite3, {3, "Tag 3", 33333, 3333333}));
@@ -230,14 +212,9 @@ TEST(TestSqlite3Functions, test_InsertMemoTagIds)
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-TEST(TestSqlite3Functions, test_DeleteMemoTagIds)
+TEST_F(TestSqlite3Functions_WithSqlite3, test_DeleteMemoTagIds)
 {
-    const auto tempDbFile = test::TestFilePath("temp__.db");
-    Sqlite3Wrapper sqlite3(tempDbFile);
-
     const auto memo = test::CreateMemo({1, "New title", "New desc", 12345});
-    ASSERT_TRUE(sqlite3.open());
-    ASSERT_TRUE(test::RecreateTables(sqlite3));
     ASSERT_TRUE(test::InsertTagRow(sqlite3, {1, "Tag 1", 11111, 1111111}));
     ASSERT_TRUE(test::InsertTagRow(sqlite3, {2, "Tag 2", 22222, 2222222}));
     ASSERT_TRUE(test::InsertTagRow(sqlite3, {3, "Tag 3", 33333, 3333333}));

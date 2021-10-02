@@ -10,17 +10,44 @@
 
 namespace memo {
 
-namespace {
-     std::string TestFilePath();
+class TestSqlite3Database : public testing::Test
+{
+    static const std::string dbFileName;
+protected:
+    TestSqlite3Database();
+
+    void SetUp() override;
+
+    void TearDown() override;
+
+protected:
+    Sqlite3Wrapper sqlite3;
+    Sqlite3Database db;
+};
+
+const std::string TestSqlite3Database::dbFileName = "temp__.db";
+
+TestSqlite3Database::TestSqlite3Database()
+    : testing::Test()
+    , sqlite3(test::TestFilePath(dbFileName))
+    , db(std::make_unique<Sqlite3Wrapper>(test::TestFilePath(dbFileName)))
+{
 }
 
-TEST(TestSqlite3Database, test_listMemos_without_filter_and_tag_ids)
+void TestSqlite3Database::SetUp()
 {
-    auto db = Sqlite3Database(std::make_unique<Sqlite3Wrapper>(TestFilePath()));
-    Sqlite3Wrapper sqlite3(TestFilePath());
     ASSERT_TRUE(sqlite3.open());
     ASSERT_TRUE(test::RecreateTables(sqlite3));
+}
 
+void TestSqlite3Database::TearDown()
+{
+    test::RemoveFile(test::TestFilePath(dbFileName));
+}
+
+
+TEST_F(TestSqlite3Database, test_listMemos_without_filter_and_tag_ids)
+{
     auto memo1 = test::CreateMemo({1, "T1", "D1", 1111});
     auto memo2 = test::CreateMemo({2, "T2", "D2", 2222});
     auto memo3 = test::CreateMemo({3, "T3", "D3", 3333});
@@ -35,13 +62,8 @@ TEST(TestSqlite3Database, test_listMemos_without_filter_and_tag_ids)
     EXPECT_EQ(expectedRows, selectedRows);
 }
 
-TEST(TestSqlite3Database, test_listMemos_Check_memos_contain_expected_tag_ids)
+TEST_F(TestSqlite3Database, test_listMemos_Check_memos_contain_expected_tag_ids)
 {
-    auto db = Sqlite3Database(std::make_unique<Sqlite3Wrapper>(TestFilePath()));
-    Sqlite3Wrapper sqlite3(TestFilePath());
-    ASSERT_TRUE(sqlite3.open());
-    ASSERT_TRUE(test::RecreateTables(sqlite3));
-
     auto memo1 = test::CreateMemo({1, "T1", "D1", 1111});
     auto memo2 = test::CreateMemo({2, "T2", "D2", 2222});
     auto memo3 = test::CreateMemo({3, "T3", "D3", 3333});
@@ -77,17 +99,12 @@ TEST(TestSqlite3Database, test_listMemos_Check_memos_contain_expected_tag_ids)
     }
 }
 
-TEST(TestSqlite3Database, test_listTags_without_filter)
+TEST_F(TestSqlite3Database, test_listTags_without_filter)
 {
-    auto db = Sqlite3Database(std::make_unique<Sqlite3Wrapper>(TestFilePath()));
-    Sqlite3Wrapper sqlite3(TestFilePath());
-    sqlite3.open();
-
     auto tag1 = test::CreateTag({1, "T1", 111, 11111});
     auto tag2 = test::CreateTag({2, "T2", 222, 22222});
     auto tag3 = test::CreateTag({3, "T3", 333, 33333});
 
-    ASSERT_TRUE(test::RecreateTables(sqlite3));
     ASSERT_TRUE(test::InsertTagRow(sqlite3, test::TagToValues(*tag1)));
     ASSERT_TRUE(test::InsertTagRow(sqlite3, test::TagToValues(*tag2)));
     ASSERT_TRUE(test::InsertTagRow(sqlite3, test::TagToValues(*tag3)));
@@ -98,13 +115,8 @@ TEST(TestSqlite3Database, test_listTags_without_filter)
     EXPECT_EQ(expectedRows, actualRows);
 }
 
-TEST(TestSqlite3Database, test_updateMemo_Update_primitive_fields)
+TEST_F(TestSqlite3Database, test_updateMemo_Update_primitive_fields)
 {
-    auto db = Sqlite3Database(std::make_unique<Sqlite3Wrapper>(TestFilePath()));
-    Sqlite3Wrapper sqlite3(TestFilePath());
-    sqlite3.open();
-
-    ASSERT_TRUE(test::RecreateTables(sqlite3));
     ASSERT_TRUE(test::InsertMemoRow(sqlite3, {1, "Old title", "Old description", 11111}));
 
     auto memo = test::CreateMemo({1, "New title", "New Desc", 22222});
@@ -116,13 +128,8 @@ TEST(TestSqlite3Database, test_updateMemo_Update_primitive_fields)
     EXPECT_EQ(expectedValues, selectedRows.front());
 }
 
-TEST(TestSqlite3Database, test_updateMemo_Update_attributes_and_add_and_remove_tags)
+TEST_F(TestSqlite3Database, test_updateMemo_Update_attributes_and_add_and_remove_tags)
 {
-    auto db = Sqlite3Database(std::make_unique<Sqlite3Wrapper>(TestFilePath()));
-    Sqlite3Wrapper sqlite3(TestFilePath());
-    sqlite3.open();
-
-    ASSERT_TRUE(test::RecreateTables(sqlite3));
     ASSERT_TRUE(test::InsertMemoRow(sqlite3, {1, "Old title", "Old description", 11111}));
     ASSERT_TRUE(test::InsertTagRow(sqlite3, {1, "Tag1", 1111, 101010}));
     ASSERT_TRUE(test::InsertTagRow(sqlite3, {2, "Tag2", 2222, 202020}));
@@ -146,15 +153,10 @@ TEST(TestSqlite3Database, test_updateMemo_Update_attributes_and_add_and_remove_t
     EXPECT_EQ(expectedTagIds, selectedTagIdRows.front());
 }
 
-TEST(TestSqlite3Database, test_updateMemo_Memo_with_given_title_already_exists_Fail)
+TEST_F(TestSqlite3Database, test_updateMemo_Memo_with_given_title_already_exists_Fail)
 {
-    auto db = Sqlite3Database(std::make_unique<Sqlite3Wrapper>(TestFilePath()));
-    Sqlite3Wrapper sqlite3(TestFilePath());
-    sqlite3.open();
-
     auto firstMemo = test::CreateMemo({1, "Existing title", "Description1", 11111});
     auto memoToUpdate = test::CreateMemo({2, "Old title", "Old description", 22222});
-    ASSERT_TRUE(test::RecreateTables(sqlite3));
     ASSERT_TRUE(test::InsertMemoRow(sqlite3, test::MemoToValues(*firstMemo)));
     ASSERT_TRUE(test::InsertMemoRow(sqlite3, test::MemoToValues(*memoToUpdate)));
 
@@ -169,14 +171,9 @@ TEST(TestSqlite3Database, test_updateMemo_Memo_with_given_title_already_exists_F
     EXPECT_EQ(expectedSecondRow, selectedMemoRows.back());
 }
 
-TEST(TestSqlite3Database, test_UpdateTag)
+TEST_F(TestSqlite3Database, test_UpdateTag)
 {
-    auto db = Sqlite3Database(std::make_unique<Sqlite3Wrapper>(TestFilePath()));
-    Sqlite3Wrapper sqlite3(TestFilePath());
-    sqlite3.open();
-
     auto newTag = test::CreateTag({1, "NetTagName", 222, 22222});
-    ASSERT_TRUE(test::RecreateTables(sqlite3));
     ASSERT_TRUE(test::InsertTagRow(sqlite3, {1, "OldTagName", 111, 11111}));
 
     EXPECT_TRUE(db.updateTag(newTag));
@@ -187,15 +184,10 @@ TEST(TestSqlite3Database, test_UpdateTag)
     EXPECT_EQ(selectedRows.front(), expectedValues);
 }
 
-TEST(TestSqlite3Database, test_UpdateTag_Tag_with_the_same_name_exists_Fail)
+TEST_F(TestSqlite3Database, test_UpdateTag_Tag_with_the_same_name_exists_Fail)
 {
-    auto db = Sqlite3Database(std::make_unique<Sqlite3Wrapper>(TestFilePath()));
-    Sqlite3Wrapper sqlite3(TestFilePath());
-    sqlite3.open();
-
     auto firstTag = test::CreateTag({1, "ExistingTagName", 111, 11111});
     auto oldTag = test::CreateTag({2, "TagNameToUpdate", 222, 22222});
-    ASSERT_TRUE(test::RecreateTables(sqlite3));
     ASSERT_TRUE(test::InsertTagRow(sqlite3, test::TagToValues(*firstTag)));
     ASSERT_TRUE(test::InsertTagRow(sqlite3, test::TagToValues(*oldTag)));
 
@@ -210,10 +202,4 @@ TEST(TestSqlite3Database, test_UpdateTag_Tag_with_the_same_name_exists_Fail)
     EXPECT_EQ(selectedRows.back(), expectedSecondRow);
 }
 
-namespace {
-    std::string TestFilePath()
-    {
-        return test::TestFilePath("temp__.db");
-    }
-} // namespace
 } // namespace memo
