@@ -184,8 +184,10 @@ bool Sqlite3Database::insertMemo(const model::MemoPtr& memo)
     if (!InsertMemoTagIds(memo->id(), memo->tagIds(), *sqlite3_))
     {
         LOG_WRN("Failed to insert Memo. Tag ids could not be assigned.")
+        rollback();
         return false;
     }
+    commitTransaction();
     LOG_DBG("Memo inserted.")
     return true;
 }

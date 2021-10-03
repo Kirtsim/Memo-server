@@ -99,6 +99,8 @@ TEST_F(TestSqlite3Database, test_listMemos_Check_memos_contain_expected_tag_ids)
     }
 }
 
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 TEST_F(TestSqlite3Database, test_listTags_without_filter)
 {
     auto tag1 = test::CreateTag({1, "T1", 111, 11111});
@@ -114,6 +116,8 @@ TEST_F(TestSqlite3Database, test_listTags_without_filter)
     const auto actualRows = test::ToStringVectors(selectedTags);
     EXPECT_EQ(expectedRows, actualRows);
 }
+
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 TEST_F(TestSqlite3Database, test_updateMemo_Update_primitive_fields)
 {
@@ -171,6 +175,8 @@ TEST_F(TestSqlite3Database, test_updateMemo_Memo_with_given_title_already_exists
     EXPECT_EQ(expectedSecondRow, selectedMemoRows.back());
 }
 
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 TEST_F(TestSqlite3Database, test_UpdateTag)
 {
     auto newTag = test::CreateTag({1, "NetTagName", 222, 22222});
@@ -202,4 +208,74 @@ TEST_F(TestSqlite3Database, test_UpdateTag_Tag_with_the_same_name_exists_Fail)
     EXPECT_EQ(selectedRows.back(), expectedSecondRow);
 }
 
+TEST_F(TestSqlite3Database, test_InsertMemo_does_not_insert_memo_with_existing_name_and_returns_false)
+{
+    auto existingMemo = test::CreateMemo({1, "Title1", "Desc1", 11111});
+    ASSERT_TRUE(test::InsertMemoRow(sqlite3, test::MemoToValues(*existingMemo)));
+
+    auto newMemo = test::CreateMemo({0, "Title1", "Desc 2", 22222});
+    const bool success = db.insertMemo(newMemo);
+    EXPECT_FALSE(success);
+
+    const auto expectedRows = test::ToStringVectors({existingMemo});
+    const auto actualRows = test::ExecCommand(sqlite3, "SELECT * FROM Memo;");
+    EXPECT_EQ(expectedRows, actualRows);
+}
+
+TEST_F(TestSqlite3Database, test_InsertMemo_does_not_proceed_to_inserting_into_Tagged_table_if_memo_title_exists)
+{
+    ASSERT_TRUE(test::InsertTagRow(sqlite3, {1, "T1", 111, 1111}));
+    ASSERT_TRUE(test::InsertTagRow(sqlite3, {2, "T2", 222, 2222}));
+
+    auto existingMemo = test::CreateMemo({1, "Title1", "Desc1", 11111});
+    ASSERT_TRUE(test::InsertMemoRow(sqlite3, test::MemoToValues(*existingMemo)));
+
+    auto newMemo = test::CreateMemo({0, "Title1", "Desc 2", 22222});
+    const bool success = db.insertMemo(newMemo);
+    EXPECT_FALSE(success);
+
+    const auto expectedMemoRows = test::ToStringVectors({existingMemo});
+    const auto actualMemoRows = test::ExecCommand(sqlite3, "SELECT * FROM Memo;");
+    const TableRows expectedTaggedRows = {};
+    const auto actualTaggedRows = test::ExecCommand(sqlite3, "SELECT * FROM Tagged ORDER BY tagId;");
+    EXPECT_EQ(expectedMemoRows, actualMemoRows);
+    EXPECT_EQ(expectedTaggedRows, actualTaggedRows);
+}
+
+TEST_F(TestSqlite3Database, test_InsertMemo_also_inserts_into_the_Tagged_table)
+{
+    ASSERT_TRUE(test::InsertTagRow(sqlite3, {1, "T1", 111, 1111}));
+    ASSERT_TRUE(test::InsertTagRow(sqlite3, {2, "T2", 222, 2222}));
+    ASSERT_TRUE(test::InsertTagRow(sqlite3, {3, "T3", 333, 3333}));
+
+    auto memo = test::CreateMemo({1, "Title1", "Desc 2", 22222});
+    memo->setTagIds({1, 3});
+    const bool success = db.insertMemo(memo);
+    EXPECT_TRUE(success);
+
+    const auto expectedMemoRows = test::ToStringVectors({memo});
+    const auto actualMemoRows = test::ExecCommand(sqlite3, "SELECT * FROM Memo;");
+    const TableRows expectedTaggedRows = {{"1", "1"}, {"1", "3"}};
+    const auto actualTaggedRows = test::ExecCommand(sqlite3, "SELECT * FROM Tagged ORDER BY tagId;");
+    EXPECT_EQ(expectedMemoRows, actualMemoRows);
+    EXPECT_EQ(expectedTaggedRows, actualTaggedRows);
+}
+
+TEST_F(TestSqlite3Database, test_InsertMemo_inserts_nothing_if_tag_does_not_exist)
+{
+    ASSERT_TRUE(test::InsertTagRow(sqlite3, {1, "T1", 111, 1111}));
+    ASSERT_TRUE(test::InsertTagRow(sqlite3, {2, "T2", 222, 2222}));
+
+    auto memo = test::CreateMemo({1, "Title1", "Desc 2", 22222});
+    memo->setTagIds({1, 3});
+    const bool success = db.insertMemo(memo);
+    EXPECT_FALSE(success);
+
+    const TableRows expectedMemoRows = {};
+    const auto actualMemoRows = test::ExecCommand(sqlite3, "SELECT * FROM Memo;");
+    const TableRows expectedTaggedRows = {};
+    const auto actualTaggedRows = test::ExecCommand(sqlite3, "SELECT * FROM Tagged ORDER BY tagId;");
+    EXPECT_EQ(expectedMemoRows, actualMemoRows);
+    EXPECT_EQ(expectedTaggedRows, actualTaggedRows);
+}
 } // namespace memo
