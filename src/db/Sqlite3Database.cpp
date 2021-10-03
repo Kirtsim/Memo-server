@@ -20,8 +20,9 @@ Sqlite3Database::Sqlite3Database(std::unique_ptr<ISqlite3Wrapper> wrapper)
     : sqlite3_(std::move(wrapper))
 {
     if (!sqlite3_->open())
-        LOG_ERR(kLogTag << "Failed to open sqlite3 database.");
-
+        LOG_ERR(kLogTag << "Failed to open sqlite3 database.")
+    else if (!sqlite3_->exec("PRAGMA foreign_keys = ON;", nullptr))
+        LOG_WRN("Failed to enable enforcement of Foreign key constraints.")
 }
 
 std::vector<model::MemoPtr> Sqlite3Database::listMemos(const MemoSearchFilter& filter)
