@@ -1,6 +1,7 @@
 #include "db/Sqlite3Database.hpp"
 #include "db/ISqlite3Wrapper.hpp"
 #include "db/Sqlite3Functions.hpp"
+#include "db/Sqlite3Schema.hpp"
 #include "model/Memo.hpp"
 #include "model/Tag.hpp"
 #include "db/Tools.hpp"
@@ -212,7 +213,32 @@ bool Sqlite3Database::insertTag(const model::TagPtr& tag)
 
 bool Sqlite3Database::deleteMemo(const model::MemoPtr& memo)
 {
-    return false;
+    LOG_DBG("Deleting Memo ...")
+    if (!memo)
+    {
+        LOG_DBG("Memo is null.")
+        return false;
+    }
+    LOG_DBG("Memo id: " << memo->id())
+    const auto stringMemoId = std::to_string(memo->id());
+    const std::string deleteTaggedQuery = "DELETE FROM " + TaggedTable::kName +
+                                        " WHERE " + TaggedTable::att::kMemoId + " = " + stringMemoId + ";";
+    const std::string deleteMemoQuery = "DELETE FROM " + MemoTable::kName +
+                                        " WHERE " + MemoTable::att::kId + " = " + stringMemoId + ";";
+    beginTransaction();
+    if (!sqlite3_->exec(deleteTaggedQuery, nullptr))
+    {
+        LOG_DBG("Failed to delete associated Tagged rows.")
+        rollback();
+        return false;
+    }
+    if (!sqlite3_->exec(deleteMemoQuery, nullptr))
+    {
+        rollback();
+        return false;
+    }
+    commitTransaction();
+    return true;
 }
 
 bool Sqlite3Database::deleteTag(const model::TagPtr& tag)
