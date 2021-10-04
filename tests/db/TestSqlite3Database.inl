@@ -208,6 +208,8 @@ TEST_F(TestSqlite3Database, test_UpdateTag_Tag_with_the_same_name_exists_Fail)
     EXPECT_EQ(selectedRows.back(), expectedSecondRow);
 }
 
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 TEST_F(TestSqlite3Database, test_InsertMemo_does_not_insert_memo_with_existing_name_and_returns_false)
 {
     auto existingMemo = test::CreateMemo({1, "Title1", "Desc1", 11111});
@@ -277,5 +279,34 @@ TEST_F(TestSqlite3Database, test_InsertMemo_inserts_nothing_if_tag_does_not_exis
     const auto actualTaggedRows = test::ExecCommand(sqlite3, "SELECT * FROM Tagged ORDER BY tagId;");
     EXPECT_EQ(expectedMemoRows, actualMemoRows);
     EXPECT_EQ(expectedTaggedRows, actualTaggedRows);
+}
+
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+TEST_F(TestSqlite3Database, test_InsertTag_autoincrements_the_tag_id)
+{
+    auto existingTag = test::CreateTag({1, "Tag1", 111, 1111});
+    ASSERT_TRUE(test::InsertTagRow(sqlite3, test::TagToValues(*existingTag)));
+
+    auto tag = test::CreateTag({0, "Tag2", 22, 2222});
+    EXPECT_TRUE(db.insertTag(tag));
+
+    tag->setId(2);
+    const auto expectedRows = test::ToStringVectors({existingTag, tag});
+    const auto actualRows = test::ExecCommand(sqlite3, "SELECT * FROM Tag ORDER BY id;");
+    EXPECT_EQ(expectedRows, actualRows);
+}
+
+TEST_F(TestSqlite3Database, test_InsertTag_does_not_insert_if_tag_name_already_exists)
+{
+    auto existingTag = test::CreateTag({1, "TestTag", 111, 1111});
+    ASSERT_TRUE(test::InsertTagRow(sqlite3, test::TagToValues(*existingTag)));
+
+    auto tag = test::CreateTag({2, "TestTag", 22, 2222});
+    EXPECT_FALSE(db.insertTag(tag));
+
+    const auto expectedRows = test::ToStringVectors({existingTag});
+    const auto actualRows = test::ExecCommand(sqlite3, "SELECT * FROM Tag;");
+    EXPECT_EQ(expectedRows, actualRows);
 }
 } // namespace memo
