@@ -342,7 +342,6 @@ TEST_F(TestSqlite3Database, test_DeleteMemo_deletes_dependent_rows_from_the_Tagg
     const auto tag1 = test::CreateTag({1, "T1", 111, 1111});
     const auto tag2 = test::CreateTag({2, "T2", 222, 2222});
     const auto tag3 = test::CreateTag({3, "T3", 333, 3333});
-    test::TagToValues(*tag1);
     ASSERT_TRUE(test::InsertMemoRow(sqlite3, test::MemoToValues(*remainingMemo)));
     ASSERT_TRUE(test::InsertMemoRow(sqlite3, test::MemoToValues(*toRemoveMemo)));
     ASSERT_TRUE(test::InsertTagRow(sqlite3, test::TagToValues(*tag1)));
@@ -360,6 +359,60 @@ TEST_F(TestSqlite3Database, test_DeleteMemo_deletes_dependent_rows_from_the_Tagg
     const auto actualTagRows = test::ExecCommand(sqlite3, "SELECT * FROM Tag ORDER BY id;");
     const TableRows expectedTaggedRows = {{"1", "2"}, {"1", "3"}};
     const auto actualTaggedRows = test::ExecCommand(sqlite3, "SELECT * FROM Tagged ORDER BY tagId;");
+    EXPECT_EQ(expectedMemoRows, actualMemoRows);
+    EXPECT_EQ(expectedTagRows, actualTagRows);
+    EXPECT_EQ(expectedTaggedRows, actualTaggedRows);
+}
+
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+TEST_F(TestSqlite3Database, test_DeleteTag_where_tag_is_not_assigned_to_any_memo)
+{
+    auto tag1 = test::CreateTag({1, "Tag1", 111, 11111});
+    auto tag2 = test::CreateTag({2, "Tag2", 222, 22222});
+    ASSERT_TRUE(test::InsertTagRow(sqlite3, test::TagToValues(*tag1)));
+    ASSERT_TRUE(test::InsertTagRow(sqlite3, test::TagToValues(*tag2)));
+
+    auto expectedRows = test::ToStringVectors({tag1, tag2});
+    auto actualRows = test::ExecCommand(sqlite3, "SELECT * FROM Tag ORDER BY id;");
+    ASSERT_EQ(expectedRows, actualRows);
+
+    EXPECT_TRUE(db.deleteTag(tag2));
+    expectedRows.pop_back();
+    actualRows = test::ExecCommand(sqlite3, "SELECT * FROM Tag;");
+    EXPECT_EQ(expectedRows, actualRows);
+}
+
+TEST_F(TestSqlite3Database, test_DeleteTag_returns_true_if_tag_with_given_id_is_not_found)
+{
+    auto tag = test::CreateTag({1, "Tag1", 111, 11111});
+    EXPECT_TRUE(db.deleteTag(tag));
+}
+
+TEST_F(TestSqlite3Database, test_DeleteTag_deletes_dependent_rows_from_the_Tagged_table)
+{
+    const auto memo1 = test::CreateMemo({1, "Memo1", "Desc1", 11111});
+    const auto memo2 = test::CreateMemo({2, "Memo2", "Desc2", 22222});
+    const auto tag1 = test::CreateTag({1, "T1", 111, 1111});
+    const auto tag2 = test::CreateTag({2, "T2", 222, 2222});
+    const auto tagToDelete = test::CreateTag({3, "T3", 333, 3333});
+    ASSERT_TRUE(test::InsertMemoRow(sqlite3, test::MemoToValues(*memo1)));
+    ASSERT_TRUE(test::InsertMemoRow(sqlite3, test::MemoToValues(*memo2)));
+    ASSERT_TRUE(test::InsertTagRow(sqlite3, test::TagToValues(*tag1)));
+    ASSERT_TRUE(test::InsertTagRow(sqlite3, test::TagToValues(*tag2)));
+    ASSERT_TRUE(test::InsertTagRow(sqlite3, test::TagToValues(*tagToDelete)));
+    ASSERT_TRUE(test::InsertTaggedRow(sqlite3, {1, 2}));
+    ASSERT_TRUE(test::InsertTaggedRow(sqlite3, {1, 3}));
+    ASSERT_TRUE(test::InsertTaggedRow(sqlite3, {2, 1}));
+    ASSERT_TRUE(test::InsertTaggedRow(sqlite3, {2, 3}));
+
+    EXPECT_TRUE(db.deleteTag(tagToDelete));
+    const auto expectedMemoRows = test::ToStringVectors({memo1, memo2});
+    const auto actualMemoRows = test::ExecCommand(sqlite3, "SELECT * FROM Memo ORDER BY id;");
+    const auto expectedTagRows = test::ToStringVectors({tag1, tag2});
+    const auto actualTagRows = test::ExecCommand(sqlite3, "SELECT * FROM Tag ORDER BY id;");
+    const TableRows expectedTaggedRows = {{"1", "2"}, {"2", "1"}};
+    const auto actualTaggedRows = test::ExecCommand(sqlite3, "SELECT * FROM Tagged ORDER BY memoId;");
     EXPECT_EQ(expectedMemoRows, actualMemoRows);
     EXPECT_EQ(expectedTagRows, actualTagRows);
     EXPECT_EQ(expectedTaggedRows, actualTaggedRows);

@@ -243,7 +243,33 @@ bool Sqlite3Database::deleteMemo(const model::MemoPtr& memo)
 
 bool Sqlite3Database::deleteTag(const model::TagPtr& tag)
 {
-    return false;
+    LOG_DBG("Deleting Tag ...")
+    if (!tag)
+    {
+        LOG_DBG("Tag is null.")
+        return false;
+    }
+
+    LOG_DBG("Tag with id " << tag->id())
+    const auto stringId = std::to_string(tag->id());
+    const std::string deleteTagged = "DELETE FROM " + TaggedTable::kName +
+                                     " WHERE " + TaggedTable::att::kTagId + " = " + stringId + ";";
+    const std::string deleteTag = "DELETE FROM " + TagTable::kName +
+                                  " WHERE " + TagTable::att::kId + " = " + stringId + ";";
+    beginTransaction();
+    if (!sqlite3_->exec(deleteTagged, nullptr))
+    {
+        LOG_DBG("Failed to delete associated Tagged rows.")
+        rollback();
+        return false;
+    }
+    if (!sqlite3_->exec(deleteTag, nullptr))
+    {
+        rollback();
+        return false;
+    }
+    commitTransaction();
+    return true;
 }
 
 bool Sqlite3Database::beginTransaction()
