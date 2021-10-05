@@ -37,17 +37,17 @@ public:
 
     virtual std::vector<model::TagPtr> listTags(const TagSearchFilter& filter) = 0;
 
-    virtual bool updateMemo(const model::MemoPtr& memo) = 0;
+    virtual bool updateMemo(const model::Memo& memo) = 0;
 
-    virtual bool updateTag(const model::TagPtr& tag) = 0;
+    virtual bool updateTag(const model::Tag& tag) = 0;
 
-    virtual bool insertMemo(const model::MemoPtr& memo) = 0;
+    virtual bool insertMemo(const model::Memo& memo) = 0;
 
-    virtual bool insertTag(const model::TagPtr& tag) = 0;
+    virtual bool insertTag(const model::Tag& tag) = 0;
 
-    virtual bool deleteMemo(const model::MemoPtr& memo) = 0;
+    virtual bool deleteMemo(const model::Memo& memo) = 0;
 
-    virtual bool deleteTag(const model::TagPtr& tag) = 0;
+    virtual bool deleteTag(const model::Tag& tag) = 0;
 };
 
 } // namespace memo

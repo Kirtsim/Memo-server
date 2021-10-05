@@ -17,17 +17,17 @@ public:
 
     std::vector<model::TagPtr> listTags(const TagSearchFilter& filter) override;
 
-    bool updateMemo(const model::MemoPtr& memo) override;
+    bool updateMemo(const model::Memo& memo) override;
 
-    bool updateTag(const model::TagPtr& tag) override;
+    bool updateTag(const model::Tag& tag) override;
 
-    bool insertMemo(const model::MemoPtr& memo) override;
+    bool insertMemo(const model::Memo& memo) override;
 
-    bool insertTag(const model::TagPtr& tag) override;
+    bool insertTag(const model::Tag& tag) override;
 
-    bool deleteMemo(const model::MemoPtr& memo) override;
+    bool deleteMemo(const model::Memo& memo) override;
 
-    bool deleteTag(const model::TagPtr& tag) override;
+    bool deleteTag(const model::Tag& tag) override;
 
 private:
     bool beginTransaction();

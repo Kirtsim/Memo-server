@@ -99,18 +99,13 @@ std::vector<model::TagPtr> Sqlite3Database::listTags(const TagSearchFilter& filt
     return selectedTags;
 }
 
-bool Sqlite3Database::updateMemo(const model::MemoPtr& memo)
+bool Sqlite3Database::updateMemo(const model::Memo& memo)
 {
     LOG_INF(kLogTag << "Updating memo ...")
-    if (!memo)
-    {
-        LOG_WRN(kLogTag << "Tag is NULL. Aborting.")
-        return false;
-    }
 
     beginTransaction();
     std::vector<unsigned long> queriedTagIds;
-    if (!SelectMemoTagIds(memo->id(), queriedTagIds, *sqlite3_))
+    if (!SelectMemoTagIds(memo.id(), queriedTagIds, *sqlite3_))
     {
         LOG_WRN(kLogTag << "Update memo FAILURE.")
         rollback();
@@ -121,12 +116,12 @@ bool Sqlite3Database::updateMemo(const model::MemoPtr& memo)
     auto checkIdNotPresent = [&oldTagIds](const unsigned long tagId) { return oldTagIds.erase(tagId) == 0; };
 
     std::vector<unsigned long> tagIdsToAdd;
-    std::copy_if(memo->tagIds().begin(), memo->tagIds().end(), std::back_inserter(tagIdsToAdd), checkIdNotPresent);
+    std::copy_if(memo.tagIds().begin(), memo.tagIds().end(), std::back_inserter(tagIdsToAdd), checkIdNotPresent);
 
     std::vector<unsigned long> tagIdsToDelete(oldTagIds.begin(), oldTagIds.end());
-    bool failed = !DeleteMemoTagIds(memo->id(), tagIdsToDelete, *sqlite3_)
-               || !InsertMemoTagIds(memo->id(), tagIdsToAdd, *sqlite3_)
-               || !UpdateMemoTable(*memo, *sqlite3_);
+    bool failed = !DeleteMemoTagIds(memo.id(), tagIdsToDelete, *sqlite3_)
+               || !InsertMemoTagIds(memo.id(), tagIdsToAdd, *sqlite3_)
+               || !UpdateMemoTable(memo, *sqlite3_);
 
     if (failed)
     {
@@ -140,17 +135,11 @@ bool Sqlite3Database::updateMemo(const model::MemoPtr& memo)
     return true;
 }
 
-bool Sqlite3Database::updateTag(const model::TagPtr& tag)
+bool Sqlite3Database::updateTag(const model::Tag& tag)
 {
     LOG_INF(kLogTag << "Updating tag ...")
-    if (!tag)
-    {
-        LOG_WRN(kLogTag << "Tag is NULL. Aborting.")
-        return false;
-    }
-
     beginTransaction();
-    if (!UpdateTagTable(*tag, *sqlite3_))
+    if (!UpdateTagTable(tag, *sqlite3_))
     {
         LOG_WRN(kLogTag << "Update tag FAILURE.")
         rollback();
@@ -161,17 +150,12 @@ bool Sqlite3Database::updateTag(const model::TagPtr& tag)
     return true;
 }
 
-bool Sqlite3Database::insertMemo(const model::MemoPtr& memo)
+bool Sqlite3Database::insertMemo(const model::Memo& memo)
 {
-    LOG_DBG("Inserting Memo with title '" << memo->title() << "' ...")
-    if (!memo)
-    {
-        LOG_DBG("Memo is null.")
-        return false;
-    }
+    LOG_DBG("Inserting Memo with title '" << memo.title() << "' ...")
     beginTransaction();
-    auto insertSuccess = InsertMemo(*memo, *sqlite3_);
-    auto newId = SelectMemoId(memo->title(), *sqlite3_);
+    auto insertSuccess = InsertMemo(memo, *sqlite3_);
+    auto newId = SelectMemoId(memo.title(), *sqlite3_);
     if (!insertSuccess || newId == -1ul)
     {
         if (newId != -1ul)
@@ -182,7 +166,7 @@ bool Sqlite3Database::insertMemo(const model::MemoPtr& memo)
         return false;
     }
 
-    if (!InsertMemoTagIds(memo->id(), memo->tagIds(), *sqlite3_))
+    if (!InsertMemoTagIds(memo.id(), memo.tagIds(), *sqlite3_))
     {
         LOG_WRN("Failed to insert Memo. Tag ids could not be assigned.")
         rollback();
@@ -193,16 +177,11 @@ bool Sqlite3Database::insertMemo(const model::MemoPtr& memo)
     return true;
 }
 
-bool Sqlite3Database::insertTag(const model::TagPtr& tag)
+bool Sqlite3Database::insertTag(const model::Tag& tag)
 {
-    LOG_DBG("Inserting Tag with name '" << tag->name() << "' ...")
-    if (!tag)
-    {
-        LOG_DBG("Tag is null.")
-        return false;
-    }
+    LOG_DBG("Inserting Tag with name '" << tag.name() << "' ...")
 
-    if (InsertTag(*tag, *sqlite3_))
+    if (InsertTag(tag, *sqlite3_))
     {
         LOG_DBG("Tag inserted.")
         return true;
@@ -211,16 +190,12 @@ bool Sqlite3Database::insertTag(const model::TagPtr& tag)
     return false;
 }
 
-bool Sqlite3Database::deleteMemo(const model::MemoPtr& memo)
+bool Sqlite3Database::deleteMemo(const model::Memo& memo)
 {
     LOG_DBG("Deleting Memo ...")
-    if (!memo)
-    {
-        LOG_DBG("Memo is null.")
-        return false;
-    }
-    LOG_DBG("Memo id: " << memo->id())
-    const auto stringMemoId = std::to_string(memo->id());
+
+    LOG_DBG("Memo id: " << memo.id())
+    const auto stringMemoId = std::to_string(memo.id());
     const std::string deleteTaggedQuery = "DELETE FROM " + TaggedTable::kName +
                                         " WHERE " + TaggedTable::att::kMemoId + " = " + stringMemoId + ";";
     const std::string deleteMemoQuery = "DELETE FROM " + MemoTable::kName +
@@ -241,17 +216,11 @@ bool Sqlite3Database::deleteMemo(const model::MemoPtr& memo)
     return true;
 }
 
-bool Sqlite3Database::deleteTag(const model::TagPtr& tag)
+bool Sqlite3Database::deleteTag(const model::Tag& tag)
 {
     LOG_DBG("Deleting Tag ...")
-    if (!tag)
-    {
-        LOG_DBG("Tag is null.")
-        return false;
-    }
-
-    LOG_DBG("Tag with id " << tag->id())
-    const auto stringId = std::to_string(tag->id());
+    LOG_DBG("Tag with id " << tag.id())
+    const auto stringId = std::to_string(tag.id());
     const std::string deleteTagged = "DELETE FROM " + TaggedTable::kName +
                                      " WHERE " + TaggedTable::att::kTagId + " = " + stringId + ";";
     const std::string deleteTag = "DELETE FROM " + TagTable::kName +
