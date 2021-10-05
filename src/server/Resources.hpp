@@ -1,4 +1,5 @@
 #pragma once
+#include "db/IDatabase.hpp"
 #include <memory>
 #include <string>
 
@@ -17,6 +18,8 @@ public:
 
     const std::string& portNumber() const;
 
+    IDatabase& database();
+
     Resources(const Resources&) = delete;
     Resources& operator=(const Resources&) = delete;
 
@@ -27,6 +30,8 @@ private:
 private:
     std::string serverAddress_;
     std::string portNumber_;
+
+    std::unique_ptr<IDatabase> database_;
 };
 
 } // namespace memo

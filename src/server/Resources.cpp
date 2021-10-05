@@ -24,4 +24,9 @@ const std::string& Resources::portNumber() const
     return portNumber_;
 }
 
+IDatabase& Resources::database()
+{
+    return *database_;
+}
+
 } // namespace memo
