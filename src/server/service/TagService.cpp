@@ -89,7 +89,7 @@ void TagService::registerProcesses()
     registerProcess(ListTagsProcess::Create(*this));
     registerProcess(AddTagProcess::Create(*this));
 
-    LOG_INF("[MemoService] Registered " <<  processes_.size() << " processes.");
+    LOG_INF("[MemoService] Registered " << processCount() << " processes.");
 }
 
 } // namespace memo

@@ -1,6 +1,7 @@
 #include "server/service/MemoService.hpp"
 #include "server/process/ListMemosProcess.hpp"
 #include "server/process/AddMemoProcess.hpp"
+#include "server/Resources.hpp"
 
 #include "logger/logger.hpp"
 
@@ -56,6 +57,8 @@ grpc::Status MemoService::AddMemo(grpc::ServerContext*, const proto::AddMemoRq* 
 {
     LOG_TRC("[MemoService] Adding new Memo");
     const auto& memo = request->memo();
+
+    auto& db = resources().database();
     LOG_TRC("ID: " << memo.id());
     LOG_TRC("Title: " << memo.title());
     LOG_TRC("Description: " << memo.description());
@@ -89,7 +92,7 @@ void MemoService::registerProcesses()
     registerProcess(ListMemosProcess::Create(*this));
     registerProcess(AddMemoProcess::Create(*this));
 
-    LOG_INF("[MemoService] Registered " <<  processes_.size() << " processes.");
+    LOG_INF("[MemoService] Registered " << processCount() << " processes.");
 }
 
 } // namespace memo

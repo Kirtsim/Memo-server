@@ -51,6 +51,11 @@ int BaseService::getId() const
     return pointerAddress;
 }
 
+size_t BaseService::processCount() const
+{
+    return processes_.size();
+}
+
 void BaseService::registerProcess(const IProcess::Ptr& process)
 {
     LOG_TRC("[BaseService] Registering new process");
@@ -63,6 +68,16 @@ void BaseService::registerProcess(const IProcess::Ptr& process)
     {
         LOG_WRN("[BaseService] Failed to register: process is null.");
     }
+}
+
+Resources& BaseService::resources()
+{
+    return *resources_;
+}
+
+grpc::ServerCompletionQueue& BaseService::completionQueue()
+{
+    return completionQueue_;
 }
 
 } // namespace memo

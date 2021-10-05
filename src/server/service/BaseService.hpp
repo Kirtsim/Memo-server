@@ -33,9 +33,16 @@ public:
 
     int getId() const override;
 
+    size_t processCount() const;
+
 protected:
     void registerProcess(const IProcess::Ptr& process);
 
+    Resources& resources();
+
+    grpc::ServerCompletionQueue& completionQueue();
+
+private:
     std::shared_ptr<Resources> resources_;
     grpc::ServerCompletionQueue& completionQueue_;
     std::unordered_map<IProcess*, IProcess::Ptr> processes_;
