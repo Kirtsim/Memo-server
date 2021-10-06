@@ -2,6 +2,7 @@
 #include "server/process/ListMemosProcess.hpp"
 #include "server/process/AddMemoProcess.hpp"
 #include "server/Resources.hpp"
+#include "model/Memo.hpp"
 
 #include "logger/logger.hpp"
 
@@ -55,23 +56,42 @@ grpc::Status MemoService::ListMemos(grpc::ServerContext*, const proto::ListMemos
 grpc::Status MemoService::AddMemo(grpc::ServerContext*, const proto::AddMemoRq* request,
                                   proto::AddMemoRs* response)
 {
-    LOG_TRC("[MemoService] Adding new Memo");
-    const auto& memo = request->memo();
+    LOG_TRC("[MemoService] Adding Memo titled '" << request->memo().title() << "'.");
+    const auto& protoMemo = request->memo();
+    model::Memo memo;
+    memo.setTitle(protoMemo.title());
+    memo.setDescription(protoMemo.description());
+    memo.setTimestamp(protoMemo.timestamp());
+    std::vector<unsigned long> tagIds(protoMemo.tag_ids().begin(), protoMemo.tag_ids().begin());
+    memo.setTagIds(tagIds);
 
+    model::MemoPtr newMemo;
     auto& db = resources().database();
-    LOG_TRC("ID: " << memo.id());
-    LOG_TRC("Title: " << memo.title());
-    LOG_TRC("Description: " << memo.description());
-    LOG_TRC("No of tags: " << memo.tag_ids_size());
-    LOG_TRC("Created at: " << memo.timestamp());
-    LOG_TRC("[MemoService] Adding new Memo - SUCCESS");
-    // TODO: insert into a db.
-    auto addedMemo = response->mutable_added_memo();
-    *addedMemo = memo;
-    addedMemo->set_id(123456789); // TODO: this number will be assigned when added to a db.
-    response->set_request_uuid(request->uuid());
-    response->mutable_operation_status()->set_code(200);
-    response->mutable_operation_status()->set_type(proto::OperationStatus_Type_SUCCESS);
+    if (db.insertMemo(memo))
+    {
+        auto filter = MemoSearchFilter();
+        filter.exactTitleMatch = memo.title();
+        auto selection = db.listMemos(filter);
+        newMemo = selection.empty() ? nullptr : selection.front();
+    }
+
+    if (newMemo)
+    {
+        auto addedMemo = response->mutable_added_memo();
+        *addedMemo = protoMemo;
+        addedMemo->set_id(newMemo->id());
+        response->set_request_uuid(request->uuid());
+        response->mutable_operation_status()->set_code(200);
+        response->mutable_operation_status()->set_type(proto::OperationStatus_Type_SUCCESS);
+        LOG_TRC("Memo inserted.")
+        LOG_DBG("New memo id: '" << newMemo->id() << "'.")
+    }
+    else
+    {
+        response->mutable_operation_status()->set_code(-1);
+        response->mutable_operation_status()->set_type(proto::OperationStatus_Type_FAILURE);
+        LOG_WRN("Failed to insert new Memo.")
+    }
     return grpc::Status::OK;
 }
 
