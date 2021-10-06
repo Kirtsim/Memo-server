@@ -3,6 +3,7 @@
 #include "server/process/AddMemoProcess.hpp"
 #include "server/Resources.hpp"
 #include "model/Memo.hpp"
+#include "db/IDatabase.hpp"
 
 #include "logger/logger.hpp"
 
@@ -20,36 +21,35 @@ MemoService::~MemoService() = default;
 grpc::Status MemoService::ListMemos(grpc::ServerContext*, const proto::ListMemosRq* request,
                                     proto::ListMemosRs* response)
 {
-    LOG_TRC("[MemoService] ++ List memos ++");
-    auto initMemo = [](proto::Memo& memo, const std::string& title)
+    LOG_TRC("[MemoService] Listing memos ...")
+    MemoSearchFilter filter;
+    filter.titlePrefix = request->filter().title_starts_with();
+    filter.titleKeywords.assign(request->filter().title_contains().begin(), request->filter().title_contains().end());
+    filter.memoKeywords.assign(request->filter().contains().begin(), request->filter().contains().end());
+    filter.tagIds.assign(request->filter().tagged_by().begin(), request->filter().tagged_by().end());
+    if (request->filter().creation_time().IsInitialized())
     {
-        memo.set_id(101);
-        memo.set_title(title);
-        memo.set_description("Lorem ipsum: short description.");
-        memo.set_timestamp(100L);
-        memo.add_tag_ids(0);
-    };
-    const bool noFilter = request->filter().title_starts_with().empty();
-    if (noFilter)
-    {
-        initMemo(*response->add_memos(), "Memo 1");
-        initMemo(*response->add_memos(), "My trip to America");
-        initMemo(*response->add_memos(), "Very memorable situation");
-        initMemo(*response->add_memos(), "My first job");
-        initMemo(*response->add_memos(), "Living in Switzerland");
-        initMemo(*response->add_memos(), "Spending time in one of the UK's hospitals");
-        initMemo(*response->add_memos(), "Welcome to Krispy Kreme");
-        initMemo(*response->add_memos(), "Bojnicka zoo");
-        initMemo(*response->add_memos(), "Being a lifeguard in America");
-        initMemo(*response->add_memos(), "Graduation from Huddersfield university");
-        initMemo(*response->add_memos(), "Our cat");
+        if (request->filter().creation_time().start() != -1ul)
+            filter.filterFromDate = request->filter().creation_time().start();
+        if (request->filter().creation_time().end() != -1ul)
+            filter.filterUntilDate = request->filter().creation_time().end();
     }
-    else
+
+    auto& db = resources().database();
+    auto selection = db.listMemos(filter);
+    for (const auto& memo : selection)
     {
-        initMemo(*response->add_memos(), request->filter().title_starts_with());
+        if (!memo)
+            continue;
+        auto protoMemo = response->add_memos();
+        protoMemo->set_id(memo->id());
+        protoMemo->set_title(memo->title());
+        protoMemo->set_description(memo->description());
+        protoMemo->mutable_tag_ids()->Add(memo->tagIds().begin(), memo->tagIds().end());
+        protoMemo->set_timestamp(memo->timestamp());
     }
     response->set_request_uuid(request->uuid());
-    LOG_TRC("[MemoService] -- List memos -- done");
+    LOG_TRC("[MemoService] Found " << selection.size() << " Memo results.")
     return grpc::Status::OK;
 }
 
