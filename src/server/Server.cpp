@@ -16,7 +16,7 @@ namespace {
 Resources::Ptr ConstructResources(const std::string& address,
                                   const std::string& portNumber)
 {
-    auto sqlite3Wrapper = std::make_unique<Sqlite3Wrapper>(std::filesystem::current_path().string());
+    auto sqlite3Wrapper = std::make_unique<Sqlite3Wrapper>(std::filesystem::current_path().string() + "/test.db");
     auto db = std::make_unique<Sqlite3Database>(std::move(sqlite3Wrapper));
     return Resources::Create(address, portNumber, std::move(db));
 }
