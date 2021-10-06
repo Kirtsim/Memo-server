@@ -20,6 +20,7 @@ target_sources(${exe_lib}
         ${src_dir}/db/Sqlite3Wrapper.cpp
         ${src_dir}/db/Sqlite3Database.cpp
         ${src_dir}/db/Sqlite3Functions.cpp
+        ${src_dir}/db/Sqlite3Schema.cpp
         ${src_dir}/db/Tools.cpp
         ${src_dir}/model/Memo.cpp
         ${src_dir}/model/Tag.cpp

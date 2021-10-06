@@ -12,6 +12,12 @@ namespace MemoTable {
         const std::string kDescription = "description";
         const std::string kTimestamp = "timestamp";
     } // namespace att
+
+    namespace cmd {
+        std::string Drop();
+
+        std::string Create();
+    } // namespace cmd
 } // namespace MemoTable
 
 namespace TagTable {
@@ -23,6 +29,12 @@ namespace TagTable {
         const std::string kColor = "color";
         const std::string kTimestamp = "timestamp";
     } // namespace att
+
+    namespace cmd {
+        std::string Drop();
+
+        std::string Create();
+    } // namespace cmd
 } // namespace TagTable
 
 namespace TaggedTable {
@@ -32,6 +44,12 @@ namespace TaggedTable {
         const std::string kMemoId = "memoId";
         const std::string kTagId = "tagId";
     } // namespace att
+
+    namespace cmd {
+        std::string Drop();
+
+        std::string Create();
+    } // namespace cmd
 } // namespace TaggedTable
 
 } // namespace memo
