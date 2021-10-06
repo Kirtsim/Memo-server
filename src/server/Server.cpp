@@ -2,10 +2,13 @@
 #include "server/service/MemoService.hpp"
 #include "server/service/TagService.hpp"
 #include "server/process/IProcess.hpp"
+#include "db/Sqlite3Wrapper.hpp"
+#include "db/Sqlite3Database.hpp"
 
 #include "logger/logger.hpp"
 
 #include <grpcpp/server_builder.h>
+#include <filesystem>
 
 namespace memo {
 
@@ -13,7 +16,9 @@ namespace {
 Resources::Ptr ConstructResources(const std::string& address,
                                   const std::string& portNumber)
 {
-    return Resources::Create(address, portNumber);
+    auto sqlite3Wrapper = std::make_unique<Sqlite3Wrapper>(std::filesystem::current_path().string());
+    auto db = std::make_unique<Sqlite3Database>(std::move(sqlite3Wrapper));
+    return Resources::Create(address, portNumber, std::move(db));
 }
 
 } // namespace

@@ -3,15 +3,19 @@
 namespace memo {
 
 Resources::Ptr Resources::Create(const std::string& address,
-                                 const std::string& portNumber)
+                                 const std::string& portNumber,
+                                 std::unique_ptr<IDatabase> database)
 {
-    return Ptr(new Resources(address, portNumber));
+    assert(database);
+    return Ptr(new Resources(address, portNumber, std::move(database)));
 }
 
 Resources::Resources(const std::string& address,
-                     const std::string& portNumber) :
-    serverAddress_(address),
-    portNumber_(portNumber)
+                     const std::string& portNumber,
+                     std::unique_ptr<IDatabase> database)
+    : serverAddress_(address)
+    , portNumber_(portNumber)
+    , database_(std::move(database))
 {}
 
 const std::string& Resources::serverAddress() const

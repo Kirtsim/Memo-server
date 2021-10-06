@@ -12,7 +12,8 @@ public:
     using Ptr = std::shared_ptr<Resources>;
 
     static Ptr Create(const std::string& iAddress,
-                      const std::string& iPortNumber);
+                      const std::string& iPortNumber,
+                      std::unique_ptr<IDatabase> database);
 
     const std::string& serverAddress() const;
 
@@ -24,8 +25,9 @@ public:
     Resources& operator=(const Resources&) = delete;
 
 private:
-    Resources(const std::string& address,
-              const std::string& portNumber);
+    Resources(const std::string& iAddress,
+              const std::string& iPortNumber,
+              std::unique_ptr<IDatabase> database);
 
 private:
     std::string serverAddress_;
