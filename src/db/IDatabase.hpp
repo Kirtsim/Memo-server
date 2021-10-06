@@ -8,22 +8,26 @@ namespace memo {
 
 struct MemoSearchFilter
 {
+    std::string exactTitleMatch;
     std::string titlePrefix;
     std::vector<std::string> titleKeywords;
     std::vector<std::string> memoKeywords;
     std::vector<unsigned long> tagIds;
     std::optional<unsigned long> filterFromDate;
     std::optional<unsigned long> filterUntilDate;
+    size_t maxCount = 100;
 };
 
 struct TagSearchFilter
 {
+    std::string exactNameMatch;
     std::string namePrefix;
     std::string nameContains;
     std::vector<int> colors;
     std::vector<unsigned long> memoIds;
     std::optional<unsigned long> filterFromDate;
     std::optional<unsigned long> filterUntilDate;
+    size_t maxCount = 100;
 };
 
 /// @brief Database for the Memo and Tag database. The database can have different

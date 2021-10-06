@@ -149,12 +149,18 @@ std::string BuildMemoQuery(const MemoSearchFilter filter)
     std::stringstream query;
     std::vector<std::string> conditions;
 
-    if (!filter.titlePrefix.empty())
+    const bool isExactTitleMatch = !filter.exactTitleMatch.empty();
+    if (isExactTitleMatch)
+    {
+        conditions.emplace_back(att::kTitle + " LIKE '" + filter.exactTitleMatch + "'");
+    }
+
+    if (!isExactTitleMatch && !filter.titlePrefix.empty())
     {
         conditions.emplace_back(att::kTitle + " LIKE '" + filter.titlePrefix + "%'");
     }
 
-    if (!filter.titleKeywords.empty())
+    if (!isExactTitleMatch && !filter.titleKeywords.empty())
     {
         const auto condition = ConstructContainsKeysCondition(att::kTitle, filter.titleKeywords);
         if (!condition.empty())
@@ -196,7 +202,7 @@ std::string BuildMemoQuery(const MemoSearchFilter filter)
         for (auto i = 1ul; i < conditions.size(); ++i)
             query << " AND " << conditions[i];
     }
-    query << " GROUP BY id;";
+    query << " GROUP BY " << att::kId << " LIMIT " << filter.maxCount << ";";
     return query.str();
 }
 
@@ -205,13 +211,20 @@ std::string BuildTagQuery(const TagSearchFilter& filter)
     namespace att = TagTable::att;
     std::stringstream query;
     std::vector<std::string> conditions;
-    if (!filter.namePrefix.empty())
+    const bool exactMatch = !filter.exactNameMatch.empty();
+
+    if (exactMatch)
+    {
+        conditions.emplace_back(att::kName + " LIKE '" + filter.exactNameMatch + "'");
+    }
+
+    if (!exactMatch && !filter.namePrefix.empty())
     {
         std::string condition = att::kName + " LIKE '" + filter.namePrefix + "%'";
         conditions.emplace_back(condition);
     }
 
-    if (!filter.nameContains.empty())
+    if (!exactMatch && !filter.nameContains.empty())
     {
         std::string condition = att::kName + " LIKE '%" + filter.nameContains + "%'";
         conditions.emplace_back(condition);
@@ -241,23 +254,23 @@ std::string BuildTagQuery(const TagSearchFilter& filter)
         memoIdIn << ")";
         conditions.emplace_back(memoIdIn.str());
     }
+
+    query << "SELECT " << att::kId << ", " << att::kName << ", " << att::kColor << ", " << att::kTimestamp
+          << " FROM " << TagTable::kName;
+
     const bool requiresJoin = !filter.memoIds.empty();
     if (requiresJoin)
     {
-        query << "SELECT " << att::kId << ", " << att::kName << ", " << att::kColor << ", " << att::kTimestamp
-              << " FROM " << TagTable::kName
-              << " INNER JOIN " << TaggedTable::kName << " ON "
+        query << " INNER JOIN " << TaggedTable::kName << " ON "
               << TagTable::kName << "." << att::kId << " = "  << TaggedTable::kName << "." << TaggedTable::att::kTagId;
     }
-    else
-        query << "SELECT * FROM " << TagTable::kName;
 
     if (!conditions.empty())
         query << " WHERE " << conditions.front();
     for (auto i = 1ul; i < conditions.size(); ++i)
         query << " AND " << conditions[i];
 
-    query << " GROUP BY " << att::kId << ";";
+    query << " GROUP BY " << att::kId << " LIMIT " << filter.maxCount << ";";
     return query.str();
 }
 
