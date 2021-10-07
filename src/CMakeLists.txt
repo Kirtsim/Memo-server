@@ -6,8 +6,6 @@ add_library(${exe_lib} "")
 target_sources(${exe} PRIVATE ${src_dir}/main.cpp)
 target_sources(${exe_lib}
     PRIVATE
-        ${src_dir}/logger/logger.cpp
-        ${src_dir}/logger/easylogging++.cc
         ${src_dir}/server/service/BaseService.cpp
         ${src_dir}/server/service/MemoService.cpp
         ${src_dir}/server/service/TagService.cpp
@@ -26,7 +24,6 @@ target_sources(${exe_lib}
         ${src_dir}/model/Tag.cpp
         ${src_dir}/model/Color.cpp
     INTERFACE
-        ${src_dir}/logger/logger.hpp
         ${src_dir}/server/service/IService.hpp
         ${src_dir}/server/service/BaseService.hpp
         ${src_dir}/server/service/MemoService.hpp
@@ -64,6 +61,7 @@ ENDIF()
 target_link_libraries(${exe_lib}
     PUBLIC
         ${memo_proto_lib}
+        ${logger_lib}
         ${_REFLECTION}
         ${_GRPC_GRPCPP}
         ${_PROTOBUF_LIBPROTOBUF}

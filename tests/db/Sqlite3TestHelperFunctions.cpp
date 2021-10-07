@@ -37,8 +37,8 @@ bool InsertTagRow(memo::Sqlite3Wrapper& sqlite3, const TagValues& values)
 {
     std::stringstream stream;
     stream << "INSERT INTO Tag (id, name, color, timestamp) "
-    << "VALUES (" << values.id << ", '" << values.name << "', "
-    << values.color << ", " << values.timestamp << ");";
+           << "VALUES (" << values.id << ", '" << values.name << "', "
+           << values.color << ", " << values.timestamp << ");";
     return sqlite3.exec(stream.str(), nullptr);
 }
 
@@ -46,7 +46,7 @@ bool InsertTaggedRow(memo::Sqlite3Wrapper& sqlite3, const TaggedValues& values)
 {
     std::stringstream stream;
     stream << "INSERT INTO Tagged (memoId, tagId) "
-    << "VALUES (" << values.memoId << ", " << values.tagId << ");";
+           << "VALUES (" << values.memoId << ", " << values.tagId << ");";
     return sqlite3.exec(stream.str(), nullptr);
 }
 
@@ -54,10 +54,10 @@ std::vector<std::vector<std::string>> ExecCommand(Sqlite3Wrapper& sqlite3, const
 {
     std::vector<std::vector<std::string>> returnedValues;
     auto callback = [&](const std::vector<std::string>& values, const std::vector<std::string>&)
-            {
+    {
         returnedValues.emplace_back(values);
         return false;
-            };
+    };
     sqlite3.exec(command, callback);
     return returnedValues;
 }

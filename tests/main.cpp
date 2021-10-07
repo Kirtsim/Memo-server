@@ -3,10 +3,9 @@
 #include "db/TestSqlite3Database.inl"
 #include "db/TestTools.inl"
 #include <gtest/gtest.h>
-#include "logger/logger.hpp"
+#include "logger/Logger.hpp"
 
 INITIALIZE_EASYLOGGINGPP
-
 
 int main()
 {

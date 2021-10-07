@@ -5,7 +5,7 @@
 #include "db/Sqlite3Wrapper.hpp"
 #include "db/Sqlite3Database.hpp"
 
-#include "logger/logger.hpp"
+#include "logger/Logger.hpp"
 
 #include <grpcpp/server_builder.h>
 #include <filesystem>

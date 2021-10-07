@@ -5,7 +5,7 @@
 #include "db/Tools.hpp"
 #include "model/Memo.hpp"
 #include "model/Tag.hpp"
-#include "logger/logger.hpp"
+#include "logger/Logger.hpp"
 #include <set>
 #include <sstream>
 

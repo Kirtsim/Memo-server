@@ -1,6 +1,6 @@
 #include "server/process/ListMemosProcess.hpp"
 #include "server/service/MemoService.hpp"
-#include "logger/logger.hpp"
+#include "logger/Logger.hpp"
 
 namespace memo {
 

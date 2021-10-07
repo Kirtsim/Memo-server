@@ -5,7 +5,7 @@
 #include "model/Memo.hpp"
 #include "db/IDatabase.hpp"
 
-#include "logger/logger.hpp"
+#include "logger/Logger.hpp"
 
 namespace memo {
 

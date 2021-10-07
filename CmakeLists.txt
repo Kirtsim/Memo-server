@@ -8,9 +8,12 @@ set(memo_proto_lib memo_proto_lib)
 set(exe memo_server)
 set(exe_lib memo_server_lib)
 set(tests_exe memo_server_tests)
+set(logger_lib logger_lib)
+set(logger_test_lib logger_test_lib)
 
 set(memo_proto_include_dir ${CMAKE_SOURCE_DIR}/Memo-proto/model)
 
 add_subdirectory(${CMAKE_SOURCE_DIR}/Memo-proto)
 add_subdirectory(${CMAKE_SOURCE_DIR}/src)
+add_subdirectory(${CMAKE_SOURCE_DIR}/src/logger)
 add_subdirectory(${CMAKE_SOURCE_DIR}/tests)

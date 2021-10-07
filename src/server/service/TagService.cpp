@@ -2,7 +2,7 @@
 #include "server/process/ListTagsProcess.hpp"
 #include "server/process/AddTagProcess.hpp"
 
-#include "logger/logger.hpp"
+#include "logger/Logger.hpp"
 
 namespace memo {
 

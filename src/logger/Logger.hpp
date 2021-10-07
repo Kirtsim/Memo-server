@@ -1,7 +1,7 @@
 #pragma once
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wsign-conversion"
-#include "logger/easylogging++.h"
+#include "easylogging++.h"
 #pragma GCC diagnostic pop
 
 #include <string>
