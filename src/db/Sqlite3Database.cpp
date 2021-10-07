@@ -34,17 +34,20 @@ Sqlite3Database::Sqlite3Database(std::unique_ptr<ISqlite3Wrapper> wrapper)
 
 std::vector<model::MemoPtr> Sqlite3Database::listMemos(const MemoSearchFilter& filter)
 {
+    LOG_DBG("Selecting memos ...")
     const auto query = BuildMemoQuery(filter);
     const auto selectedRows = SelectRows(query, *sqlite3_);
     const auto expectedMemoValueCount = 4ul;
+
     std::vector<model::MemoPtr> memos;
     std::set<unsigned long> memoIds;
+    LOG_DBG("Converting" << selectedRows.size() << " memo rows to Memos ...")
     for (const auto& row : selectedRows)
     {
         if (row.size() != expectedMemoValueCount)
         {
             LOG_WRN("SELECT query returned an invalid number of values per row: " << row.size() <<
-            ". Expected number of values: " << expectedMemoValueCount)
+                    ". Expected number of values: " << expectedMemoValueCount)
             break;
         }
         try
@@ -66,19 +69,22 @@ std::vector<model::MemoPtr> Sqlite3Database::listMemos(const MemoSearchFilter& f
         }
         catch (const std::invalid_argument&)
         {
-            LOG_WRN("Error encountered while converting memo rows to model::Memos returned by a SELECT query.");
+            LOG_WRN("Error encountered while converting memo rows to model::Memos returned by a SELECT query.")
             break;
         }
     }
+    LOG_DBG("Total number of selected Memos: " << memos.size())
     return memos;
 }
 
 std::vector<model::TagPtr> Sqlite3Database::listTags(const TagSearchFilter& filter)
 {
+    LOG_DBG("Listing Tags ...")
     const auto query = BuildTagQuery(filter);
     const auto selectedRows = SelectRows(query, *sqlite3_);
     const auto expectedValueCount = 4ul;
 
+    LOG_DBG("Converting " << selectedRows.size() << " tag rows to Tags ...")
     std::vector<model::TagPtr> selectedTags;
     for (const auto& row : selectedRows) {
         if (row.size() != expectedValueCount)
@@ -98,10 +104,11 @@ std::vector<model::TagPtr> Sqlite3Database::listTags(const TagSearchFilter& filt
         }
         catch (const std::invalid_argument&)
         {
-            LOG_WRN("Error encountered while converting tag rows to model::Tags returned by a SELECT query.");
+            LOG_WRN("Error encountered while converting tag rows to model::Tags returned by a SELECT query.")
             break;
         }
     }
+    LOG_DBG("Total number of selected Tags :" << selectedTags.size())
     return selectedTags;
 }
 
