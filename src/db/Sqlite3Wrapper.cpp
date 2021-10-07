@@ -1,4 +1,5 @@
 #include "db/Sqlite3Wrapper.hpp"
+#include "logger/Logger.hpp"
 #include <sqlite3.h>
 
 namespace memo {
@@ -55,8 +56,10 @@ bool Sqlite3Wrapper::isOpen() const
 
 bool Sqlite3Wrapper::exec(const std::string& query, const SQLCallback& callback)
 {
+    LOG_TRC(query)
     callback_ = callback;
     auto returnCode = sqlite3_exec(handle_, query.c_str(), onRowReturned, &callback_, nullptr);
+    LOG_TRC("Return code: " << returnCode)
     return returnCode == SQLITE_OK || returnCode == SQLITE_ABORT;
 }
 
