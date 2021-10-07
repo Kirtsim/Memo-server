@@ -24,11 +24,11 @@ void AddMemoProcess::init(grpc::ServerCompletionQueue& completionQueue)
 
 void AddMemoProcess::execute()
 {
-    LOG_TRC("[AddMemoProcess] Execution [start] >>>");
+    LOG_INF("[AddMemoProcess] Execution [start] >>>")
     auto status = svc_.AddMemo(&context_, &request_, &response_);
     writer_.Finish(response_, status, this);
     state_ = FINISHED;
-    LOG_TRC("[AddMemoProcess] Execution [end] <<<");
+    LOG_INF("[AddMemoProcess] Execution [end] <<<")
 }
 
 IProcess::Ptr AddMemoProcess::duplicate() const

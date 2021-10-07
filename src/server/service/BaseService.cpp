@@ -22,7 +22,7 @@ bool BaseService::executeProcess(IProcess* process)
 
     if (process->isFinished())
     {
-        LOG_TRC("[BaseService] Process finished");
+        LOG_INF("[BaseService] Process finished");
         processes_.erase(it);
         return true;
     }
@@ -36,13 +36,13 @@ bool BaseService::executeProcess(IProcess* process)
 void BaseService::enable()
 {
     registerProcesses();
-    LOG_TRC("[BaseService] Service enabled.");
+    LOG_INF("[BaseService] Service enabled.");
 }
 
 void BaseService::disable()
 {
     processes_.clear();
-    LOG_TRC("[BaseService] Service disabled");
+    LOG_INF("[BaseService] Service disabled");
 }
 
 int BaseService::getId() const
@@ -58,7 +58,7 @@ size_t BaseService::processCount() const
 
 void BaseService::registerProcess(const IProcess::Ptr& process)
 {
-    LOG_TRC("[BaseService] Registering new process");
+    LOG_INF("[BaseService] Registering new process")
     if (process)
     {
         process->init(completionQueue_);
@@ -66,7 +66,7 @@ void BaseService::registerProcess(const IProcess::Ptr& process)
     }
     else
     {
-        LOG_WRN("[BaseService] Failed to register: process is null.");
+        LOG_WRN("[BaseService] Failed to register: process is null.")
     }
 }
 

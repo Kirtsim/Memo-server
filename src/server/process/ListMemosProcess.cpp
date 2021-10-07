@@ -24,11 +24,11 @@ void ListMemosProcess::init(grpc::ServerCompletionQueue& completionQueue)
 
 void ListMemosProcess::execute()
 {
-    LOG_TRC("[ListMemosProcess] Execution [start] >>>");
+    LOG_INF("[ListMemosProcess] Execution [start] >>>")
     auto status = svc_.ListMemos(&context_, &request_, &response_);
     writer_.Finish(response_, status, this);
     state_ = FINISHED;
-    LOG_TRC("[ListMemosProcess] Execution [end] <<<");
+    LOG_INF("[ListMemosProcess] Execution [end] <<<")
 }
 
 IProcess::Ptr ListMemosProcess::duplicate() const

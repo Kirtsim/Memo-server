@@ -25,11 +25,11 @@ void AddTagProcess::init(grpc::ServerCompletionQueue& completionQueue)
 
 void AddTagProcess::execute()
 {
-    LOG_TRC("[AddTagProcess] Execution [start] >>>");
+    LOG_INF("[AddTagProcess] Execution [start] >>>")
     auto status = svc_.AddTag(&context_, &request_, &response_);
     writer_.Finish(response_, status, this);
     state_ = FINISHED;
-    LOG_TRC("[AddTagProcess] Execution [end] <<<");
+    LOG_INF("[AddTagProcess] Execution [end] <<<")
 }
 
 IProcess::Ptr AddTagProcess::duplicate() const

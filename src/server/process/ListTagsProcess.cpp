@@ -25,11 +25,11 @@ void ListTagsProcess::init(grpc::ServerCompletionQueue& completionQueue)
 
 void ListTagsProcess::execute()
 {
-    LOG_TRC("[ListTagsProcess] Execution [start] >>>");
+    LOG_INF("[ListTagsProcess] Execution [start] >>>")
     auto status = svc_.ListTags(&context_, &request_, &response_);
     writer_.Finish(response_, status, this);
     state_ = FINISHED;
-    LOG_TRC("[ListTagsProcess] Execution [end] <<<");
+    LOG_INF("[ListTagsProcess] Execution [end] <<<")
 }
 
 IProcess::Ptr ListTagsProcess::duplicate() const

@@ -13,7 +13,7 @@ MemoService::MemoService(const std::shared_ptr<Resources>& resources,
                          grpc::ServerCompletionQueue& completionQueue)
         : BaseService(resources, completionQueue)
 {
-    LOG_TRC("[MemoService] MemoService created");
+    LOG_INF("[MemoService] MemoService created")
 }
 
 MemoService::~MemoService() = default;
@@ -21,7 +21,7 @@ MemoService::~MemoService() = default;
 grpc::Status MemoService::ListMemos(grpc::ServerContext*, const proto::ListMemosRq* request,
                                     proto::ListMemosRs* response)
 {
-    LOG_TRC("[MemoService] Listing memos ...")
+    LOG_INF("[MemoService] Listing memos ...")
     MemoSearchFilter filter;
     filter.titlePrefix = request->filter().title_starts_with();
     filter.titleKeywords.assign(request->filter().title_contains().begin(), request->filter().title_contains().end());
@@ -49,14 +49,14 @@ grpc::Status MemoService::ListMemos(grpc::ServerContext*, const proto::ListMemos
         protoMemo->set_timestamp(memo->timestamp());
     }
     response->set_request_uuid(request->uuid());
-    LOG_TRC("[MemoService] Found " << selection.size() << " Memo results.")
+    LOG_INF("[MemoService] Found " << selection.size() << " Memo results.")
     return grpc::Status::OK;
 }
 
 grpc::Status MemoService::AddMemo(grpc::ServerContext*, const proto::AddMemoRq* request,
                                   proto::AddMemoRs* response)
 {
-    LOG_TRC("[MemoService] Adding Memo titled '" << request->memo().title() << "'.");
+    LOG_INF("[MemoService] Adding Memo titled '" << request->memo().title() << "'.")
     const auto& protoMemo = request->memo();
     model::Memo memo;
     memo.setTitle(protoMemo.title());
@@ -83,7 +83,7 @@ grpc::Status MemoService::AddMemo(grpc::ServerContext*, const proto::AddMemoRq* 
         response->set_request_uuid(request->uuid());
         response->mutable_operation_status()->set_code(200);
         response->mutable_operation_status()->set_type(proto::OperationStatus_Type_SUCCESS);
-        LOG_TRC("Memo inserted.")
+        LOG_INF("Memo inserted.")
         LOG_DBG("New memo id: '" << newMemo->id() << "'.")
     }
     else
@@ -112,7 +112,7 @@ void MemoService::registerProcesses()
     registerProcess(ListMemosProcess::Create(*this));
     registerProcess(AddMemoProcess::Create(*this));
 
-    LOG_INF("[MemoService] Registered " << processCount() << " processes.");
+    LOG_INF("[MemoService] Registered " << processCount() << " processes.")
 }
 
 } // namespace memo

@@ -25,6 +25,6 @@ int main(int argc, char* argv[])
   	{
         LOG_ERR("exception:\n" << e.what());
   	}
-    LOG_TRC("Server stopped.");
+    LOG_INF("Server stopped.");
     return 0;
 }

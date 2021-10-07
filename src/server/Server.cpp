@@ -31,7 +31,7 @@ Server::Server(const std::string& ipAddress, const std::string& port) :
 
 Server::~Server()
 {
-    LOG_TRC("[Server] Shutting down server ...");
+    LOG_INF("[Server] Shutting down server ...")
     server_->Shutdown();
     completionQueue_->Shutdown();
 
@@ -42,7 +42,7 @@ Server::~Server()
 
 void Server::run()
 {
-    LOG_TRC("[Server] Launching server ...");
+    LOG_INF("[Server] Launching server ...")
     std::string serverAddress = ipAddress_ + ":" + port_;
     initialize(serverAddress);
 
@@ -55,7 +55,7 @@ void Server::run()
         executeProcess(process);
     }
 
-    LOG_TRC("[Server] Run complete.");
+    LOG_INF("[Server] Run complete.")
 }
 
 void Server::initialize(const std::string& serverAddress)
@@ -77,7 +77,7 @@ void Server::initialize(const std::string& serverAddress)
     memoService->enable();
     tagService->enable();
 
-    LOG_TRC("[Server] Server listening on " << serverAddress);
+    LOG_INF("[Server] Server listening on " << serverAddress)
 }
 
 void Server::executeProcess(IProcess* process)

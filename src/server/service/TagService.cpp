@@ -10,7 +10,7 @@ TagService::TagService(const std::shared_ptr<Resources>& resources,
                        grpc::ServerCompletionQueue& completionQueue)
         : BaseService(resources, completionQueue)
 {
-    LOG_TRC("[TagService] TagService created");
+    LOG_INF("[TagService] TagService created")
 }
 
 TagService::~TagService() = default;
@@ -19,7 +19,7 @@ grpc::Status TagService::ListTags(grpc::ServerContext*,
                                   const proto::ListTagsRq* request,
                                   proto::ListTagsRs* response)
 {
-    LOG_TRC("[TagService] ++ List tags ++");
+    LOG_INF("[TagService] ++ List tags ++")
     auto initTag = [](proto::Tag& tag, const std::string& name)
     {
         tag.set_id(101);
@@ -46,7 +46,7 @@ grpc::Status TagService::ListTags(grpc::ServerContext*,
         initTag(*response->add_tags(), request->filter().name_starts_with());
     }
     response->set_request_uuid(request->uuid());
-    LOG_TRC("[TagService] -- List tags -- done");
+    LOG_INF("[TagService] -- List tags -- done")
     return grpc::Status::OK;
 }
 
@@ -54,12 +54,12 @@ grpc::Status TagService::AddTag(grpc::ServerContext*,
                                 const proto::AddTagRq* request,
                                 proto::AddTagRs* response)
 {
-    LOG_TRC("[TagService] Adding new Tag");
+    LOG_INF("[TagService] Adding new Tag")
     const auto& tag = request->tag();
-    LOG_TRC("ID: " << tag.id());
-    LOG_TRC("Name: " << tag.name());
-    LOG_TRC("Created at: " << tag.timestamp());
-    LOG_TRC("[TagService] Adding new Tag - SUCCESS");
+    LOG_TRC("ID: " << tag.id())
+    LOG_TRC("Name: " << tag.name())
+    LOG_TRC("Created at: " << tag.timestamp())
+    LOG_TRC("[TagService] Adding new Tag - SUCCESS")
     // TODO: insert into a db.
     auto addedTag = response->mutable_tag();
     *addedTag = tag;
@@ -89,7 +89,7 @@ void TagService::registerProcesses()
     registerProcess(ListTagsProcess::Create(*this));
     registerProcess(AddTagProcess::Create(*this));
 
-    LOG_INF("[MemoService] Registered " << processCount() << " processes.");
+    LOG_INF("[TagService] Registered " << processCount() << " processes.")
 }
 
 } // namespace memo
