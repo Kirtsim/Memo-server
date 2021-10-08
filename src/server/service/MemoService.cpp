@@ -83,8 +83,7 @@ grpc::Status MemoService::AddMemo(grpc::ServerContext*, const proto::AddMemoRq* 
         response->set_request_uuid(request->uuid());
         response->mutable_operation_status()->set_code(200);
         response->mutable_operation_status()->set_type(proto::OperationStatus_Type_SUCCESS);
-        LOG_INF("Memo inserted.")
-        LOG_DBG("New memo id: '" << newMemo->id() << "'.")
+        LOG_DBG("Newlye inserted memo id: " << newMemo->id())
     }
     else
     {
