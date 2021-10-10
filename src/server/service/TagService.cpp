@@ -38,7 +38,7 @@ grpc::Status TagService::ListTags(grpc::ServerContext*,
 
     auto& db = resources().database();
     const auto selection = db.listTags(filter);
-    LOG_DBG("[TagService] Found " << response->tags_size() << " Tag results.")
+    LOG_DBG("[TagService] Found " << selection.size() << " Tag results.")
 
     for (const auto& tagModel : selection)
     {

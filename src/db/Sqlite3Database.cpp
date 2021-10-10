@@ -108,7 +108,7 @@ std::vector<model::TagPtr> Sqlite3Database::listTags(const TagSearchFilter& filt
             break;
         }
     }
-    LOG_DBG("Total number of selected Tags :" << selectedTags.size())
+    LOG_DBG("Total number of selected Tags: " << selectedTags.size())
     return selectedTags;
 }
 
