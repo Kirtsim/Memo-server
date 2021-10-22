@@ -8,6 +8,7 @@ namespace memo {
 
 struct MemoSearchFilter
 {
+    std::vector<unsigned long> ids;
     std::string exactTitleMatch;
     std::string titlePrefix;
     std::vector<std::string> titleKeywords;
@@ -20,6 +21,7 @@ struct MemoSearchFilter
 
 struct TagSearchFilter
 {
+    std::vector<unsigned long> ids;
     std::string exactNameMatch;
     std::string namePrefix;
     std::string nameContains;

@@ -149,6 +149,18 @@ std::string BuildMemoQuery(const MemoSearchFilter filter)
     std::stringstream query;
     std::vector<std::string> conditions;
 
+    if (!filter.ids.empty())
+    {
+        std::stringstream idIn;
+        idIn << att::kId << " IN (" << filter.ids.front();
+        for (auto i = 1ul; i < filter.ids.size(); ++i)
+        {
+            idIn << "," << filter.ids[i];
+        }
+        idIn << ")";
+        conditions.emplace_back(idIn.str());
+    }
+
     const bool isExactTitleMatch = !filter.exactTitleMatch.empty();
     if (isExactTitleMatch)
     {
@@ -212,6 +224,18 @@ std::string BuildTagQuery(const TagSearchFilter& filter)
     std::stringstream query;
     std::vector<std::string> conditions;
     const bool exactMatch = !filter.exactNameMatch.empty();
+
+    if (!filter.ids.empty())
+    {
+        std::stringstream idIn;
+        idIn << att::kId << " IN (" << filter.ids.front();
+        for (auto i = 1ul; i < filter.ids.size(); ++i)
+        {
+            idIn << "," << filter.ids[i];
+        }
+        idIn << ")";
+        conditions.emplace_back(idIn.str());
+    }
 
     if (exactMatch)
     {

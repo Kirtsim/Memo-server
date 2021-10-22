@@ -235,6 +235,7 @@ TEST_F(TestSqlite3Functions_WithSqlite3, test_DeleteMemoTagIds)
 TEST(TestSqlite3Functions, test_BuildTagQuery_Use_all_options_in_the_filter)
 {
     TagSearchFilter searchFilter;
+    searchFilter.ids = {11, 12, 13};
     searchFilter.namePrefix = "name_prefix";
     searchFilter.nameContains = "name_contains";
     searchFilter.colors = {111, 222, 333};
@@ -244,9 +245,20 @@ TEST(TestSqlite3Functions, test_BuildTagQuery_Use_all_options_in_the_filter)
 
     std::string expectedQuery = "SELECT id, name, color, timestamp FROM Tag "
                                 "INNER JOIN Tagged ON Tag.id = Tagged.tagId "
-                                "WHERE name LIKE 'name_prefix%' AND name LIKE '%name_contains%' "
+                                "WHERE id IN (11,12,13) "
+                                "AND name LIKE 'name_prefix%' AND name LIKE '%name_contains%' "
                                 "AND color IN (111,222,333) AND timestamp >= 100001 AND timestamp <= 200002 "
                                 "AND memoId IN (1,2,3) GROUP BY id LIMIT 100;";
+    const auto actualQuery = BuildTagQuery(searchFilter);
+    EXPECT_EQ(expectedQuery, actualQuery);
+}
+
+TEST(TestSqlite3Functions, test_BuildTagQuery_Filter_by_tag_ids_only)
+{
+    TagSearchFilter searchFilter;
+    searchFilter.ids = {11, 12, 13};
+    std::string expectedQuery = "SELECT id, name, color, timestamp FROM Tag "
+                                "WHERE id IN (11,12,13) GROUP BY id LIMIT 100;";
     const auto actualQuery = BuildTagQuery(searchFilter);
     EXPECT_EQ(expectedQuery, actualQuery);
 }
@@ -369,6 +381,7 @@ TEST(TestSqlite3Functions, test_BuildTagQuery_Filter_contains_only_max_result_co
 TEST(TestSqlite3Functions, test_BuildMemoQuery_Use_all_filter_options)
 {
     MemoSearchFilter filter;
+    filter.ids = {11, 12, 13};
     filter.titlePrefix = "title_prefix";
     filter.titleKeywords = {"key1", "key2", "key3"};
     filter.memoKeywords = {"mKey1", "mKey2", "mKey3"};
@@ -380,13 +393,23 @@ TEST(TestSqlite3Functions, test_BuildMemoQuery_Use_all_filter_options)
     const std::string expectedQuery =
             "SELECT id, title, description, timestamp FROM Memo "
             "INNER JOIN Tagged ON Memo.id = Tagged.memoId "
-            "WHERE title LIKE 'title_prefix%' "
+            "WHERE id IN (11,12,13) AND title LIKE 'title_prefix%' "
             "AND (title LIKE '%key1%' OR title LIKE '%key2%' OR title LIKE '%key3%') "
             "AND (description LIKE '%mKey1%' OR description LIKE '%mKey2%' OR description LIKE '%mKey3%') "
             "AND timestamp >= 10001 AND timestamp <= 20003 "
             "AND tagId IN (1,2,3) GROUP BY id LIMIT 100;";
 
     EXPECT_EQ(expectedQuery, query);
+}
+
+TEST(TestSqlite3Functions, test_BuildMemoQuery_Filter_by_memo_ids_only)
+{
+    TagSearchFilter searchFilter;
+    searchFilter.ids = {11, 12, 13};
+    std::string expectedQuery = "SELECT id, name, color, timestamp FROM Tag "
+                                "WHERE id IN (11,12,13) GROUP BY id LIMIT 100;";
+    const auto actualQuery = BuildTagQuery(searchFilter);
+    EXPECT_EQ(expectedQuery, actualQuery);
 }
 
 TEST(TestSqlite3Functions, test_BuildMemoQuery_excludes_title_prefix_and_keywords_if_exact_match_is_in_filter)
