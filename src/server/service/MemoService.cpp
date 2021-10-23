@@ -4,6 +4,7 @@
 #include "server/Resources.hpp"
 #include "model/Memo.hpp"
 #include "db/IDatabase.hpp"
+#include "db/Tools.hpp"
 
 #include "logger/Logger.hpp"
 
@@ -37,6 +38,7 @@ grpc::Status MemoService::ListMemos(grpc::ServerContext*, const proto::ListMemos
 
     auto& db = resources().database();
     auto selection = db.listMemos(filter);
+    std::set<unsigned long> allTagIds;
     for (const auto& memo : selection)
     {
         if (!memo)
@@ -47,7 +49,24 @@ grpc::Status MemoService::ListMemos(grpc::ServerContext*, const proto::ListMemos
         protoMemo->set_description(memo->description());
         protoMemo->mutable_tag_ids()->Add(memo->tagIds().begin(), memo->tagIds().end());
         protoMemo->set_timestamp(memo->timestamp());
+        allTagIds.insert(memo->tagIds().begin(), memo->tagIds().end());
     }
+    TagSearchFilter tagFilter;
+    tagFilter.ids.assign(allTagIds.begin(), allTagIds.end());
+    const auto tags = db.listTags(tagFilter);
+    for (const auto& tag : tags)
+    {
+        if (!tag)
+            continue;
+
+        proto::Tag protoTag;
+        protoTag.set_id(tag->id());
+        protoTag.set_name(tag->name());
+        protoTag.set_color(tools::ColorToInt(tag->color()));
+        protoTag.set_timestamp(tag->timestamp());
+        (*response->mutable_tags())[tag->id()] = protoTag;
+    }
+
     response->set_request_uuid(request->uuid());
     LOG_INF("[MemoService] Found " << selection.size() << " Memo results.")
     return grpc::Status::OK;
@@ -62,7 +81,7 @@ grpc::Status MemoService::AddMemo(grpc::ServerContext*, const proto::AddMemoRq* 
     memo.setTitle(protoMemo.title());
     memo.setDescription(protoMemo.description());
     memo.setTimestamp(protoMemo.timestamp());
-    std::vector<unsigned long> tagIds(protoMemo.tag_ids().begin(), protoMemo.tag_ids().begin());
+    std::vector<unsigned long> tagIds(protoMemo.tag_ids().begin(), protoMemo.tag_ids().end());
     memo.setTagIds(tagIds);
 
     model::MemoPtr newMemo;
