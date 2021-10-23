@@ -179,7 +179,7 @@ bool Sqlite3Database::insertMemo(const model::Memo& memo)
         return false;
     }
 
-    if (!InsertMemoTagIds(memo.id(), memo.tagIds(), *sqlite3_))
+    if (!InsertMemoTagIds(newId, memo.tagIds(), *sqlite3_))
     {
         LOG_WRN("Failed to insert Memo. Tag ids could not be assigned.")
         rollback();

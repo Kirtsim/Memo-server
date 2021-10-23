@@ -250,11 +250,12 @@ TEST_F(TestSqlite3Database, test_InsertMemo_also_inserts_into_the_Tagged_table)
     ASSERT_TRUE(test::InsertTagRow(sqlite3, {2, "T2", 222, 2222}));
     ASSERT_TRUE(test::InsertTagRow(sqlite3, {3, "T3", 333, 3333}));
 
-    auto memo = test::CreateMemo({1, "Title1", "Desc 2", 22222});
+    auto memo = test::CreateMemo({1903423408, "Title1", "Desc 2", 22222});
     memo->setTagIds({1, 3});
     const bool success = db.insertMemo(*memo);
     EXPECT_TRUE(success);
 
+    memo->setId(1); // The inserted Memo will be automatically assigned a new id.
     const auto expectedMemoRows = test::ToStringVectors({memo});
     const auto actualMemoRows = test::ExecCommand(sqlite3, "SELECT * FROM Memo;");
     const TableRows expectedTaggedRows = {{"1", "1"}, {"1", "3"}};
