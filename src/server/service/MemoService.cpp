@@ -2,6 +2,7 @@
 #include "server/process/ListMemosProcess.hpp"
 #include "server/process/AddMemoProcess.hpp"
 #include "server/process/RemoveMemoProcess.hpp"
+#include "server/process/UpdateMemoProcess.hpp"
 #include "server/Resources.hpp"
 #include "model/Memo.hpp"
 #include "db/IDatabase.hpp"
@@ -114,10 +115,33 @@ grpc::Status MemoService::AddMemo(grpc::ServerContext*, const proto::AddMemoRq* 
     return grpc::Status::OK;
 }
 
-grpc::Status MemoService::UpdateMemo(grpc::ServerContext* context, const proto::UpdateMemoRq* request,
+grpc::Status MemoService::UpdateMemo(grpc::ServerContext*, const proto::UpdateMemoRq* request,
                                      proto::UpdateMemoRs* response)
 {
-    return WithAsyncMethod_UpdateMemo::UpdateMemo(context, request, response);
+    LOG_INF("[MemoService] Updating memo ...")
+    LOG_DBG("Memo id: " << request->memo().id())
+    auto& db = resources().database();
+    model::Memo memo;
+    memo.setId(request->memo().id());
+    memo.setTitle(request->memo().title());
+    memo.setDescription(request->memo().description());
+    memo.setTimestamp(request->memo().timestamp());
+
+    response->set_request_uuid(request->request_uuid());
+    if (db.updateMemo(memo))
+    {
+        response->mutable_operation_status()->set_code(200);
+        response->mutable_operation_status()->set_type(proto::OperationStatus_Type_SUCCESS);
+        LOG_DBG("Update success.")
+    }
+    else
+    {
+        response->mutable_operation_status()->set_code(-1);
+        response->mutable_operation_status()->set_type(proto::OperationStatus_Type_FAILURE);
+        LOG_DBG("Update failure.")
+    }
+
+    return grpc::Status::OK;
 }
 
 grpc::Status MemoService::RemoveMemo(grpc::ServerContext*, const proto::RemoveMemoRq* request,
@@ -156,6 +180,7 @@ void MemoService::registerProcesses()
     registerProcess(ListMemosProcess::Create(*this));
     registerProcess(AddMemoProcess::Create(*this));
     registerProcess(RemoveMemoProcess::Create(*this));
+    registerProcess(UpdateMemoProcess::Create(*this));
 
     LOG_INF("[MemoService] Registered " << processCount() << " processes.")
 }
