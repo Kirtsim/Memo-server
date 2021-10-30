@@ -1,6 +1,7 @@
 #include "server/service/MemoService.hpp"
 #include "server/process/ListMemosProcess.hpp"
 #include "server/process/AddMemoProcess.hpp"
+#include "server/process/RemoveMemoProcess.hpp"
 #include "server/Resources.hpp"
 #include "model/Memo.hpp"
 #include "db/IDatabase.hpp"
@@ -102,7 +103,7 @@ grpc::Status MemoService::AddMemo(grpc::ServerContext*, const proto::AddMemoRq* 
         response->set_request_uuid(request->uuid());
         response->mutable_operation_status()->set_code(200);
         response->mutable_operation_status()->set_type(proto::OperationStatus_Type_SUCCESS);
-        LOG_DBG("Newlye inserted memo id: " << newMemo->id())
+        LOG_DBG("Newly inserted memo id: " << newMemo->id())
     }
     else
     {
@@ -119,16 +120,42 @@ grpc::Status MemoService::UpdateMemo(grpc::ServerContext* context, const proto::
     return WithAsyncMethod_UpdateMemo::UpdateMemo(context, request, response);
 }
 
-grpc::Status MemoService::RemoveMemo(grpc::ServerContext* context, const proto::RemoveMemoRq* request,
+grpc::Status MemoService::RemoveMemo(grpc::ServerContext*, const proto::RemoveMemoRq* request,
                                      proto::RemoveMemoRs* response)
 {
-    return WithAsyncMethod_RemoveMemo::RemoveMemo(context, request, response);
+    LOG_INF("[MemoService] Removing " << request->ids().size() << " memos ...")
+    auto& db = resources().database();
+
+    MemoSearchFilter filter;
+
+    filter.ids.assign(request->ids().begin(), request->ids().end());
+    auto toRemove = db.listMemos(filter);
+    for (const auto& memo : toRemove)
+    {
+        if (!memo)
+            continue;
+
+        if (db.deleteMemo(*memo))
+        {
+            auto removedMemo = response->add_removed_memos();
+            removedMemo->set_id(memo->id());
+            removedMemo->set_title(memo->title());
+            removedMemo->set_description(memo->description());
+            removedMemo->set_timestamp(memo->timestamp());
+        }
+    }
+    response->set_request_uuid(request->request_uuid());
+    response->mutable_operation_status()->set_code(200);
+    response->mutable_operation_status()->set_type(proto::OperationStatus_Type_SUCCESS);
+    LOG_INF("[MemoService] Deleted " << response->removed_memos().size() << " memos.")
+    return grpc::Status::OK;
 }
 
 void MemoService::registerProcesses()
 {
     registerProcess(ListMemosProcess::Create(*this));
     registerProcess(AddMemoProcess::Create(*this));
+    registerProcess(RemoveMemoProcess::Create(*this));
 
     LOG_INF("[MemoService] Registered " << processCount() << " processes.")
 }
