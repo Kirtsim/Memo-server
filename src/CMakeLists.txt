@@ -12,6 +12,7 @@ target_sources(${exe_lib}
         ${src_dir}/server/process/ListMemosProcess.cpp
         ${src_dir}/server/process/AddMemoProcess.cpp
         ${src_dir}/server/process/RemoveMemoProcess.cpp
+        ${src_dir}/server/process/UpdateMemoProcess.cpp
         ${src_dir}/server/process/ListTagsProcess.cpp
         ${src_dir}/server/process/AddTagProcess.cpp
         ${src_dir}/server/Server.cpp
@@ -34,6 +35,7 @@ target_sources(${exe_lib}
         ${src_dir}/server/process/ListMemosProcess.hpp
         ${src_dir}/server/process/AddMemoProcess.hpp
         ${src_dir}/server/process/RemoveMemoProcess.hpp
+        ${src_dir}/server/process/UpdateMemoProcess.hpp
         ${src_dir}/server/process/ListTagsProcess.hpp
         ${src_dir}/server/process/AddTagProcess.hpp
         ${src_dir}/server/Server.hpp
