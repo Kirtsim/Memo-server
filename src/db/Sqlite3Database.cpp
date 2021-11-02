@@ -41,7 +41,7 @@ std::vector<model::MemoPtr> Sqlite3Database::listMemos(const MemoSearchFilter& f
 
     std::vector<model::MemoPtr> memos;
     std::set<unsigned long> memoIds;
-    LOG_DBG("Converting" << selectedRows.size() << " memo rows to Memos ...")
+    LOG_DBG("Converting " << selectedRows.size() << " memo rows to Memos ...")
     for (const auto& row : selectedRows)
     {
         if (row.size() != expectedMemoValueCount)
