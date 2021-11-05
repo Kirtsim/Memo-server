@@ -23,4 +23,17 @@ model::Color IntToColor(int numericColor)
     color.red = (numericColor & ones);
     return color;
 }
+
+std::string EscapeSingleQuotes(const std::string& text)
+{
+    std::string result;
+    for (const char character : text)
+    {
+        if (character == '\'')
+            result.push_back('\\');
+        result.push_back(character);
+    }
+    return result;
+}
+
 } // namespace memo::tools
