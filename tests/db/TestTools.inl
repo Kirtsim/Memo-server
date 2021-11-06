@@ -47,7 +47,7 @@ TEST(TestTools, test_IntToColor_and_back_ColorToInt_roundcheck)
 TEST(TestTools, test_EscapeSingleQuotes_puts_forward_slash_before_every_single_quote)
 {
     const auto result = tools::EscapeSingleQuotes("This isn't right. That's wrong. Some single quotes ''' '");
-    const auto expected = "This isn\\'t right. That\\'s wrong. Some single quotes \\'\\'\\' \\'";
+    const auto expected = "This isn''t right. That''s wrong. Some single quotes '''''' ''";
     EXPECT_EQ(expected, result);
 }
 
@@ -67,7 +67,7 @@ TEST(TestTools, test_EscapeSingleQuotes_with_empty_text_Returns_empty)
 TEST(TestTools, test_EscapeSingleQuotes_with_text_consisting_of_single_quote_Return_escaped_quote_text)
 {
     const auto result = tools::EscapeSingleQuotes("'");
-    EXPECT_EQ("\\'", result);
+    EXPECT_EQ("''", result);
 }
 
 } // namespace memo

@@ -30,7 +30,8 @@ std::string EscapeSingleQuotes(const std::string& text)
     for (const char character : text)
     {
         if (character == '\'')
-            result.push_back('\\');
+            // double the quote (this is how it works in SQL).
+            result.push_back(character);
         result.push_back(character);
     }
     return result;
