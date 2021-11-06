@@ -21,14 +21,14 @@ std::vector<std::vector<std::string>> SelectRows(const std::string& query, ISqli
     };
     const bool success = sqlite3.exec(query, callback);
     if (!success)
-        LOG_DBG("Failed to execute query:\n" << query);
+        LOG_DBG("Failed to execute query:\n" << query)
     return selection;
 }
 
 unsigned long SelectMemoId(const std::string& title, ISqlite3Wrapper& sqlite3)
 {
     const std::string query = "SELECT " + MemoTable::att::kId + " FROM " + MemoTable::kName + " WHERE " +
-                              MemoTable::att::kTitle + " LIKE '" + title + "';";
+                              MemoTable::att::kTitle + " LIKE '" + tools::EscapeSingleQuotes(title) + "';";
     const auto selection = SelectRows(query, sqlite3);
     if (selection.empty() || selection.front().empty())
         return -1ul;
@@ -38,7 +38,7 @@ unsigned long SelectMemoId(const std::string& title, ISqlite3Wrapper& sqlite3)
     }
     catch (const std::invalid_argument&)
     {
-        LOG_DBG("(SelectMemoId) Conversion to unsigned long failed for value " << selection.front().front());
+        LOG_DBG("(SelectMemoId) Conversion to unsigned long failed for value " << selection.front().front())
     }
     return -1ul;
 }
@@ -46,10 +46,12 @@ unsigned long SelectMemoId(const std::string& title, ISqlite3Wrapper& sqlite3)
 bool UpdateMemoTable(const model::Memo& memo, ISqlite3Wrapper& sqlite3)
 {
     namespace att = MemoTable::att;
+    const auto title = tools::EscapeSingleQuotes(memo.title());
+    const auto description = tools::EscapeSingleQuotes(memo.description());
     std::stringstream memoCmd;
     memoCmd << "UPDATE " << MemoTable::kName
-    << " SET " << att::kTitle << "='" << memo.title() << "', "
-               << att::kDescription << "='" << memo.description() << "', "
+    << " SET " << att::kTitle << "='" << title << "', "
+               << att::kDescription << "='" << description << "', "
                << att::kTimestamp   << "=" << memo.timestamp()
     << " WHERE " << att::kId << "=" << memo.id() << ";";
     return sqlite3.exec(memoCmd.str(), nullptr);
@@ -61,7 +63,7 @@ bool UpdateTagTable(const model::Tag& tag, ISqlite3Wrapper& sqlite3)
 
     std::stringstream updateCmd;
     updateCmd << "UPDATE " << TagTable::kName
-              << " SET " << att::kName << "='" << tag.name() << "', "
+              << " SET " << att::kName << "='" << tools::EscapeSingleQuotes(tag.name()) << "', "
                          << att::kColor << "=" << tools::ColorToInt(tag.color()) << ", "
                          << att::kTimestamp << "=" << tag.timestamp()
               << " WHERE " << att::kId << "=" << tag.id() << ";";
@@ -88,10 +90,12 @@ bool InsertMemo(const model::Memo& memo, ISqlite3Wrapper& sqlite3)
 {
     namespace att = MemoTable::att;
 
+    const std::string title = tools::EscapeSingleQuotes(memo.title());
+    const std::string description = tools::EscapeSingleQuotes(memo.description());
     std::stringstream insertCmd;
     insertCmd << "INSERT INTO " << MemoTable::kName << " (" << att::kTitle << ", " << att::kDescription << ", "
               << att::kTimestamp << ") "
-              << "VALUES ('" << memo.title() << "', '" << memo.description() << "', " << memo.timestamp() << ");";
+              << "VALUES ('" << title << "', '" << description << "', " << memo.timestamp() << ");";
 
     return sqlite3.exec(insertCmd.str(), nullptr);
 }
@@ -101,10 +105,11 @@ bool InsertTag(const model::Tag& tag, ISqlite3Wrapper& sqlite3)
     namespace att = TagTable::att;
 
     std::stringstream insertCmd;
+    const auto tagName = tools::EscapeSingleQuotes(tag.name());
     const int colorValue = tools::ColorToInt(tag.color());
     insertCmd << "INSERT INTO " << TagTable::kName << " (" << att::kName << ", " << att::kTimestamp << ", "
               << att::kColor << ") "
-              << "VALUES ('" << tag.name() << "', " << tag.timestamp() << ", " << colorValue << ");";
+              << "VALUES ('" << tagName << "', " << tag.timestamp() << ", " << colorValue << ");";
     return sqlite3.exec(insertCmd.str(), nullptr);
 }
 
@@ -164,12 +169,12 @@ std::string BuildMemoQuery(const MemoSearchFilter filter)
     const bool isExactTitleMatch = !filter.exactTitleMatch.empty();
     if (isExactTitleMatch)
     {
-        conditions.emplace_back(att::kTitle + " LIKE '" + filter.exactTitleMatch + "'");
+        conditions.emplace_back(att::kTitle + " LIKE '" + tools::EscapeSingleQuotes(filter.exactTitleMatch) + "'");
     }
 
     if (!isExactTitleMatch && !filter.titlePrefix.empty())
     {
-        conditions.emplace_back(att::kTitle + " LIKE '" + filter.titlePrefix + "%'");
+        conditions.emplace_back(att::kTitle + " LIKE '" + tools::EscapeSingleQuotes(filter.titlePrefix) + "%'");
     }
 
     if (!isExactTitleMatch && !filter.titleKeywords.empty())
@@ -239,18 +244,18 @@ std::string BuildTagQuery(const TagSearchFilter& filter)
 
     if (exactMatch)
     {
-        conditions.emplace_back(att::kName + " LIKE '" + filter.exactNameMatch + "'");
+        conditions.emplace_back(att::kName + " LIKE '" + tools::EscapeSingleQuotes(filter.exactNameMatch) + "'");
     }
 
     if (!exactMatch && !filter.namePrefix.empty())
     {
-        std::string condition = att::kName + " LIKE '" + filter.namePrefix + "%'";
+        std::string condition = att::kName + " LIKE '" + tools::EscapeSingleQuotes(filter.namePrefix) + "%'";
         conditions.emplace_back(condition);
     }
 
     if (!exactMatch && !filter.nameContains.empty())
     {
-        std::string condition = att::kName + " LIKE '%" + filter.nameContains + "%'";
+        std::string condition = att::kName + " LIKE '%" + tools::EscapeSingleQuotes(filter.nameContains) + "%'";
         conditions.emplace_back(condition);
     }
 
@@ -308,11 +313,11 @@ namespace {
             return "";
 
         std::stringstream condition;
-        condition << "(" << attribute << " LIKE '%" << *uniqueKeywords.begin() << "%'";
+        condition << "(" << attribute << " LIKE '%" << tools::EscapeSingleQuotes(*uniqueKeywords.begin()) << "%'";
         uniqueKeywords.erase(uniqueKeywords.begin());
 
         for (const auto& keyword : uniqueKeywords)
-            condition << " OR " << attribute << " LIKE '%" << keyword << "%'";
+            condition << " OR " << attribute << " LIKE '%" << tools::EscapeSingleQuotes(keyword) << "%'";
 
         condition << ")";
         return condition.str();
