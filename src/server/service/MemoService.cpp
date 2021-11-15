@@ -126,6 +126,7 @@ grpc::Status MemoService::UpdateMemo(grpc::ServerContext*, const proto::UpdateMe
     memo.setTitle(request->memo().title());
     memo.setDescription(request->memo().description());
     memo.setTimestamp(request->memo().timestamp());
+    memo.setTagIds({ request->memo().tag_ids().begin(), request->memo().tag_ids().end() });
 
     response->set_request_uuid(request->request_uuid());
     if (db.updateMemo(memo))
