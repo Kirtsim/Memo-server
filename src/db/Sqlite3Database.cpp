@@ -124,14 +124,18 @@ bool Sqlite3Database::updateMemo(const model::Memo& memo)
         rollback();
         return false;
     }
+    LOG_TRC("   Number of tags in updated memo: " << memo.tagIds().size())
 
     std::set<unsigned long> oldTagIds(queriedTagIds.begin(), queriedTagIds.end());
     auto checkIdNotPresent = [&oldTagIds](const unsigned long tagId) { return oldTagIds.erase(tagId) == 0; };
+    LOG_TRC("   Original tag count: " << oldTagIds.size())
 
     std::vector<unsigned long> tagIdsToAdd;
     std::copy_if(memo.tagIds().begin(), memo.tagIds().end(), std::back_inserter(tagIdsToAdd), checkIdNotPresent);
+    LOG_TRC("   Number of tags to add: " << tagIdsToAdd.size())
 
     std::vector<unsigned long> tagIdsToDelete(oldTagIds.begin(), oldTagIds.end());
+    LOG_TRC("   Number of tags to remove: " << tagIdsToDelete.size())
     bool failed = !DeleteMemoTagIds(memo.id(), tagIdsToDelete, *sqlite3_)
                || !InsertMemoTagIds(memo.id(), tagIdsToAdd, *sqlite3_)
                || !UpdateMemoTable(memo, *sqlite3_);
