@@ -146,6 +146,9 @@ bool DeleteMemoTagIds(const unsigned long memoId, const std::vector<unsigned lon
 
 namespace {
     std::string ConstructContainsKeysCondition(const std::string& attribute, const std::vector<std::string>& keywords);
+
+    template<typename ItemType>
+    std::string AttributeInCondition(const std::string& attribute, const std::vector<ItemType>& items);
 }
 
 std::string BuildMemoQuery(const MemoSearchFilter filter)
@@ -155,27 +158,14 @@ std::string BuildMemoQuery(const MemoSearchFilter filter)
     std::vector<std::string> conditions;
 
     if (!filter.ids.empty())
-    {
-        std::stringstream idIn;
-        idIn << att::kId << " IN (" << filter.ids.front();
-        for (auto i = 1ul; i < filter.ids.size(); ++i)
-        {
-            idIn << "," << filter.ids[i];
-        }
-        idIn << ")";
-        conditions.emplace_back(idIn.str());
-    }
+        conditions.emplace_back(AttributeInCondition(att::kId, filter.ids));
 
     const bool isExactTitleMatch = !filter.exactTitleMatch.empty();
     if (isExactTitleMatch)
-    {
         conditions.emplace_back(att::kTitle + " LIKE '" + tools::EscapeSingleQuotes(filter.exactTitleMatch) + "'");
-    }
 
     if (!isExactTitleMatch && !filter.titlePrefix.empty())
-    {
         conditions.emplace_back(att::kTitle + " LIKE '" + tools::EscapeSingleQuotes(filter.titlePrefix) + "%'");
-    }
 
     if (!isExactTitleMatch && !filter.titleKeywords.empty())
     {
@@ -202,12 +192,7 @@ std::string BuildMemoQuery(const MemoSearchFilter filter)
     const bool hasTagIds = !filter.tagIds.empty();
     if (hasTagIds)
     {
-        std::stringstream condition;
-        condition << TaggedTable::att::kTagId << " IN (" << filter.tagIds.front();
-        for (size_t i = 1; i < filter.tagIds.size(); ++i)
-            condition << "," << filter.tagIds[i];
-        condition << ")";
-        conditions.emplace_back(condition.str());
+        conditions.emplace_back(AttributeInCondition(TaggedTable::att::kTagId, filter.tagIds));
 
         query << " INNER JOIN " << TaggedTable::kName << " ON "
               << MemoTable::kName << "." << att::kId << " = "  << TaggedTable::kName << "." << TaggedTable::att::kMemoId;
@@ -231,21 +216,10 @@ std::string BuildTagQuery(const TagSearchFilter& filter)
     const bool exactMatch = !filter.exactNameMatch.empty();
 
     if (!filter.ids.empty())
-    {
-        std::stringstream idIn;
-        idIn << att::kId << " IN (" << filter.ids.front();
-        for (auto i = 1ul; i < filter.ids.size(); ++i)
-        {
-            idIn << "," << filter.ids[i];
-        }
-        idIn << ")";
-        conditions.emplace_back(idIn.str());
-    }
+        conditions.emplace_back(AttributeInCondition(att::kId, filter.ids));
 
     if (exactMatch)
-    {
         conditions.emplace_back(att::kName + " LIKE '" + tools::EscapeSingleQuotes(filter.exactNameMatch) + "'");
-    }
 
     if (!exactMatch && !filter.namePrefix.empty())
     {
@@ -260,14 +234,7 @@ std::string BuildTagQuery(const TagSearchFilter& filter)
     }
 
     if (!filter.colors.empty())
-    {
-        std::stringstream colorIn;
-        colorIn << att::kColor << " IN (" << filter.colors.front();
-        for (auto i = 1ul; i < filter.colors.size(); ++i)
-            colorIn << "," << filter.colors[i];
-        colorIn << ")";
-        conditions.emplace_back(colorIn.str());
-    }
+        conditions.emplace_back(AttributeInCondition(att::kColor, filter.colors));
 
     if (filter.filterFromDate)
         conditions.emplace_back(att::kTimestamp + " >= " + std::to_string(filter.filterFromDate.value()));
@@ -275,14 +242,7 @@ std::string BuildTagQuery(const TagSearchFilter& filter)
         conditions.emplace_back(att::kTimestamp + " <= " + std::to_string(filter.filterUntilDate.value()));
 
     if (!filter.memoIds.empty())
-    {
-        std::stringstream memoIdIn;
-        memoIdIn << TaggedTable::att::kMemoId << " IN (" << filter.memoIds.front();
-        for (auto i = 1ul; i < filter.memoIds.size(); ++i)
-            memoIdIn << "," << filter.memoIds[i];
-        memoIdIn << ")";
-        conditions.emplace_back(memoIdIn.str());
-    }
+        conditions.emplace_back(AttributeInCondition(TaggedTable::att::kMemoId, filter.memoIds));
 
     query << "SELECT " << att::kId << ", " << att::kName << ", " << att::kColor << ", " << att::kTimestamp
           << " FROM " << TagTable::kName;
@@ -305,6 +265,21 @@ std::string BuildTagQuery(const TagSearchFilter& filter)
 
 
 namespace {
+
+    template<typename ItemType>
+    std::string AttributeInCondition(const std::string& attribute, const std::vector<ItemType>& items)
+    {
+        std::stringstream stream;
+        stream << attribute << " IN (";
+        if (!items.empty())
+            stream << items.front();
+
+        for (auto i = 1ul; i < items.size(); ++i)
+            stream << "," << items[i];
+        stream << ")";
+        return stream.str();
+    }
+
     std::string ConstructContainsKeysCondition(const std::string& attribute, const std::vector<std::string>& keywords)
     {
         std::set<std::string> uniqueKeywords(keywords.begin(), keywords.end());
