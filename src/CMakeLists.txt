@@ -15,6 +15,7 @@ target_sources(${exe_lib}
         ${src_dir}/server/process/UpdateMemoProcess.cpp
         ${src_dir}/server/process/ListTagsProcess.cpp
         ${src_dir}/server/process/AddTagProcess.cpp
+        ${src_dir}/server/process/UpdateTagProcess.cpp
         ${src_dir}/server/Server.cpp
         ${src_dir}/server/Resources.cpp
         ${src_dir}/db/Sqlite3Wrapper.cpp
@@ -38,6 +39,7 @@ target_sources(${exe_lib}
         ${src_dir}/server/process/UpdateMemoProcess.hpp
         ${src_dir}/server/process/ListTagsProcess.hpp
         ${src_dir}/server/process/AddTagProcess.hpp
+        ${src_dir}/server/process/UpdateTagProcess.hpp
         ${src_dir}/server/Server.hpp
         ${src_dir}/server/Resources.hpp
         ${src_dir}/db/IDatabase.hpp

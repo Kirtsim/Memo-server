@@ -1,6 +1,7 @@
 #include "server/service/TagService.hpp"
 #include "server/process/ListTagsProcess.hpp"
 #include "server/process/AddTagProcess.hpp"
+#include "server/process/UpdateTagProcess.hpp"
 #include "server/Resources.hpp"
 #include "db/IDatabase.hpp"
 #include "db/Tools.hpp"
@@ -96,11 +97,34 @@ grpc::Status TagService::AddTag(grpc::ServerContext*,
     return grpc::Status::OK;
 }
 
-grpc::Status TagService::UpdateTag(grpc::ServerContext* context,
+grpc::Status TagService::UpdateTag(grpc::ServerContext*,
                                    const proto::UpdateTagRq* request,
                                    proto::UpdateTagRs* response)
 {
-    return WithAsyncMethod_UpdateTag::UpdateTag(context, request, response);
+    LOG_INF("[TagService] Updating tag ...")
+    LOG_DBG("Tag id: " << request->tag().id())
+    auto& db = resources().database();
+    model::Tag tag;
+    tag.setId(request->tag().id());
+    tag.setName(request->tag().name());
+    tag.setColor(tools::IntToColor(request->tag().color()));
+    tag.setTimestamp(request->tag().timestamp());
+
+    response->set_request_uuid(request->uuid());
+    if (db.updateTag(tag))
+    {
+        response->mutable_operation_status()->set_code(200);
+        response->mutable_operation_status()->set_type(proto::OperationStatus_Type_SUCCESS);
+        LOG_DBG("Update success.")
+    }
+    else
+    {
+        response->mutable_operation_status()->set_code(-1);
+        response->mutable_operation_status()->set_type(proto::OperationStatus_Type_FAILURE);
+        LOG_DBG("Update failure.")
+    }
+
+    return grpc::Status::OK;
 }
 
 grpc::Status TagService::RemoveTag(grpc::ServerContext* context,
@@ -114,6 +138,7 @@ void TagService::registerProcesses()
 {
     registerProcess(ListTagsProcess::Create(*this));
     registerProcess(AddTagProcess::Create(*this));
+    registerProcess(UpdateTagProcess::Create(*this));
 
     LOG_INF("[TagService] Registered " << processCount() << " processes.")
 }
