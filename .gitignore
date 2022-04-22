@@ -1,3 +1,4 @@
+.DS_Store
 .clangd
 
 build*
@@ -10,6 +11,8 @@ src/model/*.cc
 
 compile_commands.json
 compile_flags.txt
+
+*.user
 
 # VIM
 *.swp
