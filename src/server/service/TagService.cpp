@@ -2,6 +2,7 @@
 #include "server/process/ListTagsProcess.hpp"
 #include "server/process/AddTagProcess.hpp"
 #include "server/process/UpdateTagProcess.hpp"
+#include "server/process/RemoveTagProcess.hpp"
 #include "server/Resources.hpp"
 #include "db/IDatabase.hpp"
 #include "db/Tools.hpp"
@@ -127,11 +128,36 @@ grpc::Status TagService::UpdateTag(grpc::ServerContext*,
     return grpc::Status::OK;
 }
 
-grpc::Status TagService::RemoveTag(grpc::ServerContext* context,
+grpc::Status TagService::RemoveTag(grpc::ServerContext*,
                                    const proto::RemoveTagRq* request,
                                    proto::RemoveTagRs* response)
 {
-    return WithAsyncMethod_RemoveTag::RemoveTag(context, request, response);
+    LOG_INF("[TagService] Removing " << request->ids().size() << " tags ...")
+    auto& db = resources().database();
+
+    TagSearchFilter filter;
+
+    filter.ids.assign(request->ids().begin(), request->ids().end());
+    auto toRemove = db.listTags(filter);
+    for (const auto& tag : toRemove)
+    {
+        if (!tag)
+            continue;
+
+        if (db.deleteTag(*tag))
+        {
+            auto removedTag = response->add_removed_tags();
+            removedTag->set_id(tag->id());
+            removedTag->set_name(tag->name());
+            removedTag->set_color(tools::ColorToInt(tag->color()));
+            removedTag->set_timestamp(tag->timestamp());
+        }
+    }
+    response->set_request_uuid(request->uuid());
+    response->mutable_operation_status()->set_code(200);
+    response->mutable_operation_status()->set_type(proto::OperationStatus_Type_SUCCESS);
+    LOG_INF("[TagService] Deleted " << response->removed_tags().size() << " tags.")
+    return grpc::Status::OK;
 }
 
 void TagService::registerProcesses()
@@ -139,6 +165,7 @@ void TagService::registerProcesses()
     registerProcess(ListTagsProcess::Create(*this));
     registerProcess(AddTagProcess::Create(*this));
     registerProcess(UpdateTagProcess::Create(*this));
+    registerProcess(RemoveTagProcess::Create(*this));
 
     LOG_INF("[TagService] Registered " << processCount() << " processes.")
 }
